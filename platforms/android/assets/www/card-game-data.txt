@@ -1,0 +1,70 @@
+
+
+/*
+
+good parts of magic.
+1. collectible, huge card variety.
+2. deck building, surprising combos.
+3. quick combat gameplay. the stack is interesting.
+
+problems with magic.
+1. mana screw.
+2. waiting for my turn.
+3. too much momentum and too few options, no way to make risky or costly moves in desperation to get key cards and be saved.
+
+how to fix
+1. burn cards for mana
+2. simultaneous turns
+3. dynamic combat
+*/
+
+
+var cards = [
+  {
+    name: 'Goblin',
+    actions: [
+      {
+        name: 'charge',
+        damage: 2,
+        speed: 3
+      }
+    ],
+    cost: {
+      2
+    },
+    alt: [
+      {
+        totem: 1
+        energy: 1
+      }
+    ]
+  },
+];
+
+var phases = [
+  {
+    name: 'play',
+    players: 'all',
+    description: 'Assign tasks to minions, prepare spells.'
+  }
+];
+
+
+var zones = [
+  {
+    name: 'active',
+    arrangement: 'row'
+  },
+  {
+    name: 'hand',
+    arrangement: 'splayed'
+  },
+  {
+    name: 'deck',
+    arrangement: 'pile'
+  },
+  {
+    name: 'junk',
+    arrangement: 'pile'
+  }
+];

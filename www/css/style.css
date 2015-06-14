@@ -1,0 +1,273 @@
+
+* {line-height:1.2; vertical-align:middle;}
+
+body {
+  margin: 0;
+  font-family: 'Tahoma', sans-serif;
+  padding: 0;
+  color: #444;
+  background:#eee;
+  overflow: hidden;
+}
+
+ul {
+  margin: 0;
+  padding: 0;
+}
+
+
+/* zones */
+#zones {
+  text-align: center;
+}
+.zone {
+  padding-top: 1vh;
+  text-align: center;
+  position: relative;
+  height: 21vh;
+  white-space: nowrap;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  transition: 0.5s height, 0.5s opacity;
+}
+.enemy.zone {
+  background-color: #f8f8e8;
+}
+#wrapper.playing .enemy.zone {height: 32vh;}
+.field.zone {
+  box-shadow:0 1px 2px #aaa;
+  background: url(../assets/attack-dir.png) white no-repeat;
+  background-size: contain;
+  z-index: 101;
+}
+#wrapper.playing .field.zone {height: 32vh;}
+.hand.zone {
+  padding-top: 0;
+  height: 28vh;
+}
+/*#wrapper.playing .hand.zone {height: 8vh;}
+#wrapper.playing .hand-inner .card {opacity: 0;}*/
+.hand-inner {
+  padding: 4vh 2vh 2vh 2vh;
+  box-sizing: border-box;
+  background-color: white;
+  display: inline-block;
+  box-shadow:0 1px 2px #aaa;
+  min-width: 90vh;
+  height: 100%;
+}
+.store.zone {
+  padding-top: 0;
+}
+
+
+/* card inner styles */
+.card {
+  position: relative;
+  z-index: 150;
+  height: 20vh;
+  width: 14vh;
+  display: inline-block;
+  list-style: none;
+  padding: 0 4vh 0 0;
+  margin:0 1vh 0 0.5vh;
+}
+.icon {
+  font-family: 'rpg-icons';
+  font-size: 6vh;
+  padding: 1vh;
+  color: #222;
+  height: 5.6vh;
+}
+.soft, .card, #turn {
+  box-shadow:0 0.1vh 0.2vh #888;
+  background:white;
+  border-radius:0.5vh;
+  user-select:none;
+}
+button {
+  border:0;
+  background-color: black;
+  color: white;
+  border-radius: 0.5vh;
+  padding: 0.3vh 1vh 0.3vh 1vh;
+  cursor: pointer;
+  font-family: Tahoma, 'sans-serif';
+  font-size: 2.8vh;
+}
+/*
+.card:after {
+  position:absolute;
+  font-size:.9rem;
+  top:1.5rem;
+  right:1rem;
+  content:"i";
+  border:thin solid gray;
+  color:gray;
+  width:1rem;
+  line-height:1rem;
+  text-align:center;
+  border-radius:50%;
+  pointer-events:none;
+}*/
+.card .stats {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 4vh;
+  border-left: 1px solid rgba(0,0,0,0.1);
+  font-size: 2.6vh;
+  letter-spacing: -0.4vh;
+}
+.card .speed {
+  position: absolute;
+  right: 0.5vh;
+  top: 4.5vh;
+}
+.card .health {
+  position: absolute;
+  right: 0.5vh;
+  bottom: 0.5vh;
+}
+.card .cost {
+  position: absolute;
+  right: 0.5vh;
+  top: 0.5vh;
+}
+.title {
+  text-transform:uppercase;
+  font-size: 3vh;
+  height: 3vh;
+}
+.menu {
+  font-size: 2.4vh;
+}
+.sortable .card .handle {
+  cursor: move;
+}
+
+
+/* card types */
+.card.placeholder {
+  opacity: 0 !important;
+}
+.card.minion {
+  background-color: #e8f0e8;
+}
+.card.asset {
+  background-color: #eee;
+}
+.card.resource {
+  background-color: #ffd;
+}
+
+/* card states */
+.card.damaged .health {
+  color: red;
+}
+.card.dead {
+  background-color: #888;
+  opacity: 0.4;
+  border-bottom: 2px dotted red;
+}
+.card.dead .stats {
+  border-color: #777;
+}
+.card.target {
+  background-color: yellow;
+  cursor: pointer;
+}
+
+
+/* controls */
+#turn, #stats {
+  position: absolute;
+  z-index: 200;
+}
+#turn {
+  height: 11vh;
+  width: 9vh;
+  border-radius: 50%;
+  padding: 1vh 2vh;
+  bottom: .8vh;
+  font-size: 10vh;
+  left: .8vh;
+  font-family: 'rpg-icons';
+  cursor: pointer;
+  transition: 0.5s all;
+}
+#turn:hover {
+  transform: scale(1.1);
+}
+#wrapper.playing #turn {
+  bottom: -15vh;
+}
+#wrapper.playing .zone.store {
+  opacity: 0;
+}
+#wrapper.playing #stats {
+  right: -10vh;
+}
+#stats {
+  top: 45vh;
+  right: 0;
+  transition: 0.5s right;
+}
+#diams {
+  color: darkred;
+  font-size: 5vh;
+}
+.card.mini {
+  font-size: 4vh;
+  width: 5vh;
+  height: 6vh;
+  padding: 1vh 0 0 0;
+  text-align: center;
+  display: block;
+}
+#discard {
+  opacity: 0.5;
+}
+
+
+.text-proxy, .shoot-proxy {
+  position:absolute;
+  top: 0;
+  left: 0;
+  opacity: 0;
+  z-index: 300;
+}
+.text-proxy{
+  font-size: 4vh;
+  color: red;
+  font-weight: bold;
+  text-shadow: 0 2px 3px rgba(0,0,0,0.5);
+}
+.shoot-proxy{
+  width: 6vh;
+  height: 6vh;
+  border-radius: 50%;
+  text-shadow: 0 2px 3px rgba(0,0,0,0.5);
+  background-color: white;
+  box-shadow:0 1px 2px #aaa;
+}
+
+.introjs-helperLayer {
+  background: rgba(255,255,255,.5);
+  box-shadow: none;
+  display: none;
+  border: 0px none transparent;
+}
+.introjs-helperNumberLayer {
+  left: 16px;
+  top: 16px;
+  display: none;
+}
+.introjs-overlay {
+  background: rgba(0,0,0,0.5);
+}
