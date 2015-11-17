@@ -7,6 +7,7 @@ var $$ = function(s){
 
 var 
     shoot_proxy_el = $$(".shoot-proxy")[0],
+    pow_proxy_el = $$(".pow-proxy")[0],
     text_proxy_el = $$(".text-proxy")[0];
 
 var knife_sound = (new Audio('assets/knifeSlice.mp3')),
@@ -21,35 +22,34 @@ var knife_sound = (new Audio('assets/knifeSlice.mp3')),
     lock_sound = (new Audio('assets/lock.mp3'));
 
 var get_actor_display = function(move){
-    if (move.player.client){
-        var field_selector = ".field";
-        var near = true;
-    } else {
-        var field_selector = ".enemy";
-        var near = false;
-    }
-    var el = $$(field_selector + " .card")[move.player.field.indexOf(move.card)];
-    var rect = el.getBoundingClientRect();
-    return {
-        el: el,
-        rect: rect,
-        near: near
-    };
+    return get_display(move.card);
 };
 
 var get_target_display = function(move) {
-    if (move.player.client){
-        var enemy_selector = ".enemy";
-    } else {
-        var enemy_selector = ".field";
+    return get_display(move.target);
+};
+
+// Get the dom element and related data for a card, used for animations.
+var get_display = function(card) {
+    var selector, field = GAME.player.field, idx = field.indexOf(card);
+    if (idx == -1) {
+        field = GAME.player.get_opponent().field;
+        idx = field.indexOf(card);
     }
-    var el = $$(enemy_selector + " .card")[move.player.get_opponent().field.indexOf(move.target)];
-    var rect = el.getBoundingClientRect();
+    if (field !== GAME.player.field) {
+        idx = field.length - 1 - idx;
+        selector = '.enemy';
+    } else {
+        selector = '.field';
+    }
+    var el = $$(selector + " .card")[idx];
+    var rect = el.getBoundingClientRect();    
     return {
         el: el,
-        rect: rect
+        rect: rect,
+        near: field === GAME.player.field
     };
-};
+}
 
 var animate_won = function(then){
     setTimeout(function(){
@@ -163,8 +163,36 @@ var animate_strike = function(move, done) {
     });
     
     if (move.action.damage) {
-        animate_damage(move, target);
+
+        (move.action.name === 'charge' ? trample_sound : knife_sound).play();
+            
+        animate_message(move.target, {
+            text: move.action.damage + " dmg!",
+            color: 'red', 
+            delay: 400
+        });
     }
+}
+
+var animate_spin = function(move, done) {
+    
+    var targets = move.action.targets(move);
+    
+    var iter = function(i){
+        move.target = targets[i];
+        if (move.action.damage) {
+            animate_pow(move.target);
+        }
+        animate_strike(move, function(){
+            i++;
+            if (i>=targets.length) {
+                done();
+            } else {
+                iter(i);
+            }
+        })
+    };
+    iter(0);
 }
 
 var animate_shoot = function(move, done){
@@ -204,28 +232,69 @@ var animate_shoot = function(move, done){
 }
 
 // async, no callback.
-var animate_damage = function(move, target){
-    
-    text_proxy_el.textContent = move.action.damage + " dmg!";
-    text_proxy_el.style.left=target.rect.left -5 + 'px';
-    text_proxy_el.style.top=target.rect.top + (target.rect.bottom-target.rect.top)/2 + 'px';
+var animate_message = function(card, opts){
+    opts = opts || {};
+
+    target = get_display(card);
+
+    text_proxy_el.textContent = opts.text;
+    text_proxy_el.style.left=target.rect.left + (target.rect.bottom-target.rect.top)/6 + 'px';
+    text_proxy_el.style.top=target.rect.top - (target.rect.bottom-target.rect.top)*.2 + 'px';
+
+    text_proxy_el.style.color = opts.color || 'green';
     
     Velocity(text_proxy_el,{
-        scaleX: 1.1,
+        scaleX: 1.5,
         opacity: 1,
         complete: function(){
-            
-            (move.action.name === 'charge' ? trample_sound : knife_sound).play();
-            
+
             Velocity(text_proxy_el,{
                 opacity: 0
             },{
                 duration: 100,
-                delay: 500
+                delay: 800
             });
+            opts.callback && opts.callback();
         }
     },{
         duration: 100,
-        delay: 400
+        delay: opts.delay || 0
+    });
+}
+
+
+// async, no callback.
+var animate_pow = function(card, opts){
+    opts = opts || {};
+    target = get_display(card);
+
+    pow_proxy_el.style.left=target.rect.left + (target.rect.right-target.rect.left)/2 + 'px';
+    pow_proxy_el.style.top=target.rect.top + (target.rect.bottom-target.rect.top)/2 + 'px';
+    pow_proxy_el.style.backgroundColor = opts.color || 'orange';
+
+    Velocity(pow_proxy_el,{
+        opacity: 1,
+        complete: function(){
+            
+            Velocity(pow_proxy_el,{
+                scale: 9,
+                opacity: 0,
+                complete: function(){
+                    Velocity(pow_proxy_el,{
+                        scale: 1
+                    },{
+                        duration: 1,
+                        delay: 0
+                    });
+                    opts.callback && opts.callback();
+                }
+            },{
+                duration: 400,
+                delay: 0
+            });
+        }
+    },{
+        duration: 200,
+        delay: opts.delay || 0
     });
 }

@@ -1,10 +1,39 @@
 
-var GAME = {};
+var GAME = {
 
+  emit_move: function(move){
+
+      var check = function(listener, att) {
+          if (listener[att] === 'any') return true;
+          if (listener[att] === 'self') return move.card === listener.card;
+          if (move[att].is_a(listener[att])) return true;
+      };
+
+      var listeners = this.getListeners(move.player);
+      console.log(listeners);
+      listeners.forEach(function(listener){
+          if (check(listener, 'card') && check(listener, 'target') && check(listener, 'action')) {
+              listener.fn(move);
+          }
+      });
+  },
+
+  getListeners: function(player){
+    var listeners = [];
+    listeners = listeners.concat(
+      [].concat.apply([], player.field.map(function(card){return card.events || []}))
+    );
+    listeners = listeners.concat(
+      [].concat.apply([], player.get_opponent().field.map(function(card){return card.events || []}))
+    );
+    return listeners;
+  }
+
+};
 
 
 String.prototype.capitalizeFirstLetter = function() {
-    return this.charAt(0).toUpperCase() + this.slice(1);
+  return this.charAt(0).toUpperCase() + this.slice(1);
 }
 
 var Scenario = {
@@ -12,20 +41,52 @@ var Scenario = {
     this.setup();
     GAME.player.deck = CardSet.shuffle(GAME.player.deck);    
     
+    this.reg_events();
+
     GAME.scenario = this;
     GAME.turn_idx = 0;
     
     GAME.player.draw(4);
+  },
+
+  reg_events: function(){
+    GAME.player.deck.forEach(function(card){
+      // TODO:...
+    });
   }
 };
 
 
 GAME.scenarios = [
+
   
+  inherit(Scenario, {
+    name: 'TEST',
+    setup: function(){   
+      GAME.player.deck = CardSet.Cards.from_list([
+        'priest','priest',
+        'bolt','gem','gem','gem','bolt'
+      ]);
+      GAME.player.field = CardSet.Cards.from_list([
+        'keep', 'flame_swan'
+      ]);
+      GAME.enemy.field = [
+        inherit(CardSet.Cards.get('nest'), {health: 7}), inherit(CardSet.Cards.get('evilcow'))
+      ];
+      GAME.player.store = CardSet.Cards.from_list(['entomb','cavalry']);
+    },
+    enemy_turn: function(){
+      if (GAME.enemy.field.length < 4) {
+          GAME.enemy.field.splice(GAME.enemy.field.length-1, 0, CardSet.Cards.create('serpent'));
+          //GAME.enemy.field.splice(GAME.enemy.field.length-1, 0, CardSet.Cards.create('serpent'));
+      }
+    }
+  }),
+
   inherit(Scenario, {
     name: 'Tutorial',
     setup: function(){
-      GAME.player.deck = CardSet.Cards.from_list(['militia', 'wealth', 'militia', 'wealth', 'militia', 'wealth', 'militia', 'wealth']);
+      GAME.player.deck = CardSet.Cards.from_list(['militia', 'gem', 'militia', 'gem', 'militia', 'gem', 'militia', 'gem']);
       GAME.player.field = CardSet.Cards.from_list(['militia', 'militia', 'militia', 'keep']);
       GAME.player.deck = CardSet.shuffle(GAME.player.deck);
       GAME.player.store = [];
@@ -45,15 +106,15 @@ GAME.scenarios = [
     setup: function(){   
       GAME.player.deck = CardSet.Cards.from_list([
         'militia','militia',
-        'wealth','wealth','wealth','wealth',
-        'wealth','wealth','wealth','wealth'
+        'gem','gem','gem','gem',
+        'gem','gem','gem','gem'
       ]);
       GAME.player.field = CardSet.Cards.from_list(['keep']);
       GAME.enemy.field = CardSet.Cards.from_list(['nest']);
       GAME.player.store = CardSet.Cards.from_list(['soldier']);
     },
     enemy_turn: function(){
-      GAME.enemy.field.unshift(CardSet.Cards.create('bandit'));
+      GAME.enemy.field.push(CardSet.Cards.create('bandit'));
     }
   }),
 
@@ -63,8 +124,8 @@ GAME.scenarios = [
     setup: function(){   
       GAME.player.deck = CardSet.Cards.from_list([
         'militia','militia',
-        'wealth','wealth','wealth','wealth',
-        'wealth','wealth','wealth','wealth'
+        'gem','gem','gem','gem',
+        'gem','gem','gem','gem'
       ]);
       GAME.player.field = CardSet.Cards.from_list([
         'keep'
@@ -88,8 +149,8 @@ GAME.scenarios = [
     setup: function(){   
       GAME.player.deck = CardSet.Cards.from_list([
         'militia','militia',
-        'wealth','wealth','wealth','wealth',
-        'wealth','wealth','wealth','wealth'
+        'gem','gem','gem','gem',
+        'gem','gem','gem','gem'
       ]);
       GAME.player.field = CardSet.Cards.from_list([
         'keep'
@@ -97,15 +158,40 @@ GAME.scenarios = [
       GAME.enemy.field = [
         inherit(CardSet.Cards.get('nest'), {health: 7})
       ];
-      GAME.player.store = CardSet.Cards.from_list(['entomb']);
+      GAME.player.store = CardSet.Cards.from_list(['entomb','cavalry']);
     },
     enemy_turn: function(){
       if (GAME.enemy.field.length < 4) {
-        
-        GAME.enemy.field.splice(GAME.enemy.field.length-1, 0, CardSet.Cards.create('bandit'));
+        if (Math.random() < .5)
+          GAME.enemy.field.splice(GAME.enemy.field.length-1, 0, CardSet.Cards.create('serpent'));
+      }
+    }
+  }),
+  
+  inherit(Scenario, {
+    name: 'Horde',
+    setup: function(){   
+      GAME.player.deck = CardSet.Cards.from_list([
+        'militia','militia',
+        'gem','gem','gem','gem',
+        'gem','gem','gem','gem'
+      ]);
+      GAME.player.field = CardSet.Cards.from_list([
+        'keep'
+      ]);
+      GAME.enemy.field = [
+        inherit(CardSet.Cards.get('nest'), {health: 7})
+      ];
+      GAME.player.store = CardSet.Cards.from_list(['entomb','cavalry']);
+    },
+    enemy_turn: function(){
+      if (GAME.enemy.field.length < 4) {
+          GAME.enemy.field.splice(GAME.enemy.field.length-1, 0, CardSet.Cards.create('serpent'));
+          GAME.enemy.field.splice(GAME.enemy.field.length-1, 0, CardSet.Cards.create('serpent'));
       }
     }
   })
+
 
 ];
 

@@ -105,11 +105,15 @@ var Player =
         }
         if (!card._placeholder) dest.push(card);
         
-        // which switching piles, clear temp state.
+        // when switching piles, clear temp state.
         card._done = false;
         card._move = null;
     },
-       
+    
+    clear_placeholders: function(){
+        this.hand = this.hand.filter(function(c){return !c._placeholder});
+    },
+    
     cleanup_field : function(){
            
         var i=this.field.length;
@@ -140,14 +144,17 @@ var Player =
     
     play: function (card, action, then)
     {
-        
+        console.log('playing card');
         var move = {
             card: card,
             action: action,
             player: this,
             cost: card.cost
         };
-        var result = this.initiate_move(move, then);
+        var result = this.initiate_move(move, function(){
+            move.card._done = true; // the equivalent of summoning sickness.
+            then.apply(this,arguments);
+        });
         return result;
     },
     
@@ -162,7 +169,7 @@ var Player =
     },
     
     initiate_move: function(move, then){
-
+        console.log('move:',move)
         if (move.cost) {
             if (move.cost > this.diams) {
                 return {
@@ -171,11 +178,10 @@ var Player =
                 }
             }
             
-            this.diams -= move.cost;
         };
         
         //hilight targets, if any, and wait for user to select.
-        if (move.action.targets) {
+        if (move.action.num_targets && move.action.num_targets > 0) {
             
             if (this.client) {
                 
@@ -185,7 +191,7 @@ var Player =
                 });
             
             }
-            
+            console.log('targets', move.action.targets);
             if (move.action.targets.length){
                 this.resolving = move;
             } else {
@@ -194,7 +200,7 @@ var Player =
                     success: false
                 }
             }
-                
+
             
         } else { // otherwise just complete the move.
             this.apply_move(move, then);
@@ -209,9 +215,14 @@ var Player =
     done_targetting: function(target){
         if (this.resolving){
             
-            this.resolving.target = target
-            this.apply_move(this.resolving);
-            
+            if (this.resolving.action.targets(this.resolving).indexOf(target) > -1)
+            {
+                this.resolving.target = target
+                this.apply_move(this.resolving);
+
+            } else {
+                alert('invalid target');
+            }
             // clear targets hilight
             if (this.client) {
                 this.resolving.action.targets(this.resolving).forEach(function(card){
@@ -223,9 +234,11 @@ var Player =
     },
     
     apply_move: function(move, then){
+        
         move.card._done = true;
         move.card._move = move;
-        
+        this.diams -= move.cost;
+
         if (move.action.delayed) {
             if (this.client) animate_order();
             this.pending_actions.push(move);
@@ -257,6 +270,9 @@ var Player =
             move._done = true;
             console.log('executing')
             move.action.fn(move);
+
+            GAME.emit_move(move);
+
             if (move.action.is_a('strike') && move.target.get_counterattack) {
                 // in melee, target may attack back.
                 var counter_move = move.target.get_counterattack(move, then);

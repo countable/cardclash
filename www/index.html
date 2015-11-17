@@ -70,19 +70,28 @@
     <img src="img/logo-transp.png" id="logo">
   </p>
   <div id="levels" class="soft">
-    <a class="soft" href="ng.html#0">Tutorial</a>
-    <a class="soft" href="ng.html#1">Mercs</a>
-    <a class="soft" href="ng.html#2">Tactics</a>
-    <a class="soft" href="ng.html#3">Level 4</a>
-    <a class="soft" href="ng.html#4">Level 5</a>
-    <a class="soft" href="ng.html#5">Level 6</a>
-    <a class="soft" href="ng.html#6">Level 7</a>
-    <a class="soft" href="ng.html#7">Level 8</a>
-    <a class="soft" href="ng.html#8">Level 9</a>
+
   </div>
-  <script type="text/javascript" src="cordova.js"></script>
+  
+  <script src="js/mobile.js"></script>
+  <script src="vendor/intro.js"></script>
+  <script src="vendor/angular.min.js"></script>
+  <script src="vendor/ramda.min.js"></script>
+  <script src="vendor/Sortable.min.js"></script>
+  <script src="vendor/ng-sortable.js"></script>
+  <script src="vendor/velocity.min.js"></script>
+
+  <script src="js/mix.js"></script>
+
+  <script src="js/game.js"></script>
+  
   <script>
     window.onload = function(){document.body.className = '';};
+    var i=0;
+    GAME.scenarios.forEach(function(scenario){
+      document.getElementById('levels').innerHTML += '<a class="soft" href="ng.html#'+i+'">'+scenario.name+'</a>'
+      i++;
+    });
   </script>
 </body>
 
