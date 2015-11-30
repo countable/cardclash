@@ -26,7 +26,7 @@
     </div>
     
     <div id="stats">
-<!--      <div id="deck" class="card mini">
+      <!--<div id="deck" class="card mini">
         {{ player.deck.length }}
       </div>
       <div id="discard" class="card mini">
@@ -35,8 +35,9 @@
       <div id="diams"  data-intro="This denotes your current reserve of diamonds, which serve as money in this game." data-step=5 data-position=left>
       </div>
       <div id="diams-val">
-        {{ player.diams }}
+        {{ player.diams }}<small>/{{ player.storage }}</small>
       </div>
+      <div id="income">+{{ player.income }}</div>
     </div>
 
     <div id="zones">
@@ -45,6 +46,7 @@
         <div ng-repeat="card in enemy.field.slice().reverse() track by $index" ng-class="get_card_classes(card)" ng-click="pick(card)">
           <div class="title">{{ card.name.capitalizeFirstLetter() }}</div>
           <div class="icon" ng-bind-html="card.pic"></div>
+
           <div class="stats">
             <div class="cost" ng-if="card.cost > 0">&diams; {{ card.cost }}</div>
             <div class="speed" ng-if="card.speed"><i class="fa fa-bolt"></i> {{ card.speed }}</div>
@@ -57,10 +59,15 @@
         <li ng-repeat="card in player.field track by $index" ng-class="get_card_classes(card)" ng-click="pick(card)">
           <div class="title handle">{{ card.name.capitalizeFirstLetter() }}</div>
           <div class="icon handle" ng-bind-html="card.pic"></div>
-          <div class="menu" ng-if="!card._done">
+          <div class="menu" ng-if="card.can_act()">
             <div ng-repeat="action in card.field_actions track by $index">
               <button ng-click="act(card, action); $event.stopPropagation()" ng-bind-html="action.button(card)">
               </button>
+            </div>
+          </div>
+          <div class="statuses">
+            <div ng-if="card.stunned" class="stun pin">
+              {{ card.stunned }}
             </div>
           </div>
           <div class="stats handle">
@@ -78,6 +85,9 @@
           <div class="menu" ng-if="!card._done">
             <div ng-repeat="action in card.hand_actions track by $index">
               <button ng-if="player.diams >= card.cost" ng-click="play(card, action); $event.stopPropagation()" ng-bind-html="action.button(card)"></button>
+            </div>
+            <div ng-if="!player._dug">
+              <button ng-click="dig(card)" class="dig">dig</button>
             </div>
           </div>
           <div class="stats">

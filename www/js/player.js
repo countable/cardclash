@@ -24,6 +24,8 @@ var Player =
         this.discard = [];
 
         this.diams = 0;
+        this.income = 0;
+        this.storage = 2;
 
     },
     
@@ -71,15 +73,9 @@ var Player =
             //this.socket.emit('drawCards', new_cards);
         }
     },
-
-    draw_hand: function ()
-    {
-        this.draw(5);
-    },
     
     move_pile: function(from, to)
     {
-        console.log(from);
         while(from.length){
             this.move_card(0, from, to);
         }
@@ -118,9 +114,12 @@ var Player =
            
         var i=this.field.length;
         while(--i >= 0){
+          var card = this.field[i];
           // clear done flag.
-          this.field[i]._done = false;
-          this.field[i]._move = null;
+          if (card.stunned) card.stunned -= 1;
+          if (card.poisoned) card.health -= card.poisoned;
+          card._done = false;
+          card._move = null;
           
           // clear casualties
           if (this.field[i].health < 1){
@@ -130,11 +129,21 @@ var Player =
         }
     },
     
+    begin_turn: function(){
+        this.clear_placeholders();
+        this.diams += this.income;
+        if (this.diams > this.storage) {
+            this.diams = this.storage;
+        }
+        this._dug = false;
+        this.draw(1);
+    },
+
     end_turn: function ()
     {
         this.pending_actions = [];
         this.cleanup_field();
-        this.move_pile(this.hand, this.discard);
+        //this.move_pile(this.hand, this.discard);
         this.move_pile(this.played_cards, this.discard);
     },
     
@@ -152,7 +161,6 @@ var Player =
             cost: card.cost
         };
         var result = this.initiate_move(move, function(){
-            move.card._done = true; // the equivalent of summoning sickness.
             then.apply(this,arguments);
         });
         return result;
@@ -166,6 +174,18 @@ var Player =
             cost: action.cost
         };
         return this.initiate_move(move, action);
+    },
+
+    dig: function(index){
+      var keep = this.field.filter(function(item){return item.is_a('keep')})[0]
+      animate_message(keep, {
+        text: '+1 income',
+        color: '#39f'
+      });
+      this.income ++;
+      this._dug = true;
+      this.storage += 1;
+      this.move_card(index, this.hand, this.discard);
     },
     
     initiate_move: function(move, then){
@@ -183,21 +203,21 @@ var Player =
         //hilight targets, if any, and wait for user to select.
         if (move.action.num_targets && move.action.num_targets > 0) {
             
+            var targets =  move.action.targets(move);
             if (this.client) {
                 
-                var targets = move.action.targets(move);
+                console.log('targets:', targets, '(move was',move,')')
                 targets.forEach(function(card){
                     card._target = true;
                 });
             
             }
-            console.log('targets', move.action.targets);
-            if (move.action.targets.length){
+            if (targets.length){
                 this.resolving = move;
-            } else {
-                alert('No targets.');
+            } else if (this.client) {
                 return {
-                    success: false
+                    success: false,
+                    message: 'no targets'
                 }
             }
 
@@ -249,13 +269,15 @@ var Player =
     
     complete_move: function(move, then){
         
-        console.log(move, 'being done');
-        
         // if the card targets dynamicaly, then do it now.
         if (move.action.retarget) {
             move.target = move.action.retarget(move);
         }
         
+        if (move.card.stunned) { // stunned cards can't move.
+            return then && then();
+        }
+
         // dead cards can't do moves.
         if (move.card.is_alive && !move.card.is_alive()){
             return then && then();

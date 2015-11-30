@@ -92,8 +92,7 @@ background: linear-gradient(to bottom,  #f85032 0%,#f16f5c 50%,#f6290c 51%,#f02f
   border-radius:50%;
   pointer-events:none;
 }*/
-.card .stats {
-  display: none;
+.card .stats, .card .statuses {
   position: absolute;
   top: 0;
   right: 0;
@@ -102,6 +101,12 @@ background: linear-gradient(to bottom,  #f85032 0%,#f16f5c 50%,#f6290c 51%,#f02f
   border-left: 1px solid rgba(0,0,0,0.1);
   font-size: 3vh;
   letter-spacing: -0.4vh;
+}
+.card .stats {
+  display: none;
+}
+.card:hover .stats {
+  display: block;
 }
 .card .pin {
   position: absolute;
@@ -179,7 +184,7 @@ background: linear-gradient(to bottom,  #f85032 0%,#f16f5c 50%,#f6290c 51%,#f02f
 .hand.zone {
   position: absolute;
   text-align: center;
-  bottom: -5vh;
+  bottom: 5vh;
   left: 0;
   right: 0;
 }
@@ -219,10 +224,18 @@ background: linear-gradient(to bottom,  #f85032 0%,#f16f5c 50%,#f6290c 51%,#f02f
 .card.damaged .health {
   background-color: red;
 }
-.card.dead {
+.card.dead .icon {
   background-color: #888;
   opacity: 0.4;
-  border-bottom: 2px dotted red;
+  border-color: red;
+}
+.card .stun {
+  font-size: 2.8vh;
+  line-height: 1;
+  width: 4vh;
+  height: 4vh;
+  background-color: orange;
+  color: white;
 }
 .card.dead .stats {
   border-color: #777;
@@ -231,6 +244,9 @@ background: linear-gradient(to bottom,  #f85032 0%,#f16f5c 50%,#f6290c 51%,#f02f
   border: 1px solid yellow;
   cursor: pointer;
   transform: scale(1.1);
+}
+.card.done .icon {
+  opacity: 0.5;
 }
 
 
@@ -274,10 +290,20 @@ background: linear-gradient(to bottom,  #f85032 0%,#f16f5c 50%,#f6290c 51%,#f02f
 #diams-val {
   z-index: 2;
   text-align: center;
-  font-size: 6vh;
+  font-size: 4.5vh;
   color: white;
   text-shadow: 0.3vh 0.3vh 0.3vh rgba(0,0,0,0.9);
-  line-height: 1;
+  line-height: 1.4;
+}
+#diams-val small {
+  opacity: 0.7;
+}
+#income {
+  font-size: 2.7vh;
+  position: absolute;
+  top: -2vh;
+  right: -2vh;
+  font-weight: bold;
 }
 #diams {
   position: absolute;
@@ -310,7 +336,7 @@ background: linear-gradient(to bottom,  #f85032 0%,#f16f5c 50%,#f6290c 51%,#f02f
 .text-proxy{
   font-size: 3.5vh;
   color: red;
-  text-shadow: 0 0.2vh 0.3vh rgba(0,0,0,1);
+  text-shadow: 0.1vh 0.2vh 0 rgba(0,0,0,1);
   font-family: Arial, Helvetica, sans-serif;
 }
 .shoot-proxy{
@@ -356,6 +382,9 @@ button {
   border-radius: 1vh;
   border-top-style: dotted;
   padding: 0.3vh 0.5vh 0.8vh 0.5vh;
+}
+button.dig {
+  background: lightblue;
 }
 button:active {
   box-shadow:none;

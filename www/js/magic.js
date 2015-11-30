@@ -3,11 +3,10 @@ CardSet.Cards.add([
   
   {
     name: 'arson',
-    cost: 1,
-    price: 3,
+    cost: 4,
     hand_actions: [
       Actions.create('cast', {
-        targets: get_enemies(function(item){
+        targets: enemy_filter(function(item){
             return item.is_a('asset')
         }),
         fn: function(move){
@@ -17,16 +16,16 @@ CardSet.Cards.add([
       })
     ],
     parent: 'magic',
-    pic: '&#xe05b;'
+    pic: '&#xe05b;',
+    rarity: 1
   },
   
   {
     name: 'entomb',
-    cost: 2,
-    price: 5,
+    cost: 4,
     hand_actions: [
       Actions.create('cast', {
-        targets: get_enemies( function(item){
+        targets: enemy_filter( function(item){
             return item.is_a('minion')
         }),
         fn: function(move){
@@ -36,16 +35,16 @@ CardSet.Cards.add([
       })
     ],
     parent: 'magic',
-    pic: '&#xe2ef;'
+    pic: '&#xe2ef;',
+    rarity: 1
   },
   {
     name: 'bolt',
     cost: 1,
-    price: 3,
     hand_actions: [
       Actions.create('cast', {
         num_targets: 1,
-        targets: get_enemies(function(item){
+        targets: enemy_filter(function(item){
             return item.is_a('minion')
         }),
         fn: function(move){
@@ -61,17 +60,15 @@ CardSet.Cards.add([
       })
     ],
     parent: 'magic',
-    pic: '&#xe0d3;'
+    pic: '&#xe0d3;',
+    rarity: 1
   },
   {
     name: 'haste',
-    cost: 0,
-    price: 2,
+    cost: 1,
     hand_actions: [
       Actions.create('cast', {
-        targets: get_allies(function(item){
-            return item.is_a('minion')
-        }),
+        targets: ally_filter('minion'),
         fn: function(move){
           move.target.speed -= 3;
           Actions.get('cast').fn.apply(this, [move]);
@@ -79,36 +76,36 @@ CardSet.Cards.add([
       })
     ],
     parent: 'magic',
-    pic: '&#xe0d3;'
+    pic: '&#xe1ee;',
+    rarity: 1
   },
   {
     name: 'blizzard',
-    cost: 0,
-    price: 2,
+    cost: 3,
     hand_actions: [
       Actions.create('cast', {
+        num_targets: 0,
         fn: function(move){
-          move.player.get_opponent().field.filter(function(e){e.is_a('minion')}).forEach(function(enemy){
-            enemy.hurt(self.damage, move);
-            if (enemy.spikes) self.hurt(enemy.spikes);
-            if (self.poison) enemy._poison = self.poison;
+          get_enemies(move, 'minion').forEach(function(enemy){
+            enemy.stunned = 1;
           });
           Actions.get('cast').fn.apply(this, [move]);
         }
       })
     ],
     parent: 'magic',
-    pic: '&#xe003;'
+    pic: '&#xe003;',
+    rarity: 1
   },
   {
     name: 'zap_shield',
     cost: 1,
-    price: 3,
     hand_actions: [
       Actions.create('cast', {
-        targets: get_allies(function(item){
+        targets: ally_filter(function(item){
             return item.is_a('minion')
         }),
+
         fn: function(move){
           move.target.spikes -= 3;
           Actions.get('cast').fn.apply(this, [move]);
@@ -116,15 +113,15 @@ CardSet.Cards.add([
       })
     ],
     parent: 'magic',
-    pic: '&#xe0d3;'
+    pic: '&#xe006;',
+    rarity: 1
   },
   {
     name: 'love_potion',
-    cost: 2,
-    price: 7,
+    cost: 6,
     hand_actions: [
       Actions.create('cast', {
-        targets: get_enemies(function(item){
+        targets: enemy_filter(function(item){
             return item.is_a('minion')
         }),
         fn: function(move){
@@ -138,6 +135,7 @@ CardSet.Cards.add([
       })
     ],
     parent: 'magic',
-    pic: '&#xe01e;'
+    pic: '&#xe0d2;',
+    rarity: 2
   }
 ]);

@@ -10,7 +10,6 @@ GAME.app.controller('cardGameCtrl', function($scope, $timeout) {
     $scope.player = GAME.player;
     $scope.enemy = GAME.enemy;
     
-    
     $scope.pick = function(card){
       if ($scope.player.resolving) {
         $scope.player.done_targetting(card);
@@ -21,7 +20,6 @@ GAME.app.controller('cardGameCtrl', function($scope, $timeout) {
       if ($scope.player.diams >= card.price) {
         $scope.player.diams -= card.price;
         $scope.player.discard.push(CardSet.Cards.create(card.name));
-        animate_buy(card);
       } else {
         alert('cannot afford');
       }
@@ -29,6 +27,8 @@ GAME.app.controller('cardGameCtrl', function($scope, $timeout) {
     
     $scope.turn = function(){
       
+      if (GAME.player.resolving) return alert('finish targeting first.');
+
       $scope.playing = true;
       
       animate_war();
@@ -56,16 +56,12 @@ GAME.app.controller('cardGameCtrl', function($scope, $timeout) {
         var complete = function(){
           
             GAME.players.forEach(function(whom) {
-              
               whom.end_turn();
-              
             });
             // done turn, reset
             
             $scope.playing=false;
-            $timeout(function(){
-              GAME.player.draw(4);
-            }, 500);
+            $timeout(function(){GAME.player.begin_turn()}, 500);
             
         };
         
@@ -101,16 +97,19 @@ GAME.app.controller('cardGameCtrl', function($scope, $timeout) {
       var result = $scope.player.act(index, aindex);
       if (!result.success) alert(result.message);
     };
-    
-    $scope.playable = function(card){
-      return card.playable;
+
+    $scope.dig = function(index) {
+      GAME.player.dig(index);
     };
+
     
     $scope.get_card_classes = function(card){
       if (card._placeholder) return ['card', 'placeholder'];
       var classes = ['card'];
       
       if (card._target) classes.push('target');
+      if (card._done) classes.push('done');
+      if (card.stunned) classes.push('stunned');
       if (card.health < card.__proto__.health) classes.push('damaged');
       if (card.health < 1 && 'number' === typeof card.health) classes.push('dead');
       

@@ -10,7 +10,6 @@ var GAME = {
       };
 
       var listeners = this.getListeners(move.player);
-      console.log(listeners);
       listeners.forEach(function(listener){
           if (check(listener, 'card') && check(listener, 'target') && check(listener, 'action')) {
               listener.fn(move);
@@ -46,7 +45,7 @@ var Scenario = {
     GAME.scenario = this;
     GAME.turn_idx = 0;
     
-    GAME.player.draw(4);
+    GAME.player.draw(6);
   },
 
   reg_events: function(){
@@ -64,20 +63,20 @@ GAME.scenarios = [
     name: 'TEST',
     setup: function(){   
       GAME.player.deck = CardSet.Cards.from_list([
-        'priest','priest',
-        'bolt','gem','gem','gem','bolt'
+        'blizzard','priest','aatxe','haste','zap_shield',
+        'bolt','gem','hillscale','zap_trap','bolt'
       ]);
       GAME.player.field = CardSet.Cards.from_list([
-        'keep', 'flame_swan'
+        'keep'
       ]);
       GAME.enemy.field = [
-        inherit(CardSet.Cards.get('nest'), {health: 7}), inherit(CardSet.Cards.get('evilcow'))
+        inherit(CardSet.Cards.get('nest'), {health: 7})
       ];
-      GAME.player.store = CardSet.Cards.from_list(['entomb','cavalry']);
     },
     enemy_turn: function(){
       if (GAME.enemy.field.length < 4) {
-          GAME.enemy.field.splice(GAME.enemy.field.length-1, 0, CardSet.Cards.create('serpent'));
+          if (Math.random() < 0.3) GAME.enemy.field.splice(GAME.enemy.field.length-1, 0, CardSet.Cards.create('serpent'));
+          else if (Math.random() < 0.3) GAME.enemy.field.push(CardSet.Cards.create('bandit'));
           //GAME.enemy.field.splice(GAME.enemy.field.length-1, 0, CardSet.Cards.create('serpent'));
       }
     }
@@ -106,8 +105,8 @@ GAME.scenarios = [
     setup: function(){   
       GAME.player.deck = CardSet.Cards.from_list([
         'militia','militia',
-        'gem','gem','gem','gem',
-        'gem','gem','gem','gem'
+        'soldier','archer','hunter','cavalry',
+        'militia','soldier','archer','gem','gem'
       ]);
       GAME.player.field = CardSet.Cards.from_list(['keep']);
       GAME.enemy.field = CardSet.Cards.from_list(['nest']);
@@ -221,7 +220,6 @@ GAME.enemy_turn = function(){
   
   GAME.enemy.field.forEach(function(card){
     if (card.field_actions){
-      console.log(card);
       var move={
         card: card,
         action: card.field_actions[0],
@@ -232,7 +230,6 @@ GAME.enemy_turn = function(){
         var targets = GAME.enemy.resolving.action.targets(GAME.enemy.resolving);
         GAME.enemy.done_targetting(targets[Math.floor(Math.random()*targets.length)]);
       }
-      console.log(move);
     }
   });
   

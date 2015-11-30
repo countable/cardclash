@@ -10,9 +10,10 @@ CardSet.Cards.add([
 
   {
     name: 'gem',
-    cost: -1,
+    cost: -2,
     parent: 'resource',
-    pic: '&diams;'
+    pic: '&diams;',
+    rarity: 2
   },
 
   {
@@ -29,6 +30,7 @@ CardSet.Cards.add([
         }
       })
     ],
+    rarity: 2
   },
 
   {
@@ -39,7 +41,7 @@ CardSet.Cards.add([
     hurt: function(damage, move){
       CardSet.Cards.get('fieldable').hurt.call(this, damage, move);
       
-      move.card.health = 0
+      //move.card.health = 0
       if (this.health < 1) GAME.lost();
     }
   },

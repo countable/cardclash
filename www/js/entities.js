@@ -63,6 +63,12 @@ EntityTree.prototype.from_list = function(list){
     return tree.create(name);
   });
 };
+EntityTree.prototype.all = function(){
+  var that=this;
+  return Object.keys(this.by_name).map(function(k){
+    return that.by_name[k];
+  });
+}
 
 
 
@@ -70,7 +76,10 @@ EntityTree.prototype.from_list = function(list){
 var Cards = new EntityTree([
     
   {
-    name: 'card'
+    name: 'card',
+    can_act: function(){
+      return !this._done && !this.stunned;
+    }
   }
 ]);
 
@@ -87,6 +96,12 @@ Cards.add([
     hurt: function(damage, move){
       this.health = this.health - damage;
       console.log('being hurt', this);
+    },
+    get: function(attr){
+      var base = this[attr];
+      GAME.player.field.forEach(function(){
+        
+      });
     }
   },
 
