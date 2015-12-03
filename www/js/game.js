@@ -238,15 +238,5 @@ GAME.enemy_turn = function(){
 };
 
 
-// 
-GAME.start = function(){
-  GAME.player = inherit(Player);
-  GAME.player.client = true;
 
-  GAME.enemy = inherit(Player);
 
-  GAME.players = [GAME.player, GAME.enemy];
-  
-  GAME.scen_idx = parseInt((window.location.hash).replace("#",""));
-  GAME.scenarios[GAME.scen_idx].start();
-};

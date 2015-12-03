@@ -1,11 +1,37 @@
-GAME.app = angular.module('cardClash', ['ng-sortable']);
+GAME.app = angular.module('gameApp', ['ng-sortable', 'ngRoute']).config(
+['$routeProvider', '$locationProvider',
+    function ($routeProvider, $locationProvider) {
 
+        //$locationProvider.html5Mode(true);
 
+        $routeProvider.when('/deckbuilder', {
+            templateUrl: "deckbuilder.html"
+        });
+        $routeProvider.when('/levels', {
+            templateUrl: "levels.html"
+        });
+        $routeProvider.when('/game/:level', {
+            templateUrl: "game.html"
+        });
+        $routeProvider.when('/story', {
+            templateUrl: "story.html"
+        });
+    }
+])
+.run();
 
-
-GAME.app.controller('cardGameCtrl', function($scope, $timeout) {
+GAME.app.controller('cardGameCtrl', ['$scope','$routeParams','$timeout',
+  function($scope, $routeParams, $timeout) {
     
-    GAME.start();
+    GAME.player = inherit(Player);
+    GAME.player.client = true;
+
+    GAME.enemy = inherit(Player);
+
+    GAME.players = [GAME.player, GAME.enemy];
+    
+    GAME.scen_idx = parseInt($routeParams.level);
+    GAME.scenarios[GAME.scen_idx].start();
 
     $scope.player = GAME.player;
     $scope.enemy = GAME.enemy;
@@ -124,9 +150,69 @@ GAME.app.controller('cardGameCtrl', function($scope, $timeout) {
     };
 
     
+}]).config(function($sceProvider) {
+  // Completely disable SCE.  For demonstration purposes only!
+  // Do not use in new projects.
+  $sceProvider.enabled(false);
+})
+
+GAME.app.controller('deckBuilderCtrl', function($scope, $timeout) {
+    
+    
+  $scope.deck = [];
+  $scope.pool = CardSet.Cards.all().filter(function(c){return c.rarity});
+
+  $scope.sort_config = {
+      animation: 150,
+      handle: '.handle'
+  };
+
+  $scope.add = function(index){
+    console.log(index);
+    $scope.deck.push($scope.pool[index])
+  }
+
+  $scope.remove = function(index){
+    $scope.deck.splice(index,1);
+  }
+    
 }).config(function($sceProvider) {
   // Completely disable SCE.  For demonstration purposes only!
   // Do not use in new projects.
   $sceProvider.enabled(false);
 })
 
+
+
+GAME.app.controller('storyCtrl', function($scope, $timeout) {
+    $scope.place=-1;
+    $scope.can_proceed=false;
+    $timeout(function(){
+      $scope.place++;
+      $scope.can_proceed = true;
+    }, 1000);
+    $scope.next=function(){
+      $scope.place++;
+      $scope.can_proceed = false;
+      $timeout(function(){$scope.can_proceed=true},1500)
+    }
+    $scope.choose=function(value){
+      $scope.place ++;
+    }
+    
+}).config(function($sceProvider) {
+  // Completely disable SCE.  For demonstration purposes only!
+  // Do not use in new projects.
+  $sceProvider.enabled(false);
+})
+
+GAME.app.controller('scenarioCtrl', function($scope, $timeout) {
+    
+    
+  $scope.scenarios = GAME.scenarios;
+    
+}).config(function($sceProvider) {
+  // Completely disable SCE.  For demonstration purposes only!
+  // Do not use in new projects.
+  $sceProvider.enabled(false);
+})

@@ -103,6 +103,24 @@
 065, trilobite, minion, 1/3 armor+1
 066, tree, object
 067, wolverine, minion, 2/1 counterattack+1
+068, werewolf, minion
+069, bandage, effect, life+3
+06a, pixie dust, object
+06b, fire powder, object
+06c, direct hit, blast
+06d, echolocation, effect
+06e, concussive force, blast
+06f, mining, effect
+070, ring, object
+071, body shot, effect
+072, alter ego, effect
+073, radiation ray, effect
+074, galactic portal, effect
+075, energy nebulus, effect
+076, foosball, object
+077, power note, effect
+078, gay swan, minion
+079, bread, object
 
 
 

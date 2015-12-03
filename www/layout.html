@@ -1,0 +1,279 @@
+<!doctype html>
+<html>
+
+<head>
+
+  <link rel="stylesheet" type="text/css" href="vendor/introjs.css">
+  <link rel="stylesheet" type="text/css" href="fonts/rpg-font/style.css">
+  <link rel="stylesheet" href="css/font-awesome.min.css">
+  <link rel="stylesheet" type="text/css" href="css/style.css">
+  
+  <meta name="format-detection" content="telephone=no">
+  <meta name="msapplication-tap-highlight" content="no">
+  <meta name="viewport" id="viewport" content="user-scalable=yes, initial-scale=1, maximum-scale=2, minimum-scale=1, width=device-width">
+
+</head>
+
+<body ng-app="gameApp">
+<div ng-view></div>
+
+
+<script type="text/ng-template" id="deckbuilder.html">
+<div ng-controller="deckBuilderCtrl" id='deckbuilder'>
+  <div class="pool-wrap">
+    <table class='cardlist'>
+      <tr>
+        <th>card</th>
+        <th></th>
+        <th>cost</th>
+        <th>speed</th>
+        <th>health</th>
+      </tr>
+      <tr ng-repeat="card in pool track by $index">
+        <td ng-bind-html="card.pic" class='icon'></td>
+        <td>{{ card.name }}</td>
+        <td>&diams; {{ card.cost }}</td>
+        <td><i class="fa fa-bolt"></i> {{ card.speed }}</td>
+        <td>{{ card.health }}</td>
+        <td><button ng-click='add($index)'>add</button></td>
+      </tr>
+    </table>
+  </div>
+  <div class="deck-wrap">
+    <table class='cardlist'>
+      <tr>
+        <th>card</th>
+        <th></th>
+        <th>cost</th>
+        <th>speed</th>
+        <th>health</th>
+      </tr>
+      <tr ng-repeat="card in deck track by $index">
+        <td ng-bind-html="card.pic" class='icon'></td>
+        <td>{{ card.name }}</td>
+        <td>&diams; {{ card.cost }}</td>
+        <td><i class="fa fa-bolt"></i> {{ card.speed }}</td>
+        <td>{{ card.health }}</td>
+        <td><button ng-click='remove($index)'>remove</button></td>
+      </tr>
+    </table>
+  </div>
+</div>
+
+</script>
+
+<script type="text/ng-template" id="levels.html">
+<div ng-controller="scenarioCtrl" id="scenarios">
+  <p>
+    <img src="img/logo-transp.png" id="logo">
+  </p>
+  <div id="levels" class="soft">
+    <a class="soft" ng-repeat="scenario in scenarios track by $index" href="ng.html#{{ $index }}">'{{ scenario.name }}</a>
+  </div>
+</div>
+</script>
+
+<script type="text/ng-template" id="story.html">
+<div ng-controller="storyCtrl" id="story">
+
+  <p ng-class="{showing : (place == 0)}" >
+    "Wake up", yells your Mom, "It's your highschool graduation day!".<br><button ng-click="next()">next</button>
+  </p>
+  
+  <p ng-class="{showing : (place == 1)}" >
+    Your unconscious mind is mired with dreams, of your day job as a (pick one)<br>
+      <button ng-click=choose("cleric")>office temp</button><br>
+      <button ng-click=choose("laborer")>chimney sweep</button><br>
+      <button ng-click=choose("gopher")>delivery gopher</button><br>
+  </p>
+
+  <p ng-class="{showing : (place == 2)}" >
+    Mom doens't relent: "You're nominated for the (pick one)<br>
+      <button ng-click=choose("jock")>sports award</button><br>
+      <button ng-click=choose("geek")>academic honour award</button><br>
+      <button ng-click=choose("prep")>valedictorian</button><br>
+      <button ng-click=choose("prep")>most improved (you lied to mom)</button><br>
+  </p>
+
+  <p ng-class="{showing : (place == 3)}" >
+    "Don't you miss the award ceremony!"<br><button ng-click="next()">next</button>
+  </p>
+
+  <p ng-class="{showing : (place == 4)}" >
+    ...<br><button ng-click="next()">next</button>
+  </p>
+
+  <p ng-class="{showing : (place == 5)}" >
+    You drag yourself to breakfast of peanut butter on toast, and rush out the door. Unfortunately, upon leaving your house, you (pick one)<br>
+      <button ng-click=choose("dogs")>are attacked by a pack of stray dogs</button><br>
+      <button ng-click=choose("bus")>are hit by the school bus</button><br>
+      <button ng-click=choose("peanuts")>have an allergic reaction to peanuts</button><br>
+  </p>
+
+  <p ng-class="{showing : (place == 6)}" >
+      You convulse violently on the ground and your vision goes dark...<br><button ng-click="next()">next</button>
+  </p>
+
+  <p ng-class="{showing : (place == 7)}" >
+    ...<br><button ng-click="next()">next</button>
+  </p>
+
+  <p ng-class="{showing : (place == 8)}" >
+    You slowly open your eyes, and find yourself in marshy thicket. The sun is going down.<br><button ng-click="next()">next</button></p>
+
+  <p ng-class="{showing : (place == 9)}" >
+    "Where am I?" you wonder aloud.<br><button ng-click="next()">next</button></p>
+
+  <p ng-class="{showing : (place == 10)}" >
+    The noise seems to alert a nest of nearby rats. Big ones. They scurry towards you for a tasty meal. You cry out helplessly and close your eyes to meet your doom for the 2nd time today, when suddenly...<br><button ng-click="next()">next</button></p>
+
+  <p ng-class="{showing : (place == 11)}" >
+    Brightly coloured objects flood your vision and strange yet familiar feelings course through your mind, you see a "football" and "dust bunny" appear. As you open your eyes, you feel able to materialize these objects somehow... how strange!<br><button ng-click="next()">next</button></p>
+
+  <p ng-class="{showing : (place == 12)}" >
+    Quick, summon a "football" to save yourself from those rats!<br><button><a href="#/game/0">next</a></button></p>
+
+  
+</div>
+</script>
+
+<script type="text/ng-template" id="game.html">
+
+<div ng-controller="cardGameCtrl">
+  <div id="wrapper" ng-class="{playing: playing}" ng-cloak>
+    
+    <div id="turn" data-intro="After issuing orders, hit the 'turn' button, and sit back to watch the fight." data-step=4 data-position=top>
+      <button class="turn-button" ng-click="turn()">TURN</button>
+      <!-- &#xe2e5;-->
+    </div>
+    
+    <div id="stats">
+      <!--<div id="deck" class="card mini">
+        {{ player.deck.length }}
+      </div>
+      <div id="discard" class="card mini">
+        {{ player.discard.length }}
+      </div>-->
+      <div id="diams"  data-intro="This denotes your current reserve of diamonds, which serve as money in this game." data-step=5 data-position=left>
+      </div>
+      <div id="diams-val">
+        {{ player.diams }}<small>/{{ player.storage }}</small>
+      </div>
+      <div id="income">+{{ player.income }}</div>
+    </div>
+
+    <div id="zones">
+
+      <div class="enemy zone" data-intro="This is the enemy army. Armies attack each other from the left side. You'll see what I mean in a bit." data-step=2>
+        <div ng-repeat="card in enemy.field.slice().reverse() track by $index" ng-class="get_card_classes(card)" ng-click="pick(card)">
+          <div class="title">{{ card.name.capitalizeFirstLetter() }}</div>
+          <div class="icon" ng-bind-html="card.pic"></div>
+
+          <div class="stats">
+            <div class="cost" ng-if="card.cost > 0">&diams; {{ card.cost }}</div>
+            <div class="speed" ng-if="card.speed"><i class="fa fa-bolt"></i> {{ card.speed }}</div>
+          </div>
+          <div class="health pin" ng-if="card.health">{{ card.health }}</div>
+        </div>
+      </div>
+
+      <ul class="field zone sortable" ng-sortable="sort_config" data-intro="This is your army. Issue orders to your troops by clicking the black <button>buttons</button>, after this tour." data-step=1>
+        <li ng-repeat="card in player.field track by $index" ng-class="get_card_classes(card)" ng-click="pick(card)">
+          <div class="title handle">{{ card.name.capitalizeFirstLetter() }}</div>
+          <div class="icon handle" ng-bind-html="card.pic"></div>
+          <div class="menu" ng-if="card.can_act()">
+            <div ng-repeat="action in card.field_actions track by $index">
+              <button ng-click="act(card, action); $event.stopPropagation()" ng-bind-html="action.button(card)">
+              </button>
+            </div>
+          </div>
+          <div class="statuses">
+            <div ng-if="card.stunned" class="stun pin">
+              {{ card.stunned }}
+            </div>
+          </div>
+          <div class="stats handle">
+            <div class="cost" ng-if="card.cost > 0">&diams; {{ card.cost }}</div>
+            <div class="speed" ng-if="card.speed"><i class="fa fa-bolt"></i> {{ card.speed }}</div>
+          </div>
+          <div class="health pin" ng-if="card.health">{{ card.health }}</div>
+        </li>
+      </ul>
+      
+      <div class="hand zone" ng-sortable="sort_config" data-intro="This is your bag of tricks. It refills each turn. Again, use the black <button>buttons</button> to do stuff." data-step=3>
+        <div ng-repeat="card in player.hand track by $index" ng-class="get_card_classes(card)" ng-click="pick(card)">
+          <div class="title">{{ card.name.capitalizeFirstLetter() }}</div>
+          <div class="icon" ng-bind-html="card.pic"></div>
+          <div class="menu" ng-if="!card._done">
+            <div ng-repeat="action in card.hand_actions track by $index">
+              <button ng-if="player.diams >= card.cost" ng-click="play(card, action); $event.stopPropagation()" ng-bind-html="action.button(card)"></button>
+            </div>
+            <div ng-if="!player._dug">
+              <button ng-click="dig(card)" class="dig">dig</button>
+            </div>
+          </div>
+          <div class="stats">
+            <div class="cost" ng-if="card.cost > 0">&diams; {{ card.cost }}</div>
+            <div class="speed" ng-if="card.speed"><i class="fa fa-bolt"></i> {{ card.speed }}</div>
+          </div>
+          <div class="health pin" ng-if="card.health">{{ card.health }}</div>
+        </div>
+      </div>
+      
+      <br>
+      
+      <div class="store zone">
+        <div ng-repeat="card in player.store track by $index" ng-class="get_card_classes(card)">
+          <div class="title">{{ card.name.capitalizeFirstLetter() }}</div>
+          <div class="icon" ng-bind-html="card.pic"></div>
+          <div class="menu">
+            <div ng-repeat="action in card.field_actions track by $index">
+              {{ action.name }} {{ action.damage }}<br>
+            </div>
+            <div ng-if="player.diams >= card.price">
+              <button ng-click="buy(card)">buy</button> for {{card.price}}
+            </div>
+          </div>
+          <div class="stats">
+            <div class="cost" ng-if="card.cost > 0">&diams; {{ card.cost }}</div>
+            <div class="speed" ng-if="card.speed"><i class="fa fa-bolt"></i> {{ card.speed }}</div>
+          </div>
+          <div class="health pin" ng-if="card.health">{{ card.health }}</div>
+        </div>
+      </div>
+      
+    </div> <!--/#zones-->
+  </div> <!--/#wrapper-->
+    
+</div>
+</script>
+
+<div class='text-proxy'></div>
+<div class='shoot-proxy'></div>
+<div class='pow-proxy'></div>
+
+<script src="js/mobile.js"></script>
+<script src="vendor/intro.js"></script>
+<script src="vendor/angular.min.js"></script>
+<script src="vendor/ng-route.js"></script>
+<script src="vendor/ramda.min.js"></script>
+<script src="vendor/Sortable.min.js"></script>
+<script src="vendor/ng-sortable.js"></script>
+<script src="vendor/velocity.min.js"></script>
+
+<script src="js/mix.js"></script>
+
+<script src="js/game.js"></script>
+<script src="js/player.js"></script>
+<script src="js/gfx.js"></script>
+<script src="js/entities.js"></script>
+<script src="js/actions.js"></script>
+<script src="js/resources.js"></script>
+<script src="js/minions.js"></script>
+<script src="js/magic.js"></script>
+<script src="js/ng-app.js"></script>
+<!--<script type="text/javascript" src="cordova.js"></script>-->
+
+
+</body>
+</html>

@@ -98,7 +98,6 @@ background: linear-gradient(to bottom,  #f85032 0%,#f16f5c 50%,#f6290c 51%,#f02f
   right: 0;
   bottom: 0;
   width: 4vh;
-  border-left: 1px solid rgba(0,0,0,0.1);
   font-size: 3vh;
   letter-spacing: -0.4vh;
 }
@@ -106,6 +105,7 @@ background: linear-gradient(to bottom,  #f85032 0%,#f16f5c 50%,#f6290c 51%,#f02f
   display: none;
 }
 .card:hover .stats {
+  border-left: 1px solid rgba(0,0,0,0.1);
   display: block;
 }
 .card .pin {
@@ -209,14 +209,14 @@ background: linear-gradient(to bottom,  #f85032 0%,#f16f5c 50%,#f6290c 51%,#f02f
   opacity: 0 !important;
 }
 .card.minion .icon {
-  background: linear-gradient(190deg, #fefcea 0%,#d17676 100%);
+  background: linear-gradient(190deg, #fefcea 0%,#d17676 70%);
 }
 .card.asset .icon {
-  background: linear-gradient(190deg, #fefcea 0%,#ccc 100%);
+  background: linear-gradient(190deg, #fefcea 0%,#ccc 80%);
   background-color: #eee;
 }
 .card.resource .icon {
-  background: radial-gradient(ellipse at center, #fefcea 0%,#8cafee 100%);
+  background: radial-gradient(ellipse at center, #fefcea 10%,#8cafee 60%);
   background-color: #ffd;
 }
 
@@ -398,3 +398,112 @@ button:active {
   width: 16vh;
   height: 8vh;
 }
+
+/* levels page */
+#scenarios {
+  text-aling: center;
+}
+#levels {
+  text-align: center;
+  padding: 6vh 6vh 0 6vh;
+  margin: 3vh 3vh 0 3vh;
+  height: 52vh;
+  transition: all 1s;
+}
+#levels p {
+  text-align: center;
+}
+#logo {
+  height: 30vh;
+  transition: all 1s;
+}
+#levels a {
+  display: inline-block;
+  vertical-align: middle;
+  padding-top: 3vh;
+  height: 15vh;
+  width: 18vh;
+  margin: 3vh;
+  border-radius: 1vh;
+  color: black;
+  background-color: white;
+  transform: rotateZ(5deg) rotateX(-20deg);
+  font-size: 3vh;
+  transition: all 1s;
+  text-decoration: none;
+}
+#levels a:hover {
+  transform: rotateX(20deg) scale(1.1);
+}
+.preload #levels a {
+  transform: rotateX(70deg) rotateZ(-10deg);
+}
+.preload #levels {
+  margin-top: 50vh;
+  transform: scale(2) rotateZ(-5deg);
+}
+.preload #logo {
+  margin-top: -40vh;
+  transform: scale(2) rotateZ(-10deg);
+}
+
+/* deckbuilder screen */
+.pool-wrap {
+  left: 0;
+  right: 50%;
+}
+.deck-wrap {
+  left: 50%;
+  right: 0;
+}
+
+.deck-wrap, .pool-wrap {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  overflow: auto;
+}
+#deckbuilder table {
+  float:left;
+}
+#deckbuilder table td {
+  padding: 5px 10px;
+  border-left: 1px solid #ddd;
+  border-top: 1px solid #ddd;
+}
+#deckbuilder .icon {
+  font-family: 'rpg-icons';
+}
+
+#story {
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  position: absolute;
+  background-color: #111;
+  color: #ddd;
+}
+#story p {
+  font-size: 5vh;
+  position: absolute;
+  top: 30vh;
+  left: 10vh; right: 10vh;
+  text-align: center;
+  transition: opacity 2s;
+  opacity: 0;
+  z-index: 0;
+  font-family: Consolas, courier, sans-serif;
+}
+#story p.showing {
+  opacity: 1;
+  z-index: 1;
+}
+#story select {
+  font-size: 5vh;
+}
+#story button {
+  font-size: 5vh;
+  margin: 3vh 0 0 0;
+}
+#story button:active {top: auto}; /* prevent relative button pos */
