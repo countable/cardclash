@@ -35,10 +35,14 @@ GAME.app.controller('cardGameCtrl', ['$scope','$routeParams','$timeout',
 
     $scope.player = GAME.player;
     $scope.enemy = GAME.enemy;
-    
+    $scope.close_details = function(){
+      $scope.details=null;
+    }    
     $scope.pick = function(card){
       if ($scope.player.resolving) {
         $scope.player.done_targetting(card);
+      } else {
+        $scope.details=card;
       }
     };
     
@@ -185,18 +189,42 @@ GAME.app.controller('deckBuilderCtrl', function($scope, $timeout) {
 
 
 GAME.app.controller('storyCtrl', function($scope, $timeout) {
-    $scope.place=-1;
-    $scope.can_proceed=false;
+    
+    initial_cards = {
+      clerk: ['copier','snappy_book'],
+      laborer: ['dust_bunny','broom_mount'],
+      gopher: ['hermes_sandals', 'gopher'],
+
+      jock: ['spirit_ball', 'mini_slam'],
+      nerd: ['math_tome', 'history_tome'],
+      prep: ['leadership', 'city_crier'],
+      loser: ['solitude', 'misery'],
+
+      dogs: ['shiba_pup', 'hunters_instinct'],
+      bus: ['automata', 'schematic'],
+      nuts: ['poison_gas', 'nut_shield'],
+    };
+
+    $scope.place = -1;
+
+    $scope.collection = ['bread', 'nuts', 'goose', 'goose', 'goose'];
+
     $timeout(function(){
       $scope.place++;
-      $scope.can_proceed = true;
     }, 1000);
+
     $scope.next=function(){
       $scope.place++;
-      $scope.can_proceed = false;
-      $timeout(function(){$scope.can_proceed=true},1500)
+      if ($scope.place == 12) {
+        $scope.collection = $scope.collection.concat(initial_cards[$scope.award]);
+        $scope.collection = $scope.collection.concat(initial_cards[$scope.job]);
+        $scope.collection = $scope.collection.concat(initial_cards[$scope.death]);
+        localStorage['collection'] = JSON.stringify($scope.collection);
+        window.location.hash = "/game/1";
+      }
     }
-    $scope.choose=function(value){
+    $scope.choose=function(key, value){
+      $scope[key] = value;
       $scope.place ++;
     }
     
@@ -216,3 +244,11 @@ GAME.app.controller('scenarioCtrl', function($scope, $timeout) {
   // Do not use in new projects.
   $sceProvider.enabled(false);
 })
+
+GAME.app.directive('card', function() {
+  return {
+    restrict: 'E',
+    templateUrl: 'card.html',
+    transclude: true
+  }
+});

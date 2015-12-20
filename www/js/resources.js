@@ -43,7 +43,8 @@ CardSet.Cards.add([
       
       //move.card.health = 0
       if (this.health < 1) GAME.lost();
-    }
+    },
+    svg: 'guarded-tower'
   },
   {
     name: 'nest',
@@ -55,6 +56,7 @@ CardSet.Cards.add([
       
       move.card.health = 0;
       if (this.health < 1) GAME.won();
-    }
+    },
+    svg: 'bridge'
   }
 ]);

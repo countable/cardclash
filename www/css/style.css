@@ -47,16 +47,10 @@ background: linear-gradient(to bottom,  #f85032 0%,#f16f5c 50%,#f6290c 51%,#f02f
   height: 3vh;
   overflow: hidden;
   text-align: center;
-  display: none;
+  /*display: none;*/
 }
 .icon {
-  font-family: 'rpg-icons';
-  font-size: 15vh;
-  line-height: 1;
-  text-align: center;
   padding: 1vh;
-  color: black;
-  background-color: white;
   height: 20vh;
   width: 20vh;
   border-top-left-radius:3vh;
@@ -64,7 +58,6 @@ background: linear-gradient(to bottom,  #f85032 0%,#f16f5c 50%,#f6290c 51%,#f02f
   border-bottom-right-radius:1vh;
   border-bottom-left-radius:1vh;
   border: 0.5vh solid white;
-  overflow: hidden;
   background: linear-gradient(190deg, #fefcea 0%,#d1ca76 100%);
   box-shadow: 0 1px 4px 0 rgba(0,0,0,0.4);
 }
@@ -97,7 +90,7 @@ background: linear-gradient(to bottom,  #f85032 0%,#f16f5c 50%,#f6290c 51%,#f02f
   top: 0;
   right: 0;
   bottom: 0;
-  width: 4vh;
+  width: 5vh;
   font-size: 3vh;
   letter-spacing: -0.4vh;
 }
@@ -203,7 +196,23 @@ background: linear-gradient(to bottom,  #f85032 0%,#f16f5c 50%,#f6290c 51%,#f02f
   display: none;
 }
 
-
+#details-mask {
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  position: absolute;
+  background-color: rgba(0,0,0,0.5);
+  z-index: 300;
+}
+#details {
+  background-color: white;
+  top: 10vh;
+  left: 10vh;
+  right: 10vh;
+  bottom: 10vh;
+  position: absolute;
+}
  /*card types*/
 .card.placeholder {
   opacity: 0 !important;
@@ -231,9 +240,11 @@ background: linear-gradient(to bottom,  #f85032 0%,#f16f5c 50%,#f6290c 51%,#f02f
 }
 .card .stun {
   font-size: 2.8vh;
-  line-height: 1;
-  width: 4vh;
-  height: 4vh;
+  line-height: 1.3;
+  font-weight: normal;
+  width: 6vh;
+  padding: 0;
+  height: 6vh;
   background-color: orange;
   color: white;
 }
@@ -368,7 +379,21 @@ background: linear-gradient(to bottom,  #f85032 0%,#f16f5c 50%,#f6290c 51%,#f02f
 .introjs-overlay {
   background: rgba(0,0,0,0.5);
 }
-
+@keyframes wobble  {
+  0%  { -webkit-transform:  rotateX(0) rotateY(0); }
+  25%  { -webkit-transform:  rotateX(12deg) rotateY(0); }
+  50%  { -webkit-transform:  rotateX(0) rotateY(0); }
+  75%  { -webkit-transform:  rotateX(0) rotateY(12deg); }
+  100%  { -webkit-transform:  rotateX(0) rotateY(0); }
+}
+button:nth-child(0){ animation-delay: -0.75s }
+button:nth-child(1){ animation-delay: -0.25s }
+button:nth-child(2){ animation-delay: -0.5s }
+button:nth-child(3){ animation-delay: 0 }
+button:nth-child(4){ animation-delay: -0.75s }
+button:nth-child(5){ animation-delay: -0.25s }
+button:nth-child(6){ animation-delay: -0.5s }
+button:nth-child(7){ animation-delay: 0 }
 button {
   font-family: Tahoma, 'sans-serif';
   box-shadow: 0.1vh 0.4vh 0 0 black;
@@ -397,6 +422,7 @@ button:active {
   box-shadow: 0.1vh 0.6vh 0 0 black;
   width: 16vh;
   height: 8vh;
+  animation: wobble 3s infinite;
 }
 
 /* levels page */
@@ -471,9 +497,6 @@ button:active {
   border-left: 1px solid #ddd;
   border-top: 1px solid #ddd;
 }
-#deckbuilder .icon {
-  font-family: 'rpg-icons';
-}
 
 #story {
   top: 0;
@@ -505,5 +528,6 @@ button:active {
 #story button {
   font-size: 5vh;
   margin: 3vh 0 0 0;
+  animation: wobble 2s infinite;
 }
 #story button:active {top: auto}; /* prevent relative button pos */

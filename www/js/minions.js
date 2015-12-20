@@ -51,6 +51,15 @@ CardSet.Cards.add([
     },
     parent: 'fieldable'
   },
+
+  {
+    name:'mammal',
+    parent: 'minion'
+  },
+  {
+    name: 'bird',
+    parent: 'minion'
+  },
   
   // minions.
   {
@@ -66,7 +75,7 @@ CardSet.Cards.add([
       })
     ],
     parent: 'minion',
-    pic: '&#xe2de;',
+    svg: 'broad-dagger',
     rarity: 1
   },
   {
@@ -94,6 +103,7 @@ CardSet.Cards.add([
     ],
     text: 'When a minion deploys, your keep gets +1 health',
     pic: '&#xe2dd;',
+    svg: 'guarded-tower',
     parent: 'minion',
     rarity: 1
   },
@@ -132,6 +142,7 @@ CardSet.Cards.add([
     ],
     parent: 'minion',
     pic: '&#xe0bb;',
+    svg: 'bowman',
     rarity: 1
   },
   {
@@ -150,6 +161,7 @@ CardSet.Cards.add([
     parent: 'minion',
     health: 3,
     pic: '&#xe310;',
+    svg: 'battle-gear',
     rarity: 1
   },
   {
@@ -165,6 +177,7 @@ CardSet.Cards.add([
     parent: 'minion',
     health: 4,
     pic: '&#xe171;',
+    svg: 'cavalry',
     rarity: 1
   },
   {
@@ -178,6 +191,7 @@ CardSet.Cards.add([
       })
     ],
     parent: 'minion',
+    svg: 'rogue',
     pic: '&#xe2c5;',
     rarity: 2
   },
@@ -194,6 +208,7 @@ CardSet.Cards.add([
     spikes: 1,
     parent: 'minion',
     pic: '&#xe045;',
+    svg: 'spears',
     rarity: 1
   },
   
@@ -226,33 +241,167 @@ CardSet.Cards.add([
     ],
     speed: 6,
     parent: 'minion',
+    svg: 'bull-horns',
     pic: '&#xe216;'
   },
+  {
+    name: 'rat',
+    health: 2,
+    cost: 3,
+    field_actions:[
+      Actions.create('charge', {
+        damage: 1
+      })
+    ],
+    speed: 5,
+    parent: 'mammal',
+    svg: 'mouse'
+  },
+  {
+    name: 'goose',
+    delay: 3,
+    health: 2,
+    cost: 2,
+    field_actions:['charge'],
+    speed: 3,
+    parent: 'bird',
+    svg: 'duck'
+  },
+  
+  {
+    name: 'bread',
+    svg: 'bread'
+  },
+  {
+    name: 'nuts',
+    svg: 'coffee-beans'
+  },
+
+  {
+    name: 'copier',
+    svg: 'trade',
+    rarity: 9
+  },
+  {
+    name: 'snappy_book',
+    svg: 'evil-book',
+    rarity: 9
+  },
+  {
+    name: 'dust_bunny',
+    svg: 'rabbit',
+    rarity: 9
+  },
+  {
+    name: 'broom_mount',
+    svg: 'witch',
+    rarity: 9
+  },
+  {
+    name: 'hermes_sandals',
+    svg: 'sandals',
+    rarity: 9
+  },
+  {
+    name: 'gopher',
+    svg: 'seated-mouse',
+    rarity: 9
+  },
+  {
+    name: 'isolation',
+    svg: 'suspicious',
+    rarity: 9
+  },
+  {
+    name: 'misery',
+    svg: 'misery',
+    rarity: 9
+  },
+  {
+    name: 'math_tome',
+    svg: 'white-book',
+    rarity: 9
+  },
+  {
+    name: 'history-tome',
+    svg: 'black-book',
+    rarity: 9
+  },
+  {
+    name: 'leadership',
+    svg: 'sensuousness',
+    rarity: 9
+  },
+  {
+    name: 'city_crier',
+    svg: 'screaming',
+    rarity: 9
+  },
+  {
+    name: 'spirit_ball',
+    svg: 'american-football-ball',
+    rarity: 9
+  },
+  {
+    name: 'mini_slam',
+    svg: 'basketball-ball',
+    rarity: 9
+  },
+  {
+    name: 'misery',
+    svg: 'tear-tracks',
+    rarity: 9
+  },
+  {
+    name: 'shiba_pup',
+    svg: 'wolf-howl',
+    rarity: 9
+  },
+  {
+    name: 'hunters_instinct',
+    svg: 'target-arrows',
+    rarity: 9
+  },
+  {
+    name: 'automata',
+    delay: 3,
+    health: 5,
+    svg: 'abstract-018',
+    rarity: 9
+  },
+  {
+    name: 'schematic',
+    svg: 'processor',
+    rarity: 9
+  },
+  {
+    name: 'poison_gas',
+    svg: 'poison-gas',
+    rarity: 9
+  },
+  {
+    name: 'nut_shield',
+    svg: 'shieldcomb',
+    rarity: 9
+  },
+
   {
     name: 'ogre',
     health: 5,
     delay: 2,
-    field_actions:[
-      Actions.create('batter', {
-        damage: 3
-      })
-    ],
+    damage: 3,
+    field_actions:['batter'],
     speed: 6,
     parent: 'minion',
-    pic: '&#xe133;'
+    rarity: 2
   },
   {
     name: 'bandit',
     health: 2,
     cost: 2,
-    field_actions:[
-      Actions.create('mug', {
-        damage: 1
-      })
-    ],
+    field_actions:['mug'],
     speed: 4,
     parent: 'minion',
-    pic: '&#xe18f;',
     rarity: 1
   },
   {
@@ -261,13 +410,9 @@ CardSet.Cards.add([
     health: 7,
     delay: 4,
     cost: 5,
-    field_actions:[
-      Actions.create('charge', {
-        damage: 4
-      })
-    ],
+    damage: 4,
+    field_actions:['charge'],
     parent: 'minion',
-    pic: '&#xe100;',
     rarity: 1
   },
   {
@@ -275,11 +420,7 @@ CardSet.Cards.add([
     health: 2,
     cost: 4,
     untargetable: true,
-    field_actions:[
-      Actions.create('batter', {
-        damage: 1
-      })
-    ],
+    field_actions:['batter'],
     speed: 4,
     parent: 'minion',
     pic: '&#xe039;',
@@ -290,11 +431,7 @@ CardSet.Cards.add([
     delay: 2,
     health: 5,
     cost: 5,
-    field_actions:[
-      Actions.create('flank', {
-        damage: 3
-      })
-    ],
+    field_actions:['flank'],
     speed: 5,
     parent: 'minion',
     pic: '&#xe015;',

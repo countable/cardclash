@@ -38,6 +38,15 @@ String.prototype.capitalizeFirstLetter = function() {
 var Scenario = {
   start: function(){
     this.setup();
+    // initial deploys status.
+    GAME.player.get_opponent().field.forEach(function(c){
+      c.stunned=c.delay;
+    });
+    GAME.player.field.forEach(function(c){
+      c.stunned=c.delay;
+    });
+
+    // shuffle deck
     GAME.player.deck = CardSet.shuffle(GAME.player.deck);    
     
     this.reg_events();
@@ -85,18 +94,18 @@ GAME.scenarios = [
   inherit(Scenario, {
     name: 'Tutorial',
     setup: function(){
-      GAME.player.deck = CardSet.Cards.from_list(['militia', 'gem', 'militia', 'gem', 'militia', 'gem', 'militia', 'gem']);
-      GAME.player.field = CardSet.Cards.from_list(['militia', 'militia', 'militia', 'keep']);
-      GAME.player.deck = CardSet.shuffle(GAME.player.deck);
+      GAME.player.deck = CardSet.Cards.from_list(JSON.parse(localStorage.collection));
+      GAME.player.field = CardSet.Cards.from_list(['keep', 'goose']);
       GAME.player.store = [];
-      GAME.enemy.field = CardSet.Cards.from_list(['evilcow', 'nest']);
-      setTimeout(function(){
+      GAME.enemy.field = CardSet.Cards.from_list(['nest', 'rat','rat']);
+      /*setTimeout(function(){
         introJs().start({
           showBullets: false,
           overlayOpacity: 0.2,
-          showStepNumbers: false
+          showStepNumbers: false,
+          tooltipPosition: 'auto'
         })
-      }, 100);
+      }, 100);*/
     }
   }),
   
