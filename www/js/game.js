@@ -4,12 +4,12 @@ var GAME = {
   emit_move: function(move){
 
       var check = function(listener, att) {
-          if (listener[att] === 'any') return true;
+          if (listener[att] === 'card') return true;
           if (listener[att] === 'self') return move.card === listener.card;
           if (move[att].is_a(listener[att])) return true;
       };
 
-      var listeners = this.getListeners(move.player);
+      var listeners = GAME.get_listeners(move.player);
       listeners.forEach(function(listener){
           if (check(listener, 'card') && check(listener, 'target') && check(listener, 'action')) {
               listener.fn(move);
@@ -17,7 +17,7 @@ var GAME = {
       });
   },
 
-  getListeners: function(player){
+  get_listeners: function(player){
     var listeners = [];
     listeners = listeners.concat(
       [].concat.apply([], player.field.map(function(card){return card.events || []}))
@@ -26,6 +26,43 @@ var GAME = {
       [].concat.apply([], player.get_opponent().field.map(function(card){return card.events || []}))
     );
     return listeners;
+  },
+
+  get_globals: function(for_card, attr){
+    var ownership = (for_card.owned_by == GAME.player) ? 'player': 'enemy';
+    var from_card, effect, i, j, total = 0;
+    
+    var check = function(from_card, effect){
+      if (!effect[attr] && !effect['get_'+attr]) return false;
+      if (!(effect.card_type === 'card' || for_card.is_a(effect.card_type))) return false;
+      if (effect.owner === 'ally') {
+        return from_card.owned_by === for_card.owned_by;
+      } else if (effect.owner === 'enemy') {
+        return from_card.owned_by !== for_card.owned_by;
+      } else { // no ownership constraint.
+        return true;
+      }
+    };
+
+    // oldschool loops for perf boost.
+    var fields = GAME.get_fields();
+    for (i=0;i<fields.length;i++) {
+      if (fields[i].global_effects) {
+        from_card = fields[i];
+        for(j=0;j<from_card.global_effects.length;j++){
+          effect = from_card.global_effects[j];
+          if (check(from_card, effect)){
+            total += effect[attr] ? effect[attr] : effect['get_'+attr](card)
+          } 
+        }
+      }
+    }
+
+    return total;
+  },
+
+  get_fields: function(){
+    return GAME.enemy.field.concat(GAME.player.field);
   }
 
 };
@@ -39,13 +76,15 @@ var Scenario = {
   start: function(){
     this.setup();
     // initial deploys status.
-    GAME.player.get_opponent().field.forEach(function(c){
+    GAME.get_fields().forEach(function(c){
       c.stunned=c.delay;
     });
-    GAME.player.field.forEach(function(c){
-      c.stunned=c.delay;
+    GAME.player.field.concat(GAME.player.deck).forEach(function(c){
+      c.owned_by = GAME.player;
     });
-
+    GAME.enemy.field.concat(GAME.enemy.deck).forEach(function(c){
+      c.owned_by = GAME.enemy;
+    });
     // shuffle deck
     GAME.player.deck = CardSet.shuffle(GAME.player.deck);    
     
@@ -54,7 +93,7 @@ var Scenario = {
     GAME.scenario = this;
     GAME.turn_idx = 0;
     
-    GAME.player.draw(6);
+    GAME.player.draw(this.hand_size || 6);
   },
 
   reg_events: function(){
@@ -64,48 +103,52 @@ var Scenario = {
   }
 };
 
-
+var add_enemy = function(card_name){
+  var c = CardSet.Cards.create(card_name);
+  c.owned_by = GAME.enemy;
+  GAME.enemy.field.push(c);
+}
 GAME.scenarios = [
 
-  
   inherit(Scenario, {
     name: 'TEST',
-    setup: function(){   
-      GAME.player.deck = CardSet.Cards.from_list([
-        'blizzard','priest','aatxe','haste','zap_shield',
-        'bolt','gem','hillscale','zap_trap','bolt'
-      ]);
+    setup: function(){
+      GAME.player.deck = CardSet.Cards.from_list(Object.keys(CardSet.Cards.by_name)).filter(function(c){
+        return c.rarity;
+      }); // all cards that aren't abstract
       GAME.player.field = CardSet.Cards.from_list([
-        'keep'
+        'keep', 'alpha_wolf', 'militia'
       ]);
       GAME.enemy.field = [
         inherit(CardSet.Cards.get('nest'), {health: 7})
-      ];
+      ].concat(CardSet.Cards.from_list(['bandit']));
     },
     enemy_turn: function(){
       if (GAME.enemy.field.length < 4) {
-          if (Math.random() < 0.3) GAME.enemy.field.splice(GAME.enemy.field.length-1, 0, CardSet.Cards.create('serpent'));
-          else if (Math.random() < 0.3) GAME.enemy.field.push(CardSet.Cards.create('bandit'));
+          if (Math.random() < 0.01) add_enemy('serpent')
+          else if (Math.random() < 0.9) add_enemy('bandit');
           //GAME.enemy.field.splice(GAME.enemy.field.length-1, 0, CardSet.Cards.create('serpent'));
       }
     }
   }),
 
   inherit(Scenario, {
-    name: 'Tutorial',
+    name: 'Welcome',
+    hand_size: 3,
     setup: function(){
       GAME.player.deck = CardSet.Cards.from_list(JSON.parse(localStorage.collection));
+      //GAME.player.deck = GAME.player.deck.concat(CardSet.Cards.from_list(['goose', 'goose', 'goose', 'goose']));
       GAME.player.field = CardSet.Cards.from_list(['keep', 'goose']);
       GAME.player.store = [];
       GAME.enemy.field = CardSet.Cards.from_list(['nest', 'rat','rat']);
-      /*setTimeout(function(){
+      setTimeout(function(){
         introJs().start({
           showBullets: false,
           overlayOpacity: 0.2,
           showStepNumbers: false,
           tooltipPosition: 'auto'
         })
-      }, 100);*/
+      }, 100);
     }
   }),
   
@@ -122,7 +165,7 @@ GAME.scenarios = [
       GAME.player.store = CardSet.Cards.from_list(['soldier']);
     },
     enemy_turn: function(){
-      GAME.enemy.field.push(CardSet.Cards.create('bandit'));
+      add_enemy('bandit');
     }
   }),
 
@@ -146,8 +189,9 @@ GAME.scenarios = [
     },
     enemy_turn: function(){
       if (GAME.enemy.field.length < 4) {
-        
-        GAME.enemy.field.splice(GAME.enemy.field.length-1, 0, CardSet.Cards.create('bandit'));
+        var c= CardSet.Cards.create('bandit');
+        c.owned_by = GAME.enemy;
+        GAME.enemy.field.splice(GAME.enemy.field.length-1, 0, c);
       }
     }
   }),
@@ -171,7 +215,7 @@ GAME.scenarios = [
     enemy_turn: function(){
       if (GAME.enemy.field.length < 4) {
         if (Math.random() < .5)
-          GAME.enemy.field.splice(GAME.enemy.field.length-1, 0, CardSet.Cards.create('serpent'));
+          add_enemy('serpent')
       }
     }
   }),
@@ -194,8 +238,7 @@ GAME.scenarios = [
     },
     enemy_turn: function(){
       if (GAME.enemy.field.length < 4) {
-          GAME.enemy.field.splice(GAME.enemy.field.length-1, 0, CardSet.Cards.create('serpent'));
-          GAME.enemy.field.splice(GAME.enemy.field.length-1, 0, CardSet.Cards.create('serpent'));
+          add_enemy('serpent');
       }
     }
   })

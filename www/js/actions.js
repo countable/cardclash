@@ -50,8 +50,7 @@ CardSet.Actions.add([
       animate_strike(move, done);
     },
     fn: function(move){
-      move.target.hurt(this.damage, move);
-      
+      move.target.hurt(this.damage || move.card.damage, move);
       if (move.target.spikes) move.card.hurt(move.target.spikes);
       if (this.poison) move.target._poison = this.poison;
     },
@@ -238,6 +237,9 @@ CardSet.Actions.add([
     animate: function(move, done){
       animate_play(move, done);
     },
+    button: function(card){
+      return card.cost + '&diams; ' + this.name;
+    },
     parent: 'action'
   },
   {
@@ -245,6 +247,10 @@ CardSet.Actions.add([
     delayed: true,
     parent: 'use',
     num_targets: 1
+  },
+  {
+    name: 'blast',
+    parent: 'cast'
   }
 ]);
 

@@ -10,16 +10,16 @@ var
     pow_proxy_el = $$(".pow-proxy")[0],
     text_proxy_el = $$(".text-proxy")[0];
 
-var knife_sound = (new Audio('assets/knifeSlice.mp3')),
-    trample_sound = (new Audio('assets/trample.mp3')),
-    spend_sound = (new Audio('assets/spend.mp3')),
-    deploy_sound = (new Audio('assets/deploy2.mp3')),
-    buy_sound = (new Audio('assets/buy.mp3')),
-    spend_sound = (new Audio('assets/spend.mp3')),
-    trumpet_sound = (new Audio('assets/trumpet.mp3')),
-    lost_sound = (new Audio('assets/lost.mp3')),
-    won_sound = (new Audio('assets/won.mp3')),
-    lock_sound = (new Audio('assets/lock.mp3'));
+var knife_sound = (new Audio('sounds/knifeSlice.mp3')),
+    trample_sound = (new Audio('sounds/trample.mp3')),
+    spend_sound = (new Audio('sounds/spend.mp3')),
+    deploy_sound = (new Audio('sounds/deploy2.mp3')),
+    buy_sound = (new Audio('sounds/buy.mp3')),
+    spend_sound = (new Audio('sounds/spend.mp3')),
+    trumpet_sound = (new Audio('sounds/trumpet.mp3')),
+    lost_sound = (new Audio('sounds/lost.mp3')),
+    won_sound = (new Audio('sounds/won.mp3')),
+    lock_sound = (new Audio('sounds/lock.mp3'));
 
 var get_actor_display = function(move){
     return get_display(move.card);
@@ -227,7 +227,7 @@ var animate_shoot = function(move, done){
     });
     
     if (move.action.damage) {
-        animate_damage(move, target);
+        animate_message(move.target);
     }
 }
 

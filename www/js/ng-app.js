@@ -16,6 +16,9 @@ GAME.app = angular.module('gameApp', ['ng-sortable', 'ngRoute']).config(
         $routeProvider.when('/story', {
             templateUrl: "story.html"
         });
+        $routeProvider.when('/', {
+            templateUrl: "menu.html"
+        });
     }
 ])
 .run();
@@ -172,61 +175,12 @@ GAME.app.controller('deckBuilderCtrl', function($scope, $timeout) {
   };
 
   $scope.add = function(index){
-    console.log(index);
     $scope.deck.push($scope.pool[index])
   }
 
   $scope.remove = function(index){
     $scope.deck.splice(index,1);
   }
-    
-}).config(function($sceProvider) {
-  // Completely disable SCE.  For demonstration purposes only!
-  // Do not use in new projects.
-  $sceProvider.enabled(false);
-})
-
-
-
-GAME.app.controller('storyCtrl', function($scope, $timeout) {
-    
-    initial_cards = {
-      clerk: ['copier','snappy_book'],
-      laborer: ['dust_bunny','broom_mount'],
-      gopher: ['hermes_sandals', 'gopher'],
-
-      jock: ['spirit_ball', 'mini_slam'],
-      nerd: ['math_tome', 'history_tome'],
-      prep: ['leadership', 'city_crier'],
-      loser: ['solitude', 'misery'],
-
-      dogs: ['shiba_pup', 'hunters_instinct'],
-      bus: ['automata', 'schematic'],
-      nuts: ['poison_gas', 'nut_shield'],
-    };
-
-    $scope.place = -1;
-
-    $scope.collection = ['bread', 'nuts', 'goose', 'goose', 'goose'];
-
-    $timeout(function(){
-      $scope.place++;
-    }, 1000);
-
-    $scope.next=function(){
-      $scope.place++;
-      if ($scope.place == 12) {
-        $scope.collection = $scope.collection.concat(initial_cards[$scope.award]);
-        $scope.collection = $scope.collection.concat(initial_cards[$scope.job]);
-        $scope.collection = $scope.collection.concat(initial_cards[$scope.death]);
-        localStorage['collection'] = JSON.stringify($scope.collection);
-        window.location.hash = "/game/1";
-      }
-    }
-    $scope.choose=function(key, value){
-      $scope[key] = value;
-      $scope.place ++;
-    }
     
 }).config(function($sceProvider) {
   // Completely disable SCE.  For demonstration purposes only!

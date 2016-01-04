@@ -13,7 +13,8 @@ if (typeof module !== 'undefined') {
 //     {name: 'base'},
 //     {name: 'child', parent: 'base'}
 //  ]);
-var EntityTree = function(all){
+var EntityTree = function(opts, all){
+  this.opts = opts || {};
   all = all || [];
   this.by_name = {};
   this.add(all);
@@ -28,6 +29,7 @@ EntityTree.prototype.add = function(entity) {
     });
 
   } else {
+    if (tree.opts.on_create) tree.opts.on_create(entity);
 
     if (entity.parent)
     {
@@ -52,7 +54,9 @@ EntityTree.prototype.add = function(entity) {
 }
 // instantiate a tree node.
 EntityTree.prototype.create = function(name, overrides){
-  return inherit(this.by_name[name], overrides || {}, name + "Instance");
+  var kls = this.by_name[name];
+  if (!kls) throw kls + " is not a valid object."
+  return inherit(kls, overrides || {}, name + "Instance");
 };
 EntityTree.prototype.get = function(name){
   return this.by_name[name];
@@ -73,54 +77,32 @@ EntityTree.prototype.all = function(){
 
 
 
-var Cards = new EntityTree([
+var Cards = new EntityTree({
+    on_create: function(card){
+      for (var i=0; i<(card.field_actions || []).length; i++) {
+        if (typeof card.field_actions[i] === 'string') card.field_actions.splice(i,1,Actions.create(card.field_actions[i]))
+      }
+    }
+  }, [
     
   {
     name: 'card',
     can_act: function(){
       return !this._done && !this.stunned;
+    },
+    valid_target: function(){
+
+    },
+    get effective_speed() {
+      return this.speed + GAME.get_globals(this, 'speed');
     }
   }
 ]);
-
 
 
 Actions = new EntityTree()
 
-Cards.add([
-  // card types.
 
-  {
-    name: 'fieldable',
-    parent: 'card',
-    hurt: function(damage, move){
-      this.health = this.health - damage;
-      console.log('being hurt', this);
-    },
-    get: function(attr){
-      var base = this[attr];
-      GAME.player.field.forEach(function(){
-        
-      });
-    }
-  },
-
-  {
-    name: 'asset',
-    display_class: 'asset',
-    parent: 'fieldable'  
-  },
-  {
-    name: 'magic',
-    display_class: 'magic',
-    cost: 0,
-    hand_actions: [
-      Actions.create('cast')
-    ],
-    delayed: true,
-    parent: 'card'
-  }
-]);
 
 
 var shuffle = function(arr)

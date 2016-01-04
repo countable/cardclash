@@ -12,7 +12,7 @@ CardSet.Cards.add([
     name: 'gem',
     cost: -2,
     parent: 'resource',
-    pic: '&diams;',
+    svg: 'gems',
     rarity: 2
   },
 
@@ -20,7 +20,7 @@ CardSet.Cards.add([
     name: 'ore',
     cost: 0,
     parent: 'resource',
-    pic: '&#xe000;',
+    svg: 'rock',
     hand_actions: [
       Actions.create('use', {
         effect: function(move){
@@ -37,7 +37,6 @@ CardSet.Cards.add([
     name: 'keep',
     health: 5,
     parent: 'asset',
-    pic: '&#xe043;',
     hurt: function(damage, move){
       CardSet.Cards.get('fieldable').hurt.call(this, damage, move);
       
@@ -46,11 +45,11 @@ CardSet.Cards.add([
     },
     svg: 'guarded-tower'
   },
+  
   {
     name: 'nest',
     health: 5,
     parent: 'asset',
-    pic: '&#xe13d;',
     hurt: function(damage, move){
       CardSet.Cards.get('fieldable').hurt.call(this, damage, move);
       

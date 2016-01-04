@@ -73,71 +73,41 @@
 </div>
 </script>
 
+<script type="text/ng-template" id="menu.html">
+  <p><a href="#/story">new game</a></p>
+  <p><a href="#/levels">continue</a></p>
+</script>
+
 <script type="text/ng-template" id="story.html">
 <div ng-controller="storyCtrl" id="story">
 
-  <p ng-class="{showing : (place == 0)}" >
-    "Wake up", orders your Mom, "It's your graduation day!".<br><button ng-click="next()">next</button>
-  </p>
-  
-  <p ng-class="{showing : (place == 1)}" >
-    Nuzzleing your goosedown pillow, your unconscious mind is mired with dreams, of your day job as a (pick one)<br>
-      <button ng-click=choose("job","clerk")>office clerk</button><br>
-      <button ng-click=choose("job","laborer")>chimney sweep</button><br>
-      <button ng-click=choose("job","gopher")>delivery gopher</button><br>
-  </p>
+  <div
+    ng-repeat="page in story.pages track by $index"
+    ng-class="{showing : (place == $index), page:true}"
+  >
+    <p>{{ page.text }}</p>
+    
+    <p
+      ng-if="page.options"
+      ng-repeat="option in page.options"
+    >
 
-  <p ng-class="{showing : (place == 2)}" >
-    Mom doens't relent: "You're nominated for the (pick one)<br>
-      <button ng-click=choose("award","jock")>sports award</button><br>
-      <button ng-click=choose("award","geek")>academic honour award</button><br>
-      <button ng-click=choose("award","prep")>valedictorian</button><br>
-      <button ng-click=choose("award","loser")>most improved (you made this up earlier)</button><br>
-  </p>
+      <button
+        ng-click=choose(page.input,option.value)
+      >{{ option.text }}</button>
+    </p>
 
-  <p ng-class="{showing : (place == 3)}" >
-    "Don't you miss the award ceremony!"<br><button ng-click="next()">next</button>
-  </p>
-
-  <p ng-class="{showing : (place == 4)}" >
-    ...<br><button ng-click="next()">next</button>
-  </p>
-
-  <p ng-class="{showing : (place == 5)}" >
-    You drag yourself to hasty meal of nut butter on bread, and rush out the hatch of your home. Upon leaving your house, you (pick one)<br>
-      <button ng-click=choose("death","dogs")>are downed by a pack of wild dogs</button><br>
-      <button ng-click=choose("death","bus")>are hit by a bus</button><br>
-      <button ng-click=choose("death","nuts")>have an allergic reaction to nuts</button><br>
-  </p>
-
-  <p ng-class="{showing : (place == 6)}" >
-      You convulse violently on the ground and your vision goes dark...<br><button ng-click="next()">next</button>
-  </p>
-
-  <p ng-class="{showing : (place == 7)}" >
-    ...<br><button ng-click="next()">next</button>
-  </p>
-
-  <p ng-class="{showing : (place == 8)}" >
-    Your eyes slowly slide open, and find yourself on a morgue slab. You don't seem to be dead.<br><button ng-click="next()">next</button></p>
-
-  <p ng-class="{showing : (place == 9)}" >
-    "Where am I?" you wonder aloud.<br><button ng-click="next()">next</button></p>
-
-  <p ng-class="{showing : (place == 10)}" >
-    The noise of your voice alerts the rats. Huge ones, that scurry towards you for a tasty meal. You scamble away, but you're too slow, and prepare to meet your doom for the 2nd time today. But suddenly...<br><button ng-click="next()">next</button></p>
-
-  <p ng-class="{showing : (place == 11)}" >
-    Brightly coloured objects flood your vision and strange yet familiar feelings course through your mind, you see a some geese and loaf of bread appear. As you open your eyes, you feel able to materialize these objects somehow... how strange!<br><button ng-click="next()">next</button></p>
-
-  
+    <p ng-if="!page.options">
+      <button ng-click="next()">next</button>
+    </p>
+  </div>
 </div>
 </script>
 
 <script type="text/ng-template" id="card.html">
 
   <div class="title">{{ card.name.capitalizeFirstLetter() }}</div>
-  <img class="icon" pic="{{card.svg}}" ng-src="svg/{{card.svg}}.svg" ng-click="pick(card)">
+  <img class="icon handle" pic="{{card.svg}}" ng-src="svg/{{card.svg}}.svg" ng-click="pick(card)">
   
   <div ng-transclude></div>
 
@@ -215,7 +185,7 @@
           <card card=card zone='hand'>
             <div class="menu" ng-if="!card._done">
               <div ng-repeat="action in card.hand_actions track by $index">
-                <button ng-if="player.diams >= card.cost" ng-click="play(card, action); $event.stopPropagation()" ng-bind-html="action.button(card)"></button>
+                <button ng-class="{faded: player.diams < card.cost}" ng-click="play(card, action); $event.stopPropagation()" ng-bind-html="action.button(card)"></button>
               </div>
               <div ng-if="!player._dug">
                 <button ng-click="dig(card)" class="dig">dig</button>
@@ -274,10 +244,11 @@
 <script src="js/gfx.js"></script>
 <script src="js/entities.js"></script>
 <script src="js/actions.js"></script>
-<script src="js/resources.js"></script>
 <script src="js/minions.js"></script>
+<script src="js/resources.js"></script>
 <script src="js/magic.js"></script>
 <script src="js/ng-app.js"></script>
+<script src="js/story.js"></script>
 <!--<script type="text/javascript" src="cordova.js"></script>-->
 
 

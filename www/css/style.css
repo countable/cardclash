@@ -16,6 +16,18 @@ body {
   color: #444;
   background: #ddd;
   overflow: hidden;
+
+}
+
+@keyframes roll {
+from { transform: rotate(0deg) }
+to   { transform: rotate(360deg) }
+}
+
+.barrel-roll {
+  animation-name: roll;
+  animation-duration: 4s;
+  animation-iteration-count: 1;
 }
 
 ul {
@@ -142,7 +154,11 @@ background: linear-gradient(to bottom,  #f85032 0%,#f16f5c 50%,#f6290c 51%,#f02f
 .sortable .card .handle {
   cursor: move;
 }
-
+button.faded {
+  color: #444;
+  text-decoration: line-through;
+  opacity: 0.8;
+}
 
 /* zones */
 #zones {
@@ -507,7 +523,7 @@ button:active {
   background-color: #111;
   color: #ddd;
 }
-#story p {
+#story .page {
   font-size: 5vh;
   position: absolute;
   top: 30vh;
@@ -518,9 +534,12 @@ button:active {
   z-index: 0;
   font-family: Consolas, courier, sans-serif;
 }
-#story p.showing {
+#story .page.showing {
   opacity: 1;
   z-index: 1;
+}
+#story p {
+  margin: 0;
 }
 #story select {
   font-size: 5vh;
