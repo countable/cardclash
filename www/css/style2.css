@@ -16,7 +16,27 @@ body {
   color: #444;
   background: #ddd;
   overflow: hidden;
+  height: 100%;
+  background-color: black;
+}
 
+#view {
+  top: 0; left: 0; right: 0; bottom: 0;
+  position: absolute;
+
+  width: 100vw;
+  height: 56.25vw; /* height:width ratio = 9/16 = .5625  */
+  background: white;
+  margin: auto;
+  position: absolute;
+  top:0;bottom:0; /* vertical center */
+  left:0;right:0; /* horizontal center */
+
+}
+
+a, a:hover, a:visited{
+  color: black;
+  text-decoration: none;
 }
 
 @keyframes roll {
@@ -38,48 +58,43 @@ ul {
 
 /* card inner styles */
 .card {
+  background-color:blue;
   position: relative;
   z-index: 150;
-  height: 20vh;
-  width: 20vh;
+  height: 11vw;
+  width: 12vw;
   display: inline-block;
   list-style: none;
-  margin:0 2vh 0 0;
+  margin:0 1.40vw 0 0;
   border-radius: 22%;
-/*
-background: linear-gradient(to bottom,  #f85032 0%,#f16f5c 50%,#f6290c 51%,#f02f17 71%,#e73827 100%); 
-*/
-
 }
+
 .card .title {
-  top: 0;
-  left: 0;
+  display: none;
+  bottom: 0;
+  left: -1vw
+  right: -1vw;
   position: absolute;
-  right: 0;
-  height: 3vh;
+  height: 2.25vw;
   overflow: hidden;
   text-align: center;
-  /*display: none;*/
 }
 .icon {
-  padding: 1vh;
-  height: 20vh;
-  width: 20vh;
-  border-top-left-radius:3vh;
-  border-top-right-radius:3vh;
-  border-bottom-right-radius:1vh;
-  border-bottom-left-radius:1vh;
-  border: 0.5vh solid white;
-  background: linear-gradient(190deg, #fefcea 0%,#d1ca76 100%);
-  box-shadow: 0 1px 4px 0 rgba(0,0,0,0.4);
+  /*border: .3vw solid black;*/
+  padding: 0.5vw;
+  display: block;
+  height: 11vw;
+  width: 11vw;
+  text-shadow: 0 0 4px rgba(0,0,0,0.3);
+  background-color: white;
 }
 .soft, .card {
   user-select:none;
 }
 .card .menu {
   position: absolute;
-  top: 14vh;
-  left: -0.5vh;
+  top: 10.80vw;
+  left: -0.35vw;
 }
 
 /*
@@ -102,9 +117,9 @@ background: linear-gradient(to bottom,  #f85032 0%,#f16f5c 50%,#f6290c 51%,#f02f
   top: 0;
   right: 0;
   bottom: 0;
-  width: 5vh;
-  font-size: 3vh;
-  letter-spacing: -0.4vh;
+  width: 3.50vw;
+  font-size: 2.10vw;
+  letter-spacing: -0.28vw;
 }
 .card .stats {
   display: none;
@@ -115,41 +130,45 @@ background: linear-gradient(to bottom,  #f85032 0%,#f16f5c 50%,#f6290c 51%,#f02f
 }
 .card .pin {
   position: absolute;
-  font-size: 3.5vh;
+  font-size: 2.35vw;
   text-align: center;
-  text-shadow: 0.2vh 0.4vh 0.4vh black;
+  text-shadow: 0.14vw 0.28vw 0.28vw black;
   font-weight: bold;
-  border: 0.4vh solid black;
-  border-radius: 2vh;
+  border-radius: 50%;
+  /*border: 0.28vw solid black;
+  border-radius: 1.40vw;
   border-top-style: dotted;
-  border-bottom-width: 0.8vh;
+  border-bottom-width: 0.56vw;*/
 }
 
 .card .speed {
   position: absolute;
-  right: 0.5vh;
-  top: 4.5vh;
+  right: 0.35vw;
+  top: 3.15vw;
 }
 .card .health {
-  right: -0.5vh;
-  bottom: -0.5vh;
+  right: -1vw;
+  bottom: 0;
   background-color: white;
   line-height: 1;
-  width: 6vh;
-  height: 6vh;
+  width: 3vw;
+  height: 3vw;
   background-color: #0c0;
   color: white;
 }
 .card .cost {
   position: absolute;
-  right: 0.5vh;
-  top: 0.5vh;
+  right: 0.35vw;
+  top: 0.35vw;
 }
 .title {
   text-transform:uppercase;
-  font-size: 2.8vh;
-  height: 3vh;
+  font-size: 1.76vw;
+  height: 2.25vw;
   overflow:hidden;
+  background-color:white;
+  border-radius: 20%;
+  border: 1px solid black;
 }
 .sortable .card .handle {
   cursor: move;
@@ -165,9 +184,9 @@ button.faded {
   text-align: center;
 }
 .zone {
-  padding-top: 6vh;
+  padding-top: 4.20vw;
   position: relative;
-  height: 32vh;
+  height: 22.40vw;
   white-space: nowrap;
   -webkit-touch-callout: none;
   -webkit-user-select: none;
@@ -179,33 +198,48 @@ button.faded {
 }
 .enemy.zone {
   text-align: right;
-  padding-right: 6vh;
-  background: linear-gradient(185deg, #ffffff 80%,#f1eab6 100%);
+  padding-right: 4.20vw;
+  background: linear-gradient(0deg, #ffa 0%,#faa 100%);
+  height: 18vw;
 }
 .field.zone {
+  background: white; /*linear-gradient(0deg, #aaf 0%,#aff 100%);*/
   text-align: left;
+  height: 18vw;
   z-index: 101;
-  padding-left: 6vh;
-  background: linear-gradient(5deg, #ffffff 80%,#f1eab6 100%);
-  border-top: 0.5vh solid #cc7;
-  border-bottom: 2vh solid #ccc;
+  padding-left: 4.20vw;
+  /*background: linear-gradient(5deg, #ffffff 80%,#f1eab6 100%);*/
 }
 .hand.zone {
   position: absolute;
   text-align: center;
-  bottom: 5vh;
+  background-color: #ccc;
+  bottom: 0;
   left: 0;
   right: 0;
 }
-
+[ng-drop="true"].drag-enter {
+    border: solid 5px red;
+}
+[ng-drop="true"] {
+    border: solid 5px yellow;
+}
+[ng-drop="true"]#diams {
+  background-color: yellow !important;
+  transform: scale(2);
+}
+[ng-drop="true"].drag-enter#diams {
+    border: solid 5px red;
+    transform: scale(3);
+}
 /*
   transform: rotate(9deg);
 .hand.zone .card:nth-child(1){ transform: rotate(-9deg)}
-.hand.zone .card:nth-child(2){ transform: rotate(-4deg); margin-bottom: 1.5vh;}
-.hand.zone .card:nth-child(3){ transform: rotate(4deg); margin-bottom: 1.5vh;}
+.hand.zone .card:nth-child(2){ transform: rotate(-4deg); margin-bottom: 1.05vw;}
+.hand.zone .card:nth-child(3){ transform: rotate(4deg); margin-bottom: 1.05vw;}
 */
 
-/*#wrapper.playing .hand.zone {height: 8vh;}
+/*#wrapper.playing .hand.zone {height: 5.60vw;}
 #wrapper.playing .hand-inner .card {opacity: 0;}*/
 .store.zone {
   padding-top: 0;
@@ -223,26 +257,44 @@ button.faded {
 }
 #details {
   background-color: white;
-  top: 10vh;
-  left: 10vh;
-  right: 10vh;
-  bottom: 10vh;
+  top: 7vw;
+  left: 21vw;
+  right: 21vw;
+  bottom: 7vw;
   position: absolute;
+  padding: 3.50vw;
 }
+#details table {
+  background-color: #F88;
+}
+#details table td {
+  padding: 2.80vw;
+  font-size: 4.90vw;
+}
+
+
  /*card types*/
 .card.placeholder {
   opacity: 0 !important;
 }
+.card.minion {
+
+}
 .card.minion .icon {
-  background: linear-gradient(190deg, #fefcea 0%,#d17676 70%);
+  background: url(../img/fire.jpg); /*linear-gradient(190deg, #fefcea 0%,#d17676 70%);*/
+  background-size: cover;
+  border-top-right-radius: 50%;
+  border-top-left-radius: 50%;
 }
 .card.asset .icon {
-  background: linear-gradient(190deg, #fefcea 0%,#ccc 80%);
-  background-color: #eee;
+  /*background: linear-gradient(190deg, #fefcea 0%,#ccc 80%);
+  background-color: #eee;*/
+  background: #aaa;
 }
 .card.resource .icon {
-  background: radial-gradient(ellipse at center, #fefcea 10%,#8cafee 60%);
-  background-color: #ffd;
+  /*background: radial-gradient(ellipse at center, #fefcea 10%,#8cafee 60%);
+  background-color: #ffd;*/
+  background: #ff8;
 }
 
 /* card states */
@@ -255,12 +307,12 @@ button.faded {
   border-color: red;
 }
 .card .stun {
-  font-size: 2.8vh;
+  font-size: 1.96vw;
   line-height: 1.3;
   font-weight: normal;
-  width: 6vh;
+  width: 4.20vw;
   padding: 0;
-  height: 6vh;
+  height: 4.20vw;
   background-color: orange;
   color: white;
 }
@@ -268,7 +320,6 @@ button.faded {
   border-color: #777;
 }
 .card.target .icon {
-  border: 1px solid yellow;
   cursor: pointer;
   transform: scale(1.1);
 }
@@ -284,67 +335,80 @@ button.faded {
 }
 
 #turn {
-  bottom: 2vh;
-  right: 2vh;
-/*  height: 11vh;
-  width: 9vh;
+  bottom: 1.40vw;
+  right: 1.40vw;
+/*  height: 7.70vw;
+  width: 6.30vw;
   border-radius: 50%;
-  padding: 2vh;
-  font-size: 10vh;
+  padding: 1.40vw;
+  font-size: 7vw;
   font-family: 'rpg-icons';*/
   cursor: pointer;
   transition: 0.5s all;
 }
 #wrapper.playing #turn {
-  bottom: -15vh;
+  bottom: -10.50vw;
 }
 #wrapper.playing .zone.store {
   opacity: 0;
 }
 #wrapper.playing #stats {
-  right: -10vh;
+  right: -7vw;
 }
 #stats {
-  top: 70vh;
-  right: 4vh;
+  top: 40vw;
+  right: 2.80vw;
   transition: 0.5s right;
 }
+#exit {
+  z-index: 1000;
+  font-size: 4.20vw;
+  height: 7vw;
+  width: 7vw;
+  background-color: #F88;
+  display: block;
+  top: -1.40vw;
+  left: -1.40vw;
+  position: absolute;
+  text-align: center;
+  border-radius: 50%;
+}
 #diams-val, #diams {
-  width: 8vh;
-  height: 8vh;
+  width: 5.60vw;
+  height: 5.60vw;
   position: relative;
 }
 #diams-val {
   z-index: 2;
   text-align: center;
-  font-size: 4.5vh;
+  font-size: 3.15vw;
   color: white;
-  text-shadow: 0.3vh 0.3vh 0.3vh rgba(0,0,0,0.9);
+  text-shadow: 0.21vw 0.21vw 0.21vw rgba(0,0,0,0.9);
   line-height: 1.4;
 }
 #diams-val small {
   opacity: 0.7;
 }
 #income {
-  font-size: 2.7vh;
+  font-size: 1.89vw;
   position: absolute;
-  top: -2vh;
-  right: -2vh;
+  top: -1.40vw;
+  right: -1.40vw;
   font-weight: bold;
 }
 #diams {
   position: absolute;
   background-color: #39f;
   transform: rotate(45deg);
-  border: 0.4vh solid black;
-  border-right-width: 0.8vh;
-  border-bottom-width: 0.8vh;
+  border: 0.28vw solid black;
+  border-right-width: 0.56vw;
+  border-bottom-width: 0.56vw;
 }
 .card.mini {
-  font-size: 4vh;
-  width: 5vh;
-  height: 6vh;
-  padding: 1vh 0 0 0;
+  font-size: 2.6vw;
+  width: 3.50vw;
+  height: 4.20vw;
+  padding: 0.70vw 0 0 0;
   text-align: center;
   display: block;
 }
@@ -361,22 +425,22 @@ button.faded {
   z-index: 300;
 }
 .text-proxy{
-  font-size: 3.5vh;
+  font-size: 2.45vw;
   color: red;
-  text-shadow: 0.1vh 0.2vh 0 rgba(0,0,0,1);
+  text-shadow: 0.07vw 0.14vw 0 rgba(0,0,0,1);
   font-family: Arial, Helvetica, sans-serif;
 }
 .shoot-proxy{
-  width: 6vh;
-  height: 6vh;
+  width: 4.20vw;
+  height: 4.20vw;
   border-radius: 50%;
-  text-shadow: 0 0.4vh 0.6vh rgba(0,0,0,0.5);
+  text-shadow: 0 0.28vw 0.42vw rgba(0,0,0,0.5);
   background-color: white;
-  box-shadow:0 0.4vh 0.6vh #aaa;
+  box-shadow:0 0.28vw 0.42vw #aaa;
 }
 .pow-proxy {
-  width: 3vh;
-  height: 3vh;
+  width: 2.10vw;
+  height: 2.10vw;
   border-radius: 50%;
   background: radial-gradient(ellipse at center, #fb9d23 0%, #ffc578 100%);
 }
@@ -412,32 +476,41 @@ button:nth-child(6){ animation-delay: -0.5s }
 button:nth-child(7){ animation-delay: 0 }
 button {
   font-family: Tahoma, 'sans-serif';
-  box-shadow: 0.1vh 0.4vh 0 0 black;
+  box-shadow: 0.07vw 0.28vw 0 0 black;
   background: gold;
-  border:0.4vh solid black;
+  border:0.28vw solid black;
   cursor:pointer;
   color:black;
-  font-size:3vh;
+  font-size: 2.10vw;
   padding: 0;
   text-decoration:none;
-  border-radius: 1vh;
+  border-radius: 0.70vw;
   border-top-style: dotted;
-  padding: 0.3vh 0.5vh 0.8vh 0.5vh;
-}
-button.dig {
-  background: lightblue;
+  padding: 0.21vw 0.35vw 0.56vw 0.35vw;
 }
 button:active {
   box-shadow:none;
   position:relative;
-  top:0.4vh;
+  top:0.28vw;
+}
+
+.menu div {
+  width: 5.5vw;
+  height: 3vw;
+  display: inline-block;
+  background-color: white;
+  border: 0.5vw solid #888;
+  box-shadow: 0 0 5px rgba(0,0,0,0.5);
+}
+.menu div.dig {
+  background: lightblue;
 }
 
 .turn-button {
-  font-size:5vh;
-  box-shadow: 0.1vh 0.6vh 0 0 black;
-  width: 16vh;
-  height: 8vh;
+  font-size:3.50vw;
+  box-shadow: 0.07vw 0.42vw 0 0 black;
+  width: 11.20vw;
+  height: 5.60vw;
   animation: wobble 3s infinite;
 }
 
@@ -446,46 +519,88 @@ button:active {
   text-aling: center;
 }
 #levels {
+  background-image: url(../img/cellar.svg);
+  background-size: cover;
   text-align: center;
-  padding: 6vh 6vh 0 6vh;
-  margin: 3vh 3vh 0 3vh;
-  height: 52vh;
+  padding: 1vw 4.20vw 0 4.20vw;
+  position: absolute;
+  bottom: 0; top: 0; left: 0; right: 0;
   transition: all 1s;
 }
 #levels p {
   text-align: center;
+  display: inline-block;
+  background-color: white;
+  border: 1px solid black;
+  height: 10vw;
+  width: 10vw;
+  padding: 0.5vw;
+  margin: 10vw 15vw 10vw 5vw;
+  transition: all 1s;
+  transform: rotateZ(5deg) rotateX(-20deg);
+}
+#levels p b {
+  display: block;
+  font-size: 5vw;
+  line-height: 4vw;
 }
 #logo {
-  height: 30vh;
+  height: 21vw;
   transition: all 1s;
 }
-#levels a {
+#levels p:hover {
+  color: black;
+  transform: rotateX(20deg) scale(1.1);
+}
+
+.splash {
+  display: none;
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  /*background-image: url(../img/splash.png);*/
+}
+/* Game Menu */
+#game_menu {
+  text-align: center;
+  padding: 4.20vw 4.20vw 0 4.20vw;
+  margin: 2.10vw 2.10vw 0 2.10vw;
+  height: 36.40vw;
+  transition: all 1s;
+}
+#game_menu p {
+  text-align: center;
+  padding: 0;
+  margin: 0;
+}
+#game_menu a {
   display: inline-block;
   vertical-align: middle;
-  padding-top: 3vh;
-  height: 15vh;
-  width: 18vh;
-  margin: 3vh;
-  border-radius: 1vh;
+  padding-top: 2.10vw;
+  height: 10.50vw;
+  width: 19.60vw;
+  margin: 2.10vw;
+  border-radius: 0.70vw;
   color: black;
   background-color: white;
   transform: rotateZ(5deg) rotateX(-20deg);
-  font-size: 3vh;
+  font-size: 2.10vw;
   transition: all 1s;
   text-decoration: none;
 }
-#levels a:hover {
+#game_menu a:hover {
   transform: rotateX(20deg) scale(1.1);
 }
+/* done game menu */
+
 .preload #levels a {
   transform: rotateX(70deg) rotateZ(-10deg);
 }
 .preload #levels {
-  margin-top: 50vh;
+  margin-top: 35vw;
   transform: scale(2) rotateZ(-5deg);
 }
 .preload #logo {
-  margin-top: -40vh;
+  margin-top: -28vw;
   transform: scale(2) rotateZ(-10deg);
 }
 
@@ -498,13 +613,16 @@ button:active {
   left: 50%;
   right: 0;
 }
-
+.deck-name {
+  font-size: 2vw;
+}
 .deck-wrap, .pool-wrap {
   position: absolute;
-  top: 0;
+  top: 4vw;
   bottom: 0;
   overflow: auto;
 }
+
 #deckbuilder table {
   float:left;
 }
@@ -524,10 +642,10 @@ button:active {
   color: #ddd;
 }
 #story .page {
-  font-size: 5vh;
+  font-size: 3.50vw;
   position: absolute;
-  top: 30vh;
-  left: 10vh; right: 10vh;
+  top: 5vw;
+  left: 7vw; right: 7vw;
   text-align: center;
   transition: opacity 2s;
   opacity: 0;
@@ -542,11 +660,11 @@ button:active {
   margin: 0;
 }
 #story select {
-  font-size: 5vh;
+  font-size: 3.50vw;
 }
 #story button {
-  font-size: 5vh;
-  margin: 3vh 0 0 0;
+  font-size: 3.50vw;
+  margin: 2.10vw 0 0 0;
   animation: wobble 2s infinite;
 }
 #story button:active {top: auto}; /* prevent relative button pos */

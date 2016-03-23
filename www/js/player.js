@@ -23,9 +23,9 @@ var Player =
         this.pending_actions = [];
         this.discard = [];
 
-        this.diams = 0;
+        this.diams = 10;
         this.income = 0;
-        this.storage = 2;
+        this.storage = 12;
 
     },
     
@@ -81,6 +81,9 @@ var Player =
         }
     },
     
+    can_dig: function(){
+        return !!(!this._dug && this.resolving);
+    },
     
     // provide an index OR a card for the first arg.
     move_card: function(index, source, dest, placeholder)
@@ -153,7 +156,6 @@ var Player =
     
     play: function (card, action, then)
     {
-        console.log('playing card');
         var move = {
             card: card,
             action: action,
@@ -166,7 +168,7 @@ var Player =
         return result;
     },
     
-    act: function(card, action){
+    /*act: function(card, action){
         var move = {
             card: card,
             action: action,
@@ -174,7 +176,7 @@ var Player =
             cost: action.cost
         };
         return this.initiate_move(move, action);
-    },
+    },*/
 
     dig: function(index){
       var keep = this.field.filter(function(item){return item.is_a('keep')})[0]
@@ -188,17 +190,7 @@ var Player =
       this.move_card(index, this.hand, this.discard);
     },
     
-    initiate_move: function(move, then){
-        console.log('move:',move)
-        if (move.cost) {
-            if (move.cost > this.diams) {
-                return {
-                    message: "Not enough diamonds.",
-                    success: false
-                }
-            }
-            
-        };
+    initiate_move: function(move, then) {
         
         //hilight targets, if any, and wait for user to select.
         if (move.action.num_targets && move.action.num_targets > 0) {
@@ -223,7 +215,9 @@ var Player =
 
             
         } else { // otherwise just complete the move.
-            this.apply_move(move, then);
+            console.log('set resolving');
+            this.resolving = move;
+            //this.apply_move(move, then);
         }
 
         return {
@@ -232,15 +226,16 @@ var Player =
     
     },
     
-    done_targetting: function(target){
+    done_targetting: function(target, done){
         if (this.resolving){
-            
             if (this.resolving.action.targets(this.resolving).indexOf(target) > -1)
             {
                 this.resolving.target = target
-                this.apply_move(this.resolving);
-
+                console.log('DT',done)
+                this.apply_move(this.resolving, done);
             } else {
+                console.error(target);
+                console.trace();
                 alert('invalid target');
             }
             // clear targets hilight
@@ -255,6 +250,18 @@ var Player =
     
     apply_move: function(move, then){
         
+        if (move.cost) {
+            if (move.cost > this.diams) {
+                return {
+                    message: "Not enough diamonds.",
+                    success: false
+                }
+            }
+        };
+
+        console.log('apply', move, move.action.delayed);
+        console.trace();
+
         move.card._done = true;
         move.card._move = move;
         this.diams -= move.cost;
@@ -262,27 +269,30 @@ var Player =
         if (move.action.delayed) {
             if (this.client) animate_order();
             this.pending_actions.push(move);
+
         } else {
+            console.trace();
+            console.log('completing', then);
             this.complete_move(move, then);
+
         }
     },
     
     complete_move: function(move, then){
         
+        console.log('COMPLETE', arguments);
+
         // if the card targets dynamicaly, then do it now.
         if (move.action.retarget) {
             move.target = move.action.retarget(move);
         }
-        
         if (move.card.stunned) { // stunned cards can't move.
             return then && then();
         }
-
         // dead cards can't do moves.
         if (move.card.is_alive && !move.card.is_alive()){
             return then && then();
         }
-        
         // ensure this move wasnt already used, ie as a counterattack.        
         if (move._done){
             return then && then();
@@ -290,7 +300,6 @@ var Player =
         
         move.action.animate(move, function(){
             move._done = true;
-            console.log('executing')
             move.action.fn(move);
 
             GAME.emit_move(move);
@@ -303,7 +312,6 @@ var Player =
                 }
             }
             then && then();
-            
         });
     },
     

@@ -91,6 +91,7 @@ CardSet.Cards.add([
     delay: 2,
     health: 2,
     speed: 7,
+    damage: 1,
     field_actions: [
       Actions.create('charge', {
         damage: 1,
@@ -135,11 +136,7 @@ CardSet.Cards.add([
     health: 2,
     speed: 2,
     delay: 0,
-    field_actions: [
-      Actions.create('charge', {
-        damage: 1
-      })
-    ],
+    field_actions: ['charge'],
     text: 'your minions have -1 speed',
     global_effects: [
       {
@@ -157,11 +154,8 @@ CardSet.Cards.add([
     cost: 3,
     health: 2,
     speed: 2,
-    field_actions: [
-      Actions.create('volley', {
-        damage: 1
-      })
-    ],
+    damage: 1,
+    field_actions: ['volley'],
     parent: 'minion',
     svg: 'bowman',
     rarity: 1
@@ -171,13 +165,10 @@ CardSet.Cards.add([
     health: 1,
     cost: 3,
     speed: 6,
+    damage: 2,
     field_actions: [
-      Actions.create('charge', {
-        damage: 2
-      }),
-      Actions.create('guard', {
-        
-      })
+      'charge',
+      'guard'
     ],
     parent: 'minion',
     health: 3,
@@ -187,13 +178,9 @@ CardSet.Cards.add([
   {
     name: 'cavalry',
     cost: 5,
-    health: 1,
     speed: 4,
-    field_actions: [
-      Actions.create('flank', {
-        damage: 2
-      })
-    ],
+    damage: 3,
+    field_actions: ['flank'],
     parent: 'minion',
     health: 4,
     svg: 'cavalry',
@@ -204,11 +191,7 @@ CardSet.Cards.add([
     health: 1,
     cost: 4,
     speed: 5,
-    field_actions: [
-      Actions.create('hunt', {
-        damage: 2
-      })
-    ],
+    field_actions: ['hunt'],
     parent: 'minion',
     svg: 'rogue',
     rarity: 2
@@ -219,11 +202,8 @@ CardSet.Cards.add([
     health: 2,
     cost: 5,
     speed: 6,
-    field_actions: [
-      Actions.create('slash', {
-        damage: 1
-      })
-    ],
+    damage: 1,
+    field_actions: ['slash'],
     spikes: 1,
     parent: 'minion',
     svg: 'fluffy-flame',
@@ -236,24 +216,18 @@ CardSet.Cards.add([
     health: 3,
     cost: 1,
     delay: 2,
-    field_actions:[
-      Actions.create('charge', {
-        damage: 1
-      })
-    ],
+    damage: 1,
+    field_actions:['charge'],
     speed: 6,
     parent: 'minion',
     svg: 'bull-horns'
   },
   {
-    name: 'rat',
+    name: 'mousefly',
     health: 2,
     cost: 3,
-    field_actions:[
-      Actions.create('charge', {
-        damage: 1
-      })
-    ],
+    damage: 1,
+    field_actions:['charge'],
     speed: 5,
     parent: 'mammal',
     svg: 'mouse'
@@ -263,6 +237,7 @@ CardSet.Cards.add([
     delay: 3,
     health: 2,
     cost: 2,
+    damage: 2,
     field_actions:['charge'],
     speed: 3,
     parent: 'bird',
@@ -294,11 +269,7 @@ CardSet.Cards.add([
     svg: 'fox-head',
     health: 2,
     cost: 1,
-    field_actions:[
-      Actions.create('charge', {
-        damage: 2
-      })
-    ],
+    field_actions:['charge'],
     speed: 2,
     parent: 'mammal',
     rarity: 9

@@ -31,19 +31,26 @@ var get_target_display = function(move) {
 
 // Get the dom element and related data for a card, used for animations.
 var get_display = function(card) {
+    
     var selector, field = GAME.player.field, idx = field.indexOf(card);
+
     if (idx == -1) {
         field = GAME.player.get_opponent().field;
         idx = field.indexOf(card);
     }
+    
     if (field !== GAME.player.field) {
         idx = field.length - 1 - idx;
         selector = '.enemy';
     } else {
         selector = '.field';
     }
+    
+    console.log (selector + " .card", idx);
     var el = $$(selector + " .card")[idx];
+    
     var rect = el.getBoundingClientRect();    
+    
     return {
         el: el,
         rect: rect,

@@ -5,8 +5,10 @@
 
   <link rel="stylesheet" type="text/css" href="vendor/introjs.css">
   <link rel="stylesheet" type="text/css" href="fonts/rpg-font/style.css">
-  <link rel="stylesheet" href="css/font-awesome.min.css">
-  <link rel="stylesheet" type="text/css" href="css/style.css">
+  <!--<link rel="stylesheet" href="css/font-awesome.min.css">-->
+  <!--<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">-->
+  <link rel="stylesheet" type="text/css" href="css/libs.css">
+  <link rel="stylesheet" type="text/css" href="css/style2.css">
   
   <meta name="format-detection" content="telephone=no">
   <meta name="msapplication-tap-highlight" content="no">
@@ -15,11 +17,18 @@
 </head>
 
 <body ng-app="gameApp">
-<div ng-view></div>
 
+<div class="splash"></div>
 
-<script type="text/ng-template" id="deckbuilder.html">
-<div ng-controller="deckBuilderCtrl" id='deckbuilder'>
+<div ng-view id="view"></div>
+
+<script type="text/ng-template" id="deck.html">
+
+<div ng-controller="deckCtrl" id='deckbuilder'>
+  <a href='#/{{ epic_id }}/deck' id="exit">X</a>
+  <form style='text-align:center'>
+    Deck Name: <input ng-change="save()" ng-model="deck.name" class='deck-name'>
+  </form>
   <div class="pool-wrap">
     <table class='cardlist'>
       <tr>
@@ -48,7 +57,7 @@
         <th>speed</th>
         <th>health</th>
       </tr>
-      <tr ng-repeat="card in deck track by $index">
+      <tr ng-repeat="card in deck.cards track by $index">
         <td ng-bind-html="card.pic" class='icon'></td>
         <td>{{ card.name }}</td>
         <td>&diams; {{ card.cost }}</td>
@@ -59,23 +68,59 @@
     </table>
   </div>
 </div>
-
 </script>
 
-<script type="text/ng-template" id="levels.html">
-<div ng-controller="scenarioCtrl" id="scenarios">
-  <p>
-    <img src="img/logo-transp.png" id="logo">
+<script type="text/ng-template" id="decks.html">
+<a href='#{{ epic_id }}/' id="exit">X</a>
+<div ng-controller="decksCtrl" id="decks">
+  <p class='paper-stack'>
+    <button ng-click="new_deck()">New Deck</button>
   </p>
-  <div id="levels" class="soft">
-    <a class="soft" ng-repeat="scenario in scenarios track by $index" href="ng.html#{{ $index }}">'{{ scenario.name }}</a>
+  <div id="decks" class='paper-stack'>
+    <p ng-repeat="deck in decks track by $index">
+      <a href="#/{{ epic_id }}/deck/{{ deck.id }}">{{ deck.name }}</a>
+    </p>
+  </div>
+</div>
+</script>
+
+<script type="text/ng-template" id="map.html">
+<a href='#/{{ epic_id }}/map/{{ map_idx }}' id="exit">X</a>
+<div ng-controller="mapCtrl" id="scenarios">
+  <div id="levels">
+    <p ng-repeat="scenario in scenarios track by $index" class="page">
+      <b>{{ scenario.order }}</b>
+      <a href="#/{{ epic_id }}/game/{{ map_idx }}/{{ $index }}">{{ scenario.name.replace('_'," ") }}</a>
+    </p>
   </div>
 </div>
 </script>
 
 <script type="text/ng-template" id="menu.html">
-  <p><a href="#/story">new game</a></p>
-  <p><a href="#/levels">continue</a></p>
+<div ng-controller='menuCtrl'>
+  <div class='paper-stack'>
+    <p ng-repeat="idx in [1,2,3]">
+      <button ng-click="load_epic(idx)">
+        <a>Game {{ idx }}</a>
+        <span ng-if="!epics[idx]">(new)</span>
+      </button>
+    </p>
+  </div>
+</div>
+</script>
+
+<script type="text/ng-template" id="epic.html">
+<a href='#/' id="exit">X</a>
+<div ng-controller='epicCtrl'>
+  <div class='paper-stack'>
+    <p><button><a href="#/{{ epic_id }}/deck">decks</a></button></p>
+  </div>
+  <div class='paper-stack'>
+    <p ng-repeat="map in maps track by $index">
+      <button><a href="#/{{ epic_id}}/map/{{ $index }}">{{ map.name }}</a></button>
+    </p>
+  </div>
+</div>
 </script>
 
 <script type="text/ng-template" id="story.html">
@@ -104,10 +149,16 @@
 </div>
 </script>
 
+
 <script type="text/ng-template" id="card.html">
 
   <div class="title">{{ card.name.capitalizeFirstLetter() }}</div>
-  <img class="icon handle" pic="{{card.svg}}" ng-src="svg/{{card.svg}}.svg" ng-click="pick(card)">
+  <img class="icon page handle"
+    pic="{{card.svg}}"
+    ng-src="svg/{{card.svg}}.svg"
+    ng-dblclick="info(card)" 
+    draggable="false"
+    >
   
   <div ng-transclude></div>
 
@@ -126,20 +177,45 @@
 <div ng-controller="cardGameCtrl">
   <div id="wrapper" ng-class="{playing: playing}" ng-cloak>
     
+    <a href='#/{{ epic_id }}/map/{{ map_idx }}' id="exit">X</a>
+
     <div id="turn" data-intro="After issuing orders, hit the 'turn' button, and sit back to watch the fight." data-step=4 data-position=top>
       <button class="turn-button" ng-click="turn()">TURN</button>
       <!-- &#xe2e5;-->
     </div>
     
     <div id="details-mask" ng-if="details" ng-click="close_details()">
-      <div id="details">
-        <div ng-class="get_card_classes(details)">
-          <card card=card></card>
-        </div> <!--/.card-->
-        <div class="stats">
-          <div class="cost" ng-if="card.cost > 0">&diams; {{ card.cost }}</div>
-          <div class="speed" ng-if="card.speed"><i class="fa fa-bolt"></i> {{ card.speed }}</div>
-        </div>
+      <div id="details" class="page">
+
+        <h3>{{ details.name }}</h3>
+        <table class='page'>
+          <tr>
+            <th>health &hearts;</th>
+            <th>speed <i class='fa fa-bolt'></i></th>
+            <th>damage <i class='fa fa-hand-rock-o'></i></th>
+            <th>cost &diams;</th>
+          </tr><tr>
+            <td>{{ details.health }}</td>
+            <td>{{ details.speed }}</td>
+            <td>{{ details.damage }}</td>
+            <td>{{ details.cost }}</td>
+          </tr>
+        </table>
+
+        <p ng-if="details.field_actions">actions: <i ng-repeat="act in details.field_actions"> {{ act.name }} </i> </p>
+        
+        <table class='page'>
+          <tr>
+            <th>cost</th>
+            <th>delay</th>
+            <th>rarity</th>
+          </tr><tr>
+            <td>{{ details.cost }}</td>
+            <td>{{ details.delay }}</td>
+            <td>{{ details.rarity }}</td>
+          </tr>
+        </table>
+
       </div>
     </div>
 
@@ -150,7 +226,12 @@
       <div id="discard" class="card mini">
         {{ player.discard.length }}
       </div>-->
-      <div id="diams"  data-intro="This denotes your current reserve of diamonds, which serve as money in this game." data-step=5 data-position=left>
+      <div id="diams"
+        data-intro="This denotes your current reserve of diamonds, which serve as money in this game."
+        data-step=5
+        data-position=left 
+        ng-drop="{{ player.can_dig() }}"
+        ng-drop-success="onDropDig($data,$event)">
       </div>
       <div id="diams-val">
         {{ player.diams }}<small>/{{ player.storage }}</small>
@@ -160,64 +241,55 @@
 
     <div id="zones">
 
-      <div class="enemy zone" data-intro="This is the enemy army. Armies attack each other from the left side. You'll see what I mean in a bit." data-step=2>
-        <div ng-repeat="card in enemy.field.slice().reverse() track by $index" ng-class="get_card_classes(card)">
+      <div class="enemy zone" data-intro="This is the enemy army. Armies attack each other from the left side. You'll see what I mean in a bit." data-step=2
+      ng-drop="{{ is_targeting() === false }}"
+      ng-drop-success="onDropEnemyField()"
+      >
+        <div ng-repeat="card in enemy.field.slice().reverse() track by $index" ng-class="get_card_classes(card)"
+        ng-drop-success="pick(card)"
+        ng-drop="{{ card._target === true }}"
+        >
           <card card=card zone='enemy'></card>
         </div>
       </div>
 
-      <ul class="field zone sortable" ng-sortable="sort_config" data-intro="This is your army. Issue orders to your troops by clicking the black <button>buttons</button>, after this tour." data-step=1>
-        <li ng-repeat="card in player.field track by $index" ng-class="get_card_classes(card)">
+      <!--<ul class="field zone sortable" ng-sortable="sort_config" data-intro="This is your army. Issue orders to your troops by clicking the black <button>buttons</button>, after this tour." data-step=1>-->
+      <ul class="field zone" data-intro="This is your army. Issue orders to your troops by clicking the black <button>buttons</button>, after this tour." data-step=1
+        ng-drop="{{ is_targeting() === false }}"
+        ng-drop-success="onDropField()"
+        >
+        <li ng-repeat="card in player.field"
+          ng-class="get_card_classes(card)"
+          ng-drag="{{ card.can_act() }}"
+          ng-drag-start="actStart(card)"
+          ng-drag-stop="cancelDrag()"
+          >
           <card card=card zone='field'>
-            <div class="menu" ng-if="card.can_act()">
-              <div ng-repeat="action in card.field_actions track by $index">
+            <div class="menu" ng-if="card.field_actions.length > 1">
+              <div ng-repeat="action in card.field_actions.slice(1)">
                 <button ng-click="act(card, action); $event.stopPropagation()" ng-bind-html="action.button(card)">
                 </button>
               </div>
             </div>
           </card>
-
         </li>
       </ul>
       
-      <div class="hand zone" ng-sortable="sort_config" data-intro="This is your bag of tricks. It refills each turn. Again, use the black <button>buttons</button> to do stuff." data-step=3>
-        <div ng-repeat="card in player.hand track by $index" ng-class="get_card_classes(card)">
+      <div class="hand zone" data-intro="This is your bag of tricks. It refills each turn. Again, use the black <button>buttons</button> to do stuff." data-step=3>
+        <div ng-repeat="card in player.hand"
+          ng-class="get_card_classes(card)"
+          ng-drag="{{ card.can_act() }}"
+          ng-drag-start="playStart(card)"
+          ng-drag-stop="cancelDrag()"
+          >
           <card card=card zone='hand'>
-            <div class="menu" ng-if="!card._done">
-              <div ng-repeat="action in card.hand_actions track by $index">
-                <button ng-class="{faded: player.diams < card.cost}" ng-click="play(card, action); $event.stopPropagation()" ng-bind-html="action.button(card)"></button>
-              </div>
-              <div ng-if="!player._dug">
-                <button ng-click="dig(card)" class="dig">dig</button>
+            <div class="menu" ng-if="card.hand_actions.length > 1">
+              <div ng-repeat="action in card.hand_actions.slice(1)" ng-class="{faded: player.diams < card.cost}" ng-click="play(card, action); $event.stopPropagation()" ng-bind-html="action.button(card)">
               </div>
             </div>
           </card>
-
         </div>
       </div>
-      
-      <br>
-      
-      <div class="store zone">
-        <div ng-repeat="card in player.store track by $index" ng-class="get_card_classes(card)">
-          <div class="title">{{ card.name.capitalizeFirstLetter() }}</div>
-          <img class="icon" pic="{{card.svg}}" ng-src="svg/{{card.svg}}.svg">
-          <div class="menu">
-            <div ng-repeat="action in card.field_actions track by $index">
-              {{ action.name }} {{ action.damage }}<br>
-            </div>
-            <div ng-if="player.diams >= card.price">
-              <button ng-click="buy(card)">buy</button> for {{card.price}}
-            </div>
-          </div>
-          <div class="stats">
-            <div class="cost" ng-if="card.cost > 0">&diams; {{ card.cost }}</div>
-            <div class="speed" ng-if="card.speed"><i class="fa fa-bolt"></i> {{ card.speed }}</div>
-          </div>
-          <div class="health pin" ng-if="card.health">{{ card.health }}</div>
-        </div>
-      </div>
-      
     </div> <!--/#zones-->
   </div> <!--/#wrapper-->
     
@@ -233,8 +305,9 @@
 <script src="vendor/angular.min.js"></script>
 <script src="vendor/ng-route.js"></script>
 <script src="vendor/ramda.min.js"></script>
-<script src="vendor/Sortable.min.js"></script>
-<script src="vendor/ng-sortable.js"></script>
+<!--<script src="vendor/Sortable.min.js"></script>-->
+<script src="vendor/ngDraggable.js"></script>
+<!--<script src="vendor/ng-sortable.js"></script>-->
 <script src="vendor/velocity.min.js"></script>
 
 <script src="js/mix.js"></script>
@@ -247,7 +320,7 @@
 <script src="js/minions.js"></script>
 <script src="js/resources.js"></script>
 <script src="js/magic.js"></script>
-<script src="js/ng-app.js"></script>
+<script src="js/controller.js"></script>
 <script src="js/story.js"></script>
 <!--<script type="text/javascript" src="cordova.js"></script>-->
 

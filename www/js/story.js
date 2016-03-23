@@ -98,7 +98,7 @@ STORY = {
   }
 };
 
-GAME.app.controller('storyCtrl', function($scope, $timeout) {
+GAME.app.controller('storyCtrl', function($scope, $timeout, $routeParams) {
     
     initial_cards = {
       clerk: ['copier'],
@@ -108,7 +108,7 @@ GAME.app.controller('storyCtrl', function($scope, $timeout) {
       jock: ['spirit_ball'],
       geek: ['math_tome'],
       prep: ['leadership'],
-      loser: ['solitude'],
+      loser: ['isolation'],
 
       dogs: ['shiba_pup'],
       bus: ['droid'],
@@ -131,8 +131,13 @@ GAME.app.controller('storyCtrl', function($scope, $timeout) {
         $scope.collection = $scope.collection.concat(initial_cards[$scope.award]);
         $scope.collection = $scope.collection.concat(initial_cards[$scope.job]);
         $scope.collection = $scope.collection.concat(initial_cards[$scope.death]);
-        localStorage['collection'] = JSON.stringify($scope.collection);
-        window.location.hash = "/game/1";
+
+        GAME.save_epic({
+          id: $routeParams.epic,
+          collection: $scope.collection
+        });
+
+        window.location.hash = "/" + $routeParams.epic + "/game/0/1";
       }
     }
     $scope.choose=function(key, value){
