@@ -278,7 +278,7 @@
       <div class="hand zone" data-intro="This is your bag of tricks. It refills each turn. Again, use the black <button>buttons</button> to do stuff." data-step=3>
         <div ng-repeat="card in player.hand"
           ng-class="get_card_classes(card)"
-          ng-drag="{{ card.can_act() }}"
+          ng-drag="{{ player.can_play(card) }}"
           ng-drag-start="playStart(card)"
           ng-drag-stop="cancelDrag()"
           >

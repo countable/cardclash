@@ -58,7 +58,6 @@ ul {
 
 /* card inner styles */
 .card {
-  background-color:blue;
   position: relative;
   z-index: 150;
   height: 11vw;
@@ -218,19 +217,35 @@ button.faded {
   left: 0;
   right: 0;
 }
-[ng-drop="true"].drag-enter {
-    border: solid 5px red;
+[ng-drop="true"].zone.drag-enter {
+    background-color: red;
 }
-[ng-drop="true"] {
-    border: solid 5px yellow;
+[ng-drop="true"].zone {
+    background-color: yellow;
 }
+
+[ng-drag="true"].card.dragging .icon {
+  transform: scale(1.1);
+  background-color: red;
+}
+[ng-drop="true"].card {
+  transform: scale(1.1);
+}
+[ng-drop="true"].card.drag-enter {
+  transform: scale(0.9);
+
+}
+
 [ng-drop="true"]#diams {
-  background-color: yellow !important;
-  transform: scale(2);
+  background-color: red !important;
+  /*transform: scale(2);*/
+  transform: rotate(50deg) scale(1.5);
+  transition: all 1s;
+
 }
 [ng-drop="true"].drag-enter#diams {
     border: solid 5px red;
-    transform: scale(3);
+    /*transform: scale(3);*/
 }
 /*
   transform: rotate(9deg);
@@ -281,7 +296,8 @@ button.faded {
 
 }
 .card.minion .icon {
-  background: url(../img/fire.jpg); /*linear-gradient(190deg, #fefcea 0%,#d17676 70%);*/
+  /*background: url(../img/fire.jpg);*/
+  linear-gradient(190deg, #fefcea 0%,#d17676 70%);
   background-size: cover;
   border-top-right-radius: 50%;
   border-top-left-radius: 50%;

@@ -97,7 +97,7 @@ GAME.app.controller('cardGameCtrl', ['$scope','$routeParams','$timeout',
     }
     $scope.cancelDrag = function(){
       $timeout(function(){
-        delete GAME.player.resolving;
+        GAME.player.clear_targets();
       });
     }
 

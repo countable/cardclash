@@ -226,6 +226,10 @@ var Player =
     
     },
     
+    can_play: function(card){
+        return (card.cost <= this.diams && card.can_act());
+    },
+
     done_targetting: function(target, done){
         if (this.resolving){
             if (this.resolving.action.targets(this.resolving).indexOf(target) > -1)
@@ -240,14 +244,24 @@ var Player =
             }
             // clear targets hilight
             if (this.client) {
+                this.clear_targets();
+            }
+            delete this.resolving;
+        }
+    },
+    
+    clear_targets: function(){
+        if (this.resolving) {
+            if (this.resolving.action.targets) {
+
                 this.resolving.action.targets(this.resolving).forEach(function(card){
                     delete card._target;
                 });
             }
-            this.resolving = null;
+            delete this.resolving;
         }
     },
-    
+
     apply_move: function(move, then){
         
         if (move.cost) {
