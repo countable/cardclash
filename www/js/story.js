@@ -133,11 +133,11 @@ GAME.app.controller('storyCtrl', function($scope, $timeout, $routeParams) {
         $scope.collection = $scope.collection.concat(initial_cards[$scope.death]);
 
         GAME.save_epic({
-          id: $routeParams.epic,
+          id: $routeParams.epic_id,
           collection: $scope.collection
         });
 
-        window.location.hash = "/" + $routeParams.epic + "/game/0/1";
+        window.location.hash = "/" + $routeParams.epic_id + "/game/0/0";
       }
     }
     $scope.choose=function(key, value){

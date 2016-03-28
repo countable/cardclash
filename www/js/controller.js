@@ -26,97 +26,128 @@ GAME.app = angular.module('gameApp', ['ngRoute', 'ngDraggable']).config(
 
         $routeProvider.when('/:epic_id/deck/:deck_id', {
           templateUrl: "deck.html"
-        });
-        $routeProvider.when('/:epic_id/deck', {
+        })
+        .when('/:epic_id/deck', {
           templateUrl: "decks.html"
-        });
-        $routeProvider.when('/:epic_id', {
+        })
+        .when('/quick/quick', {
+          templateUrl: "game.html"
+        })
+        .when('/:epic_id/map/:map', {
+          templateUrl: "map.html"
+        })
+        .when('/:epic_id/game/:map/:level', {
+          templateUrl: "game.html"
+        })
+        .when('/:epic_id/story', {
+          templateUrl: "story.html"
+        })
+        .when('/:epic_id', {
           templateUrl: "epic.html"
         })
-        $routeProvider.when('/:epic_id/map/:map', {
-          templateUrl: "map.html"
-        });
-        $routeProvider.when('/:epic_id/game/:map/:level', {
-          templateUrl: "game.html"
-        });
-        $routeProvider.when('/:epic_id/story', {
-          templateUrl: "story.html"
-        });
-        $routeProvider.when('/', {
+        .when('/', {
           templateUrl: "menu.html"
         });
     }
 ])
 .run();
 
-GAME.app.controller('cardGameCtrl', ['$scope','$routeParams','$timeout',
+GAME.app.controller('gameCtrl', ['$scope','$routeParams','$timeout',
   function($scope, $routeParams, $timeout) {
     
-
+    // get active epic.
     $scope.epic_id = $routeParams.epic_id;
-    
-    // players
-    GAME.player = inherit(Player);
-    GAME.player.client = true;
-    GAME.enemy = inherit(Player);
-    GAME.players = [GAME.player, GAME.enemy];
+    GAME.epic = GAME.get_epic($scope.epic_id);
     
     // scenario
     GAME.scen_idx = parseInt($routeParams.level);
     GAME.map_idx = parseInt($routeParams.map);
-    GAME.maps[GAME.map_idx].scenarios[GAME.scen_idx].start();
+    GAME.start();
+    GAME.player.client = true;
 
+    // refs.
+    $scope.GAME = GAME;
     $scope.player = GAME.player;
     $scope.enemy = GAME.enemy;
 
     var _apply = function(){$scope.$apply();};
-    $scope.is_targeting = function(){
-      if (!GAME.player.resolving) return null;
-      return (!!GAME.player.resolving.action.num_targets);
-    }
+
+    $scope.is_targeting_player_field = function(){
+      var r=GAME.player.resolving;
+      if (!r) return false;
+      return r.cost <= GAME.player.diams && (r.action.num_targets === 'PLAYER_FIELD'
+        || r.action.num_targets === 'BOTH_FIELDS'
+        || r.action.num_targets === 'ANY_FIELD'
+        );
+    };
+
+    $scope.is_targeting_enemy_field = function(){
+      var r=GAME.player.resolving;
+      if (!r) return false;
+      return r.cost <= GAME.player.diams && (r.action.num_targets === 'ENEMY_FIELD'
+        || r.action.num_targets === 'BOTH_FIELD'
+        || r.action.num_targets === 'ANY_FIELD'
+        );
+    };
+    
+    // Drag and Drop events.
     $scope.onDropField = function(){
       // complete untargeted moves.
-      if (!$scope.is_targeting()) {
+      if ($scope.is_targeting_player_field()) {
         GAME.player.apply_move(GAME.player.resolving,_apply);
       }
     };
     $scope.onDropEnemyField = function(){
       // complete untargeted moves.
-      if (!$scope.is_targeting()) {
+      if ($scope.is_targeting_enemy_field()) {
         GAME.player.apply_move(GAME.player.resolving,_apply);
       }
     };
-    $scope.onDropDig = function(index){
-      GAME.player.dig(index);
+
+    $scope.onDropDig = function(){
+      GAME.player.dig(GAME.player.hand.indexOf(GAME.player.resolving.card));
     }
     $scope.playStart = function(card){
-      $scope.play(card, card.hand_actions[0]);
-    }
+        var move = {
+            card: card,
+            action: card.hand_actions[0],
+            player: GAME.player,
+            cost: card.hand_actions[0].cost || card.cost,
+            from_hand: true
+        };
+        var result = GAME.player.initiate_move(move);
+    };
     $scope.actStart = function(card){
-      $scope.play(card, card.field_actions[0]);
-    }
+        var move = {
+            card: card,
+            action: card.field_actions[0],
+            player: GAME.player,
+            cost: card.field_actions[0].cost,
+        };
+        var result = GAME.player.initiate_move(move);
+    };
     $scope.cancelDrag = function(){
       $timeout(function(){
         GAME.player.clear_targets();
       });
     }
-
-    $scope.close_details = function(){
-      $scope.details=null;
-    };
-
     $scope.pick = function(card){
       if ($scope.player.resolving) {
-        $scope.player.done_targetting(card,_apply);
+        $scope.player.done_targetting(card, _apply);
       }
     };
 
 
-
+    // Details screen
+    $scope.close_details = function(){
+      $scope.details=null;
+    };
     $scope.info = function(card){
       $scope.details=card;
     }
-    
+
+
+    // buying cards - not currently used.    
     $scope.buy = function(card){
       if ($scope.player.diams >= card.price) {
         $scope.player.diams -= card.price;
@@ -131,20 +162,17 @@ GAME.app.controller('cardGameCtrl', ['$scope','$routeParams','$timeout',
       if (GAME.player.resolving) return alert('finish targeting first.');
 
       $scope.playing = true;
-      
       animate_war();
-      
       GAME.enemy_turn();
-      
       GAME.turn_idx ++;
       
       $timeout(function(){
         
         // queued moves.
-        var pending_actions = R.pluck('pending_actions')(GAME.players).reduce(R.concat);
-        
+        var pending_moves = R.pluck('pending_moves')(GAME.players).reduce(R.concat);
+        console.log(pending_moves);
         // sort actions by speed.
-        pending_actions.sort(function(x, y){ 
+        pending_moves.sort(function(x, y){ 
             if (x.card.speed > y.card.speed) {
                 return 1;
             }
@@ -167,7 +195,7 @@ GAME.app.controller('cardGameCtrl', ['$scope','$routeParams','$timeout',
         };
         
         var do_action = function(cur_action_idx){
-          var move = pending_actions[cur_action_idx];
+          var move = pending_moves[cur_action_idx];
           
           if (move){
             move.player.complete_move(move, function(){
@@ -185,22 +213,6 @@ GAME.app.controller('cardGameCtrl', ['$scope','$routeParams','$timeout',
       }, 500);
     };
     
-    $scope.play = function(card, action){
-      var result = $scope.player.play(card, action, function(){
-        $timeout(function(){ //trigger repaint
-        },100)
-      });
-      if (!result.success) alert(result.message);
-    };
-    
-    /*$scope.act = function(card, action){
-      var result = $scope.player.act(card, action);
-      if (!result.success) alert(result.message);
-    };*/
-
-    $scope.dig = function(index) {
-      GAME.player.dig(index);
-    };
 
     
     $scope.get_card_classes = function(card){
@@ -306,7 +318,6 @@ GAME.app.controller('menuCtrl', function($scope, $timeout, $routeParams) {
   $scope.epics = get_epics();
 
   $scope.load_epic = function(idx){
-    console.log(idx, 'epic is loading');
     if (!$scope.epics[idx]) {
       window.location.hash = "/"+idx+"/story"
     } else {
@@ -316,15 +327,6 @@ GAME.app.controller('menuCtrl', function($scope, $timeout, $routeParams) {
 
 }).config(disableSCE);
 
-GAME.save_epic = function(epic){
-  if (!epic.id) throw ("Epic ID missing!");
-  localStorage["epic_"+epic.id] = JSON.stringify(epic);
-};
-
-GAME.get_epic = function(id){
-  if (!localStorage['epic_'+id]) { throw "No epic with ID:"+id }
-  return JSON.parse(localStorage['epic_'+id])
-}
 
 GAME.app.controller('epicCtrl', function($scope, $timeout, $routeParams) {
   $scope.maps = GAME.maps;

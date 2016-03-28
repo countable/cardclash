@@ -60,9 +60,41 @@ var GAME = {
 
     return total;
   },
-
-  get_fields: function(){
+  
+  /**
+   * Get a list of all units on the field.
+   */
+  get_fields: function() {
     return GAME.enemy.field.concat(GAME.player.field);
+  },
+
+
+  save_epic: function(epic) {
+    if (!epic.id) throw ("Epic ID missing!");
+    localStorage["epic_"+epic.id] = JSON.stringify(epic);
+  },
+
+  get_epic: function(id) {
+    if (!localStorage['epic_'+id]) { throw "No epic with ID:"+id }
+    return JSON.parse(localStorage['epic_'+id])
+  },
+
+  get_default_deck: function(epic) {
+    var deck_list;
+    if (epic.decks) {
+      deck_list = epic.decks[epic.default_deck_id || object.keys(epic.decks)[0]];
+    } else { // no decks, use entire collection.
+      deck_list = epic.collection;
+    }
+    return CardSet.Cards.from_list(deck_list);
+  },
+
+  start: function(){
+    this.player = inherit(Player);
+    this.enemy = inherit(Player);
+    this.players = [this.player, this.enemy];
+    this.player.deck = this.get_default_deck(this.epic);
+    this.maps[this.map_idx].scenarios[this.scen_idx].start();    
   }
 
 };
@@ -74,9 +106,9 @@ String.prototype.capitalizeFirstLetter = function() {
 
 var Scenario = {
   start: function(){
-
     this.setup();
     // initial deploys status.
+
     GAME.get_fields().forEach(function(c){
       c.stunned=c.delay;
     });
@@ -87,7 +119,7 @@ var Scenario = {
       c.owned_by = GAME.enemy;
     });
     // shuffle deck
-    GAME.player.deck = CardSet.shuffle(GAME.player.deck);    
+    GAME.player.deck = CardSet.shuffle(GAME.player.deck);
     
     this.reg_events();
 
@@ -117,9 +149,9 @@ GAME.maps = [
         order: 1,
         name: 'stairwell',
         setup: function(){
-          GAME.player.deck = CardSet.Cards.from_list(JSON.parse(localStorage.collection));
+
           GAME.player.field = CardSet.Cards.from_list([
-            'keep'
+            'keep', 'shiba_pup'
           ]);
           GAME.enemy.field = [
             inherit(CardSet.Cards.get('nest'), {health: 7})
@@ -133,7 +165,6 @@ GAME.maps = [
         order: 2,
         name: 'mousefly_swarm',
         setup: function(){
-          GAME.player.deck = CardSet.Cards.from_list(JSON.parse(localStorage.collection));
         },
         enemy_turn: function(){
 
@@ -143,7 +174,6 @@ GAME.maps = [
         order: 3,
         name: 'mousefly_queen',
         setup: function(){
-          GAME.player.deck = CardSet.Cards.from_list(JSON.parse(localStorage.collection));
         },
         enemy_turn: function(){
 
@@ -153,7 +183,6 @@ GAME.maps = [
         order: 5,
         name: 'kilapede',
         setup: function(){
-          GAME.player.deck = CardSet.Cards.from_list(JSON.parse(localStorage.collection));
         },
         enemy_turn: function(){
 
@@ -163,7 +192,6 @@ GAME.maps = [
         order: 5,
         name: 'squallway',
         setup: function(){
-          GAME.player.deck = CardSet.Cards.from_list(JSON.parse(localStorage.collection));
         },
         enemy_turn: function(){
 
@@ -173,7 +201,6 @@ GAME.maps = [
         order: 4,
         name: 'impedence',
         setup: function(){
-          GAME.player.deck = CardSet.Cards.from_list(JSON.parse(localStorage.collection));
         },
         enemy_turn: function(){
 
@@ -200,20 +227,24 @@ GAME.maps = [
       inherit(Scenario, {
         name: 'TEST',
         setup: function(){
-          GAME.player.deck = CardSet.Cards.from_list(Object.keys(CardSet.Cards.by_name)).filter(function(c){
+          /*GAME.player.deck = CardSet.Cards.from_list(Object.keys(CardSet.Cards.by_name)).filter(function(c){
             return c.rarity;
-          }); // all cards that aren't abstract
+          });*/ // all cards that aren't abstract
+          GAME.player.deck = CardSet.Cards.from_list([
+            'haste','archer',
+            'archer','archer','archer','archer','archer'
+          ]);
           GAME.player.field = CardSet.Cards.from_list([
-            'keep', 'alpha_wolf', 'militia'
+            'keep', 'alpha_wolf', 'archer'
           ]);
           GAME.enemy.field = [
             inherit(CardSet.Cards.get('nest'), {health: 7})
-          ].concat(CardSet.Cards.from_list(['bandit']));
+          ].concat(CardSet.Cards.from_list(['bandit', 'bandit']));
         },
         enemy_turn: function(){
           if (GAME.enemy.field.length < 4) {
-              if (Math.random() < 0.01) add_enemy('serpent')
-              else if (Math.random() < 0.9) add_enemy('bandit');
+              //if (Math.random() < 0.01) add_enemy('serpent')
+              //else if (Math.random() < 0.9) add_enemy('bandit');
               //GAME.enemy.field.splice(GAME.enemy.field.length-1, 0, CardSet.Cards.create('serpent'));
           }
         }
@@ -223,8 +254,11 @@ GAME.maps = [
         name: 'Welcome',
         hand_size: 3,
         setup: function(){
-          GAME.player.deck = CardSet.Cards.from_list(JSON.parse(localStorage.collection));
           //GAME.player.deck = GAME.player.deck.concat(CardSet.Cards.from_list(['goose', 'goose', 'goose', 'goose']));
+          GAME.player.deck = CardSet.Cards.from_list([
+            'haste','archer',
+            'archer','archer','archer','archer','archer'
+          ]);
           GAME.player.field = CardSet.Cards.from_list(['keep', 'goose']);
           GAME.player.store = [];
           GAME.enemy.field = CardSet.Cards.from_list(['nest', 'mousefly','mousefly']);
@@ -338,16 +372,23 @@ GAME.enemy_turn = function(){
   });
   
   GAME.enemy.field.forEach(function(card){
-    if (card.field_actions){
-      var move={
-        card: card,
-        action: card.field_actions[0],
-        player: GAME.enemy
-      }
+    if (card.field_actions && GAME.enemy.can_act(card)){
+
+      var move = {
+          card: card,
+          action: card.field_actions[0],
+          player: GAME.enemy,
+          cost: card.field_actions[0].cost,
+      };
       GAME.enemy.initiate_move(move);
-      if (GAME.enemy.resolving && GAME.enemy.resolving.action.targets){ // just pick the first target, if needed
-        var targets = GAME.enemy.resolving.action.targets(GAME.enemy.resolving);
-        GAME.enemy.done_targetting(targets[Math.floor(Math.random()*targets.length)]);
+
+      if (GAME.enemy.resolving) {
+        if (GAME.enemy.resolving.action.targets){ // just pick the first target, if needed
+          var targets = GAME.enemy.resolving.action.targets(GAME.enemy.resolving);
+          GAME.enemy.done_targetting(targets[Math.floor(Math.random()*targets.length)]);
+        } else {
+          GAME.enemy.apply_move(GAME.enemy.resolving);
+        }
       }
     }
   });

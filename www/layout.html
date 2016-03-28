@@ -8,7 +8,11 @@
   <!--<link rel="stylesheet" href="css/font-awesome.min.css">-->
   <!--<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">-->
   <link rel="stylesheet" type="text/css" href="css/libs.css">
-  <link rel="stylesheet" type="text/css" href="css/style2.css">
+  <link rel="stylesheet" type="text/css" href="css/layout.css">
+  <link rel="stylesheet" type="text/css" href="css/entities.css">
+  <link rel="stylesheet" type="text/css" href="css/animations.css">
+  <link rel="stylesheet" type="text/css" href="css/pages.css">
+  <link rel="stylesheet" type="text/css" href="fonts/type/stylesheet.css">
   
   <meta name="format-detection" content="telephone=no">
   <meta name="msapplication-tap-highlight" content="no">
@@ -152,19 +156,23 @@
 
 <script type="text/ng-template" id="card.html">
 
-  <div class="title">{{ card.name.capitalizeFirstLetter() }}</div>
-  <img class="icon page handle"
+  <div class="inline-details">
+    <div class="title">{{ card.name.capitalizeFirstLetter() }}</div>
+    <div class="description" ng-bind-html="card.get_description()"></div>
+  </div>
+
+  <div class="icon handle"
     pic="{{card.svg}}"
-    ng-src="svg/{{card.svg}}.svg"
+    style="-webkit-mask:url(svg/{{card.svg}}.svg) center"
     ng-dblclick="info(card)" 
-    draggable="false"
-    >
+    ng-if="card.svg"
+    ></div>
   
   <div ng-transclude></div>
 
   <div class="statuses">
     <div ng-if="card.stunned" class="stun pin">
-      &#x29D7;
+      &#x29D7;<br>
       {{ card.stunned }}
     </div>
   </div>
@@ -174,14 +182,13 @@
 
 <script type="text/ng-template" id="game.html">
 
-<div ng-controller="cardGameCtrl">
+<div ng-controller="gameCtrl">
   <div id="wrapper" ng-class="{playing: playing}" ng-cloak>
     
-    <a href='#/{{ epic_id }}/map/{{ map_idx }}' id="exit">X</a>
+    <a href='#/{{ epic_id }}/map/{{ GAME.map_idx }}' id="exit">X</a>
 
-    <div id="turn" data-intro="After issuing orders, hit the 'turn' button, and sit back to watch the fight." data-step=4 data-position=top>
-      <button class="turn-button" ng-click="turn()">TURN</button>
-      <!-- &#xe2e5;-->
+    <div id="turn" data-intro="After issuing orders, hit the 'turn' button, and sit back to watch the fight." data-step=4 data-position=top ng-click="turn()">
+      GO
     </div>
     
     <div id="details-mask" ng-if="details" ng-click="close_details()">
@@ -231,10 +238,11 @@
         data-step=5
         data-position=left 
         ng-drop="{{ player.can_dig() }}"
-        ng-drop-success="onDropDig($data,$event)">
+        ng-drop-success="onDropDig()">
       </div>
       <div id="diams-val">
-        {{ player.diams }}<small>/{{ player.storage }}</small>
+        <div id="diams-current">{{ player.diams }}</div>
+        <div id="diams-max">{{ player.storage }}</div>
       </div>
       <div id="income">+{{ player.income }}</div>
     </div>
@@ -242,7 +250,7 @@
     <div id="zones">
 
       <div class="enemy zone" data-intro="This is the enemy army. Armies attack each other from the left side. You'll see what I mean in a bit." data-step=2
-      ng-drop="{{ is_targeting() === false }}"
+      ng-drop="{{ is_targeting_enemy_field() }}"
       ng-drop-success="onDropEnemyField()"
       >
         <div ng-repeat="card in enemy.field.slice().reverse() track by $index" ng-class="get_card_classes(card)"
@@ -254,13 +262,15 @@
       </div>
 
       <!--<ul class="field zone sortable" ng-sortable="sort_config" data-intro="This is your army. Issue orders to your troops by clicking the black <button>buttons</button>, after this tour." data-step=1>-->
-      <ul class="field zone" data-intro="This is your army. Issue orders to your troops by clicking the black <button>buttons</button>, after this tour." data-step=1
-        ng-drop="{{ is_targeting() === false }}"
+      <div class="field zone" data-intro="This is your army. Issue orders to your troops by clicking the black <button>buttons</button>, after this tour." data-step=1
+        ng-drop="{{ is_targeting_player_field() }}"
         ng-drop-success="onDropField()"
         >
-        <li ng-repeat="card in player.field"
+        <div ng-repeat="card in player.field"
           ng-class="get_card_classes(card)"
-          ng-drag="{{ card.can_act() }}"
+          ng-drop-success="pick(card)"
+          ng-drop="{{ card._target === true }}"
+          ng-drag="{{ player.can_act(card) }}"
           ng-drag-start="actStart(card)"
           ng-drag-stop="cancelDrag()"
           >
@@ -272,8 +282,8 @@
               </div>
             </div>
           </card>
-        </li>
-      </ul>
+        </div>
+      </div>
       
       <div class="hand zone" data-intro="This is your bag of tricks. It refills each turn. Again, use the black <button>buttons</button> to do stuff." data-step=3>
         <div ng-repeat="card in player.hand"

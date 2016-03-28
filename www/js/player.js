@@ -20,11 +20,11 @@ var Player =
         this.field = [];
         
         this.played_cards = []; // cards played this turn.
-        this.pending_actions = [];
+        this.pending_moves = [];
         this.discard = [];
 
-        this.diams = 10;
-        this.income = 0;
+        this.diams = 11;
+        this.income = 1;
         this.storage = 12;
 
     },
@@ -46,6 +46,7 @@ var Player =
     draw: function(n)
     {
         var new_cards;
+        if (this.hand.length + n > 7) { n = 7 - this.hand.length }
         if (this.is_client)
         {
             // wait for the server to simulate this.
@@ -81,8 +82,21 @@ var Player =
         }
     },
     
-    can_dig: function(){
-        return !!(!this._dug && this.resolving);
+    can_dig: function(move) {
+        move = move || this.resolving;
+        if (move) console.log(!this.dug, move, move.from_hand);
+        return !!(!this._dug && move && move.from_hand);
+    },
+
+    can_act: function(card){
+      return card.field_actions && !card._done && !card.stunned
+        && card.field_actions[0].cost <= this.diams;
+    },
+
+    can_play: function(card){
+      return !this._dug
+        || (card.hand_actions && !this._done && !this.stunned
+        && card.cost <= this.diams);
     },
     
     // provide an index OR a card for the first arg.
@@ -144,7 +158,7 @@ var Player =
 
     end_turn: function ()
     {
-        this.pending_actions = [];
+        this.pending_moves = [];
         this.cleanup_field();
         //this.move_pile(this.hand, this.discard);
         this.move_pile(this.played_cards, this.discard);
@@ -153,30 +167,6 @@ var Player =
     readyForCombat: function(){
         this.setPhase('COMBAT');
     },
-    
-    play: function (card, action, then)
-    {
-        var move = {
-            card: card,
-            action: action,
-            player: this,
-            cost: card.cost
-        };
-        var result = this.initiate_move(move, function(){
-            then.apply(this,arguments);
-        });
-        return result;
-    },
-    
-    /*act: function(card, action){
-        var move = {
-            card: card,
-            action: action,
-            player: this,
-            cost: action.cost
-        };
-        return this.initiate_move(move, action);
-    },*/
 
     dig: function(index){
       var keep = this.field.filter(function(item){return item.is_a('keep')})[0]
@@ -193,12 +183,11 @@ var Player =
     initiate_move: function(move, then) {
         
         //hilight targets, if any, and wait for user to select.
-        if (move.action.num_targets && move.action.num_targets > 0) {
+        if (move.action.num_targets === 1) {
             
             var targets =  move.action.targets(move);
             if (this.client) {
                 
-                console.log('targets:', targets, '(move was',move,')')
                 targets.forEach(function(card){
                     card._target = true;
                 });
@@ -215,7 +204,6 @@ var Player =
 
             
         } else { // otherwise just complete the move.
-            console.log('set resolving');
             this.resolving = move;
             //this.apply_move(move, then);
         }
@@ -225,21 +213,14 @@ var Player =
         };
     
     },
-    
-    can_play: function(card){
-        return (card.cost <= this.diams && card.can_act());
-    },
 
     done_targetting: function(target, done){
         if (this.resolving){
             if (this.resolving.action.targets(this.resolving).indexOf(target) > -1)
             {
                 this.resolving.target = target
-                console.log('DT',done)
                 this.apply_move(this.resolving, done);
             } else {
-                console.error(target);
-                console.trace();
                 alert('invalid target');
             }
             // clear targets hilight
@@ -273,8 +254,6 @@ var Player =
             }
         };
 
-        console.log('apply', move, move.action.delayed);
-        console.trace();
 
         move.card._done = true;
         move.card._move = move;
@@ -282,11 +261,9 @@ var Player =
 
         if (move.action.delayed) {
             if (this.client) animate_order();
-            this.pending_actions.push(move);
+            this.pending_moves.push(move);
 
         } else {
-            console.trace();
-            console.log('completing', then);
             this.complete_move(move, then);
 
         }
@@ -294,8 +271,6 @@ var Player =
     
     complete_move: function(move, then){
         
-        console.log('COMPLETE', arguments);
-
         // if the card targets dynamicaly, then do it now.
         if (move.action.retarget) {
             move.target = move.action.retarget(move);

@@ -1,0 +1,43 @@
+
+
+/* animations */
+.text-proxy, .shoot-proxy, .pow-proxy {
+  position:absolute;
+  top: 0;
+  left: 0;
+  opacity: 0;
+  z-index: 300;
+}
+.text-proxy{
+  font-size: 2vw;
+  color: darkred;
+  font-weight: bold;
+  /*text-shadow: 0.07vw 0.14vw 0 rgba(0,0,0,1);*/
+  font-family: Tahoma, Courier, Arial, Helvetica, sans-serif;
+  background: white;
+}
+.text-proxy:after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -8px;
+  width: 0; height: 0;
+  border-top: 8px solid #fff;
+  border-right: 8px solid transparent;
+  border-left: 8px solid transparent;
+}
+.shoot-proxy{
+  width: 4.20vw;
+  height: 4.20vw;
+  border-radius: 50%;
+  text-shadow: 0 0.28vw 0.42vw rgba(0,0,0,0.5);
+  background-color: white;
+  box-shadow:0 0.28vw 0.42vw #aaa;
+}
+.pow-proxy {
+  width: 2.10vw;
+  height: 2.10vw;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center, #fb9d23 0%, #ffc578 100%);
+}

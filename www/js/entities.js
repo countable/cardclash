@@ -87,11 +87,16 @@ var Cards = new EntityTree({
     
   {
     name: 'card',
-    can_act: function(){
-      return !this._done && !this.stunned;
-    },
     valid_target: function(){
 
+    },
+    get_description: function() {
+      return (this.field_actions || []).map(function(action){
+        return action.get_description();
+      }).join(". ")
+      + "<br>" + (this.hand_actions || []).map(function(action){
+        return action.get_description();
+      }).join(". ")
     },
     get effective_speed() {
       return this.speed + GAME.get_globals(this, 'speed');

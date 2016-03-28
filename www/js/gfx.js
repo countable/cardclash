@@ -10,6 +10,12 @@ var
     pow_proxy_el = $$(".pow-proxy")[0],
     text_proxy_el = $$(".text-proxy")[0];
 
+if (true) { // mute
+    Audio = function(){
+        this.play = function(){};
+    }
+}
+
 var knife_sound = (new Audio('sounds/knifeSlice.mp3')),
     trample_sound = (new Audio('sounds/trample.mp3')),
     spend_sound = (new Audio('sounds/spend.mp3')),
@@ -46,11 +52,9 @@ var get_display = function(card) {
         selector = '.field';
     }
     
-    console.log (selector + " .card", idx);
     var el = $$(selector + " .card")[idx];
     
     var rect = el.getBoundingClientRect();    
-    
     return {
         el: el,
         rect: rect,
@@ -148,9 +152,11 @@ var animate_strike = function(move, done) {
     actor = get_actor_display(move);
     target = get_target_display(move);
     
+    console.log(actor);
+
     Velocity(actor.el, {
       translateX: target.rect.left - actor.rect.left + 'px',
-      translateY: target.rect.top - actor.rect.top + (actor.near ? actor.rect.height : -target.rect.height) + 'px'
+      translateY: target.rect.top - actor.rect.top + (actor.near ? actor.rect.height * .75 : -actor.rect.height * .75) + 'px'
     }, {
       duration: 500,
       complete: function(){
@@ -172,7 +178,7 @@ var animate_strike = function(move, done) {
     if (move.action.damage) {
 
         (move.action.name === 'charge' ? trample_sound : knife_sound).play();
-            
+        
         animate_message(move.target, {
             text: move.action.damage + " dmg!",
             color: 'red', 
@@ -234,7 +240,12 @@ var animate_shoot = function(move, done){
     });
     
     if (move.action.damage) {
-        animate_message(move.target);
+
+        animate_message(move.target, {
+            text: move.action.damage + " dmg!",
+            color: 'red', 
+            delay: 400
+        });
     }
 }
 

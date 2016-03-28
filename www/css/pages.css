@@ -1,0 +1,172 @@
+
+.introjs-helperLayer {
+  background: rgba(255,255,255,.5);
+  box-shadow: none;
+  display: none;
+  border: 0px none transparent;
+}
+.introjs-helperNumberLayer {
+  left: 16px;
+  top: 16px;
+  display: none;
+}
+.introjs-overlay {
+  background: rgba(0,0,0,0.5);
+}
+
+
+
+/* levels page */
+#scenarios {
+  text-aling: center;
+}
+#levels {
+  background-image: url(../img/cellar.svg);
+  background-size: cover;
+  text-align: center;
+  padding: 1vw 4.20vw 0 4.20vw;
+  position: absolute;
+  bottom: 0; top: 0; left: 0; right: 0;
+  transition: all 1s;
+}
+#levels p {
+  text-align: center;
+  display: inline-block;
+  background-color: white;
+  border: 1px solid black;
+  height: 10vw;
+  width: 10vw;
+  padding: 0.5vw;
+  margin: 10vw 15vw 10vw 5vw;
+  transition: all 1s;
+  transform: rotateZ(5deg) rotateX(-20deg);
+}
+#levels p b {
+  display: block;
+  font-size: 5vw;
+  line-height: 4vw;
+}
+#logo {
+  height: 21vw;
+  transition: all 1s;
+}
+#levels p:hover {
+  color: black;
+  transform: rotateX(20deg) scale(1.1);
+}
+
+.splash {
+  display: none;
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  /*background-image: url(../img/splash.png);*/
+}
+/* Game Menu */
+#game_menu {
+  text-align: center;
+  padding: 4.20vw 4.20vw 0 4.20vw;
+  margin: 2.10vw 2.10vw 0 2.10vw;
+  height: 36.40vw;
+  transition: all 1s;
+}
+#game_menu p {
+  text-align: center;
+  padding: 0;
+  margin: 0;
+}
+#game_menu a {
+  display: inline-block;
+  vertical-align: middle;
+  padding-top: 2.10vw;
+  height: 10.50vw;
+  width: 19.60vw;
+  margin: 2.10vw;
+  border-radius: 0.70vw;
+  color: black;
+  background-color: white;
+  transform: rotateZ(5deg) rotateX(-20deg);
+  font-size: 2.10vw;
+  transition: all 1s;
+  text-decoration: none;
+}
+#game_menu a:hover {
+  transform: rotateX(20deg) scale(1.1);
+}
+/* done game menu */
+
+.preload #levels a {
+  transform: rotateX(70deg) rotateZ(-10deg);
+}
+.preload #levels {
+  margin-top: 35vw;
+  transform: scale(2) rotateZ(-5deg);
+}
+.preload #logo {
+  margin-top: -28vw;
+  transform: scale(2) rotateZ(-10deg);
+}
+
+/* deckbuilder screen */
+.pool-wrap {
+  left: 0;
+  right: 50%;
+}
+.deck-wrap {
+  left: 50%;
+  right: 0;
+}
+.deck-name {
+  font-size: 2vw;
+}
+.deck-wrap, .pool-wrap {
+  position: absolute;
+  top: 4vw;
+  bottom: 0;
+  overflow: auto;
+}
+
+#deckbuilder table {
+  float:left;
+}
+#deckbuilder table td {
+  padding: 5px 10px;
+  border-left: 1px solid #ddd;
+  border-top: 1px solid #ddd;
+}
+
+#story {
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  position: absolute;
+  background-color: #111;
+  color: #ddd;
+}
+#story .page {
+  font-size: 3.50vw;
+  position: absolute;
+  top: 5vw;
+  left: 7vw; right: 7vw;
+  text-align: center;
+  transition: opacity 2s;
+  opacity: 0;
+  z-index: 0;
+  font-family: Consolas, courier, sans-serif;
+}
+#story .page.showing {
+  opacity: 1;
+  z-index: 1;
+}
+#story p {
+  margin: 0;
+}
+#story select {
+  font-size: 3.50vw;
+}
+#story button {
+  font-size: 3.50vw;
+  margin: 2.10vw 0 0 0;
+  animation: wobble 2s infinite;
+}
+#story button:active {top: auto}; /* prevent relative button pos */

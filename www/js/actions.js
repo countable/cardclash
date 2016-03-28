@@ -40,6 +40,10 @@ CardSet.Actions.add([
     },
     button: function(card){
       return this.name + (this.damage ? ' ' + this.damage : '');
+    },
+    get_description: function(card){
+      return this.name + ' ' + (this.damage || '') + ' to ' +
+        (this.num_targets === 1 ? '1 card' : this.num_targets.toLowerCase().replace("_"," "));
     }
   },
   {
@@ -88,7 +92,7 @@ CardSet.Actions.add([
   {
     name: 'charge',
     damage: 1,
-    num_targets: 0,
+    num_targets: 'ENEMY_FIELD',
     retarget: function(move){
       var alive_enemies = get_enemies(move, function(item){
         return item.health > 0;
@@ -100,7 +104,7 @@ CardSet.Actions.add([
   {
     name: 'mug',
     damage: 1,
-    num_targets: 0,
+    num_targets: 'ENEMY_FIELD',
     retarget: function(move){
       var alive_enemies = get_enemies(move, function(item){
         return item.health > 0;
@@ -220,6 +224,7 @@ CardSet.Actions.add([
       }
       move.player.move_card(move.card, move.player.hand, move.player.field, true);
     },
+    num_targets: 'PLAYER_FIELD',   
     button: function(card){
       return card.cost + '&diams; ' + this.name;
     },

@@ -9,7 +9,8 @@ CardSet.Cards.add([
       Actions.create('cast')
     ],
     delayed: true,
-    parent: 'card'
+    parent: 'card',
+    display_class: 'magic',
   },
 
   {
