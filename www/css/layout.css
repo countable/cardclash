@@ -78,8 +78,7 @@ button.faded {
 }
 .zone {
   background: white;
-  padding-top: 5.5vw;
-  position: relative;
+  padding-top: 0;
   /*white-space: nowrap;*/
   -webkit-touch-callout: none;
   -webkit-user-select: none;
@@ -197,7 +196,7 @@ button.faded {
 }
 #diams {
   position: absolute;
-  background-color: #5cc2f1;
+  background: #5cc2f1;
   transform: rotate(45deg);
   box-shadow: 0 0 2vw rgba(0,0,0,0.2);
 }

@@ -4,7 +4,10 @@ CardSet.Cards.add([
   {
     name: 'fieldable',
     parent: 'card',
-    hurt: function(damage, move){
+    hurt: function(damage, move) {
+      if (this.armor) {
+        damage = Math.min(0, damage=this.armor);
+      }
       this.health = this.health - damage;
     },
     get: function(attr){
@@ -166,9 +169,9 @@ CardSet.Cards.add([
     cost: 3,
     speed: 6,
     damage: 2,
+    armor: 1,
     field_actions: [
-      'charge',
-      'guard'
+      'charge'
     ],
     parent: 'minion',
     health: 3,
@@ -319,6 +322,7 @@ CardSet.Cards.add([
   {
     name: 'bandit',
     health: 2,
+    damage: 1,
     cost: 2,
     field_actions:['mug'],
     speed: 4,

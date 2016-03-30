@@ -94,9 +94,11 @@ var Player =
     },
 
     can_play: function(card){
-      return !this._dug
-        || (card.hand_actions && !this._done && !this.stunned
-        && card.cost <= this.diams);
+      return !card._done
+        && (
+            !this._dug
+            || (card.hand_actions && card.cost <= this.diams)
+        );
     },
     
     // provide an index OR a card for the first arg.

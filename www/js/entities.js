@@ -100,6 +100,9 @@ var Cards = new EntityTree({
     },
     get effective_speed() {
       return this.speed + GAME.get_globals(this, 'speed');
+    },
+    get effective_damage() {
+      return this.damage + GAME.get_globals(this, 'damage');
     }
   }
 ]);

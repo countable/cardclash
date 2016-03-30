@@ -257,7 +257,7 @@ var animate_message = function(card, opts){
 
     text_proxy_el.textContent = opts.text;
     text_proxy_el.style.left=target.rect.left + (target.rect.bottom-target.rect.top)/6 + 'px';
-    text_proxy_el.style.top=target.rect.top - (target.rect.bottom-target.rect.top)*.2 + 'px';
+    text_proxy_el.style.top=target.rect.top /*- (target.rect.bottom-target.rect.top)*.2*/ + 'px';
 
     text_proxy_el.style.color = opts.color || 'green';
     

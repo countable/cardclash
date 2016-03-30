@@ -1,6 +1,19 @@
 
 
 
+function Move(o){
+  for (k in o) this[k] = o[k];
+}
+Move.prototype.get_damage = function(){
+  return this.action.damage || this.card.damage;
+}
+Move.prototype.melee = function(target){
+  target.hurt(move.get_damage(), this);
+  //animate_pow(move, enemy);
+  if (target.spikes) this.card.hurt(target.spikes);
+  if (this.card.poison) target._poison = this.card.poison;
+}
+
 var enemy_filter = function(filter){
   return function(move){
     return get_enemies(move, filter).filter(function(item){
@@ -28,7 +41,11 @@ var filter_field = function(field, filter) {
   } else {
     filter_fn = filter;
   }
-  return field.filter(filter_fn)
+  return field.filter(filter_fn);
+}
+
+function isNumeric(n) {
+  return !isNaN(parseFloat(n)) && isFinite(n);
 }
 
 CardSet.Actions.add([
@@ -43,7 +60,7 @@ CardSet.Actions.add([
     },
     get_description: function(card){
       return this.name + ' ' + (this.damage || '') + ' to ' +
-        (this.num_targets === 1 ? '1 card' : this.num_targets.toLowerCase().replace("_"," "));
+        (isNumeric(this.num_targets) ? this.num_targets + ' card' : (this.num_targets||'').toLowerCase().replace("_"," "));
     }
   },
   {
@@ -54,7 +71,7 @@ CardSet.Actions.add([
       animate_strike(move, done);
     },
     fn: function(move){
-      move.target.hurt(this.damage || move.card.damage, move);
+      move.target.hurt(move.get_damage(), move);
       if (move.target.spikes) move.card.hurt(move.target.spikes);
       if (this.poison) move.target._poison = this.poison;
     },
@@ -67,7 +84,7 @@ CardSet.Actions.add([
       animate_shoot(move, done);
     },
     fn: function(move){
-      move.target.hurt(this.damage, move);
+      move.target.hurt(move.get_damage(), move);
     },
     parent: 'action'
   },
@@ -75,23 +92,20 @@ CardSet.Actions.add([
   // combat.
   {
     name: 'hunt',
-    damage: 1,
     targets: function(move) {
-      return get_enemies(function(enemy){
-        return enemy.speed <= move.card.speed;
+      return get_enemies(move, function(enemy){
+        return enemy.speed >= move.card.speed;
       });
     },
     parent: 'strike'
   },
   {
     name: 'raid',
-    damage: 1,
     targets: enemy_filter('asset'),
     parent: 'strike'
   },
   {
     name: 'charge',
-    damage: 1,
     num_targets: 'ENEMY_FIELD',
     retarget: function(move){
       var alive_enemies = get_enemies(move, function(item){
@@ -103,7 +117,6 @@ CardSet.Actions.add([
   },
   {
     name: 'mug',
-    damage: 1,
     num_targets: 'ENEMY_FIELD',
     retarget: function(move){
       var alive_enemies = get_enemies(move, function(item){
@@ -114,8 +127,23 @@ CardSet.Actions.add([
     parent: 'strike'
   },
   {
+    name: 'rob',
+    targets: function(move) {
+      return get_enemies(function(enemy){
+        return true;
+      });
+    },
+    fn: function(move){
+      if (move.target.is_a('keep')) {
+        move.player.get_opponent().diams -= move.get_damage();
+      } else {
+        move.target.stunned += move.get_damage();
+      }
+    },
+    parent: 'strike'
+  },
+  {
     name: 'volley',
-    damage: 1,
     num_targets: 1,
     targets: function(move){
       var targets = [], field = move.player.get_opponent().field;
@@ -131,7 +159,6 @@ CardSet.Actions.add([
   },
   {
     name: 'siege',
-    damage: 1,
     retarget: function(move){
       return get_enemies('asset')[0];
     },
@@ -139,7 +166,6 @@ CardSet.Actions.add([
   },
   {
     name: 'flank',
-    damage: 1,
     targets: function(move){
       var op_field = move.player.get_opponent().field;
       return op_field.slice(Math.max(1, op_field.length-2));
@@ -173,20 +199,19 @@ CardSet.Actions.add([
     animate: function(move, done){
       animate_spin(move, done);
     },
-    num_targets: -1,
+    num_targets: 'ENEMY_FIELD',
     targets: function(move){
       return get_enemies(move, 'minion');
     },
     fn: function(move){
       self = this;
       this.targets(move).forEach(function(enemy){
-        enemy.hurt(self.damage, move);
+        enemy.hurt(move.get_damage(), move);
         //animate_pow(move, enemy);
         if (enemy.spikes) move.card.hurt(enemy.spikes);
         if (self.poison) enemy._poison = self.poison;
       });
     },
-    damage: 1,
     parent: 'action'
   },
   {
@@ -203,10 +228,7 @@ CardSet.Actions.add([
     fn: function(move){
       self = this;
       this.targets(move).forEach(function(enemy){
-        enemy.hurt(self.damage, move);
-        //animate_pow(move, enemy);
-        if (enemy.spikes) move.card.hurt(enemy.spikes);
-        if (self.poison) enemy._poison = self.poison;
+        move.melee(enemy);
       });
     },
     damage: 1,

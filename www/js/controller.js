@@ -108,22 +108,22 @@ GAME.app.controller('gameCtrl', ['$scope','$routeParams','$timeout',
       GAME.player.dig(GAME.player.hand.indexOf(GAME.player.resolving.card));
     }
     $scope.playStart = function(card){
-        var move = {
+        var move = new Move({
             card: card,
             action: card.hand_actions[0],
             player: GAME.player,
             cost: card.hand_actions[0].cost || card.cost,
             from_hand: true
-        };
+        });
         var result = GAME.player.initiate_move(move);
     };
     $scope.actStart = function(card){
-        var move = {
+        var move = new Move({
             card: card,
             action: card.field_actions[0],
             player: GAME.player,
             cost: card.field_actions[0].cost,
-        };
+        });
         var result = GAME.player.initiate_move(move);
     };
     $scope.cancelDrag = function(){

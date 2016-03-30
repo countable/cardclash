@@ -227,13 +227,10 @@ GAME.maps = [
       inherit(Scenario, {
         name: 'TEST',
         setup: function(){
-          /*GAME.player.deck = CardSet.Cards.from_list(Object.keys(CardSet.Cards.by_name)).filter(function(c){
+          GAME.player.deck = CardSet.Cards.from_list(Object.keys(CardSet.Cards.by_name)).filter(function(c){
             return c.rarity;
-          });*/ // all cards that aren't abstract
-          GAME.player.deck = CardSet.Cards.from_list([
-            'haste','archer',
-            'archer','archer','archer','archer','archer'
-          ]);
+          }).slice(0,8) // all cards that aren't abstract
+
           GAME.player.field = CardSet.Cards.from_list([
             'keep', 'alpha_wolf', 'archer'
           ]);
@@ -254,7 +251,7 @@ GAME.maps = [
         name: 'Welcome',
         hand_size: 3,
         setup: function(){
-          //GAME.player.deck = GAME.player.deck.concat(CardSet.Cards.from_list(['goose', 'goose', 'goose', 'goose']));
+          GAME.player.deck = GAME.player.deck.concat(CardSet.Cards.from_list(['goose', 'goose', 'goose', 'goose']));
           GAME.player.deck = CardSet.Cards.from_list([
             'haste','archer',
             'archer','archer','archer','archer','archer'
@@ -374,12 +371,12 @@ GAME.enemy_turn = function(){
   GAME.enemy.field.forEach(function(card){
     if (card.field_actions && GAME.enemy.can_act(card)){
 
-      var move = {
+      var move = new Move({
           card: card,
           action: card.field_actions[0],
           player: GAME.enemy,
           cost: card.field_actions[0].cost,
-      };
+      });
       GAME.enemy.initiate_move(move);
 
       if (GAME.enemy.resolving) {

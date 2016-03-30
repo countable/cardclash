@@ -178,6 +178,8 @@
   </div>
 
   <div class="health pin" ng-if="card.health">{{ card.health }}</div>
+  <div class="speed pin" ng-if="card.speed">{{ card.effective_speed }}</div>
+  <div class="damage pin" ng-if="card.damage">{{ card.damage }}</div>
 </script>
 
 <script type="text/ng-template" id="game.html">
@@ -293,6 +295,7 @@
           ng-drag-stop="cancelDrag()"
           >
           <card card=card zone='hand'>
+            <div class="cost pin" ng-if="card.cost" ng-class="{faded: player.diams < card.cost}"><span>{{ card.cost }}</span></div>          
             <div class="menu" ng-if="card.hand_actions.length > 1">
               <div ng-repeat="action in card.hand_actions.slice(1)" ng-class="{faded: player.diams < card.cost}" ng-click="play(card, action); $event.stopPropagation()" ng-bind-html="action.button(card)">
               </div>
