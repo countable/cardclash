@@ -173,13 +173,14 @@ GAME.app.controller('gameCtrl', ['$scope','$routeParams','$timeout',
         console.log(pending_moves);
         // sort actions by speed.
         pending_moves.sort(function(x, y){ 
-            if (x.card.speed > y.card.speed) {
+            return x.card.speed - y.card.speed;
+            /*if (x.card.speed > y.card.speed) {
                 return 1;
             }
             if (x.card.speed < y.card.speed) {
                 return -1;
             }
-            return 0;
+            return 0;*/
         });
         
         var complete = function(){
@@ -190,7 +191,10 @@ GAME.app.controller('gameCtrl', ['$scope','$routeParams','$timeout',
             // done turn, reset
             
             $scope.playing=false;
-            $timeout(function(){GAME.player.begin_turn()}, 500);
+            $timeout(function(){
+              GAME.player.begin_turn()
+              GAME.enemy.begin_turn()
+            }, 500);
             
         };
         
@@ -224,6 +228,9 @@ GAME.app.controller('gameCtrl', ['$scope','$routeParams','$timeout',
       if (card.stunned) classes.push('stunned');
       if (card.health < card.__proto__.health) classes.push('damaged');
       if (card.health < 1 && 'number' === typeof card.health) classes.push('dead');
+
+      var keys = Object.keys(card.facts || {});
+      if (keys.length) classes=classes.concat(keys);
       
       classes.push(card.display_class);
       

@@ -177,7 +177,7 @@
     </div>
   </div>
 
-  <div class="health pin" ng-if="card.health">{{ card.health }}</div>
+  <div class="health pin" ng-if="card.health !== undefined">{{ card.health }}</div>
   <div class="speed pin" ng-if="card.speed">{{ card.effective_speed }}</div>
   <div class="damage pin" ng-if="card.damage">{{ card.damage }}</div>
 </script>
@@ -290,7 +290,7 @@
       <div class="hand zone" data-intro="This is your bag of tricks. It refills each turn. Again, use the black <button>buttons</button> to do stuff." data-step=3>
         <div ng-repeat="card in player.hand"
           ng-class="get_card_classes(card)"
-          ng-drag="{{ player.can_play(card) }}"
+          ng-drag="{{ player.can_play_or_dig(card) }}"
           ng-drag-start="playStart(card)"
           ng-drag-stop="cancelDrag()"
           >
@@ -312,6 +312,7 @@
 <div class='text-proxy'></div>
 <div class='shoot-proxy'></div>
 <div class='pow-proxy'></div>
+<div class='zap-proxy'></div>
 
 <script src="js/mobile.js"></script>
 <script src="vendor/intro.js"></script>

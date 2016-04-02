@@ -1,7 +1,7 @@
 
 
 /* animations */
-.text-proxy, .shoot-proxy, .pow-proxy {
+.text-proxy, .shoot-proxy, .pow-proxy, .zap-proxy {
   position:absolute;
   top: -100px;
   left: 0;
@@ -40,4 +40,11 @@
   height: 2.10vw;
   border-radius: 50%;
   background: radial-gradient(ellipse at center, #fb9d23 0%, #ffc578 100%);
+}
+.zap-proxy {
+  height: 8vw;
+  width: 8vw;
+  -webkit-clip-path: polygon(1% 80%, 20% 99%, 33% 78%, 44% 83%, 53% 60%, 63% 61%, 73% 39%, 83% 43%, 96% 4%, 79% 23%, 62% 22%, 51% 38%, 38% 35%, 27% 55%, 17% 52%);
+  clip-path: polygon(1% 80%, 20% 99%, 33% 78%, 44% 83%, 53% 60%, 63% 61%, 73% 39%, 83% 43%, 96% 4%, 79% 23%, 62% 22%, 51% 38%, 38% 35%, 27% 55%, 17% 52%);
+  background: yellow;
 }

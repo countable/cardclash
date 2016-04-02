@@ -6,7 +6,7 @@ var $$ = function(s){
 }
 
 var 
-    shoot_proxy_el = $$(".shoot-proxy")[0],
+    shoot_proxy_el = $$(".zap-proxy")[0],
     pow_proxy_el = $$(".pow-proxy")[0],
     text_proxy_el = $$(".text-proxy")[0];
 
@@ -106,6 +106,9 @@ var animate_war = function(){
 };
 
 var animate_play= function(move, done){
+
+    if (!move.player.client) return done();
+
     var el = $$(".hand .card")[move.player.hand.indexOf(move.card)];
     (move.card.is_a('wealth') ? spend_sound : deploy_sound ).play(); 
     

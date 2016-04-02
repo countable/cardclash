@@ -5,11 +5,10 @@ function Move(o){
   for (k in o) this[k] = o[k];
 }
 Move.prototype.get_damage = function(){
-  return this.action.damage || this.card.damage;
+  return this.action.damage || this.card.effective_damage || 0;
 }
 Move.prototype.melee = function(target){
-  target.hurt(move.get_damage(), this);
-  //animate_pow(move, enemy);
+  target.hurt(this.get_damage(), this);
   if (target.spikes) this.card.hurt(target.spikes);
   if (this.card.poison) target._poison = this.card.poison;
 }
@@ -71,9 +70,7 @@ CardSet.Actions.add([
       animate_strike(move, done);
     },
     fn: function(move){
-      move.target.hurt(move.get_damage(), move);
-      if (move.target.spikes) move.card.hurt(move.target.spikes);
-      if (this.poison) move.target._poison = this.poison;
+      move.melee(move.target)
     },
     parent: 'action'
   },
@@ -104,6 +101,11 @@ CardSet.Actions.add([
     targets: enemy_filter('asset'),
     parent: 'strike'
   },
+  {
+    name: 'tunnel',
+    targets: enemy_filter('asset'),
+    parent: 'strike'
+  },  
   {
     name: 'charge',
     num_targets: 'ENEMY_FIELD',
@@ -205,12 +207,7 @@ CardSet.Actions.add([
     },
     fn: function(move){
       self = this;
-      this.targets(move).forEach(function(enemy){
-        enemy.hurt(move.get_damage(), move);
-        //animate_pow(move, enemy);
-        if (enemy.spikes) move.card.hurt(enemy.spikes);
-        if (self.poison) enemy._poison = self.poison;
-      });
+      this.targets(move).forEach(move.melee);
     },
     parent: 'action'
   },
@@ -220,18 +217,15 @@ CardSet.Actions.add([
     animate: function(move, done){
       animate_spin(move, done);
     },
-    num_targets: -1,
+    num_targets: 'ENEMY_FIELD',
     targets: function(move){
       var t = get_enemies(move, 'card')
       return t.slice(0,Math.min(t.length, 2));
     },
     fn: function(move){
       self = this;
-      this.targets(move).forEach(function(enemy){
-        move.melee(enemy);
-      });
+      this.targets(move).forEach(move.melee);
     },
-    damage: 1,
     parent: 'action'
   },
   {
@@ -251,7 +245,7 @@ CardSet.Actions.add([
       return card.cost + '&diams; ' + this.name;
     },
     animate: function(move, done){
-        animate_play(move, done);
+      animate_play(move, done);
     },
     parent: 'action'
   },

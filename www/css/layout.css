@@ -5,7 +5,7 @@ html {
 }
 
 *, *:before, *:after {
-  box-sizing: inherit;
+  box-sizing: border-box;
 }
 * {line-height:1.2; vertical-align:middle;}
 
@@ -33,7 +33,6 @@ body {
 #view {
   top: 0; left: 0; right: 0; bottom: 0;
   position: absolute;
-
   overflow: hidden;
   width: 100vw;
   height: 56.25vw; /* height:width ratio = 9/16 = .5625  */
@@ -78,7 +77,7 @@ button.faded {
 }
 .zone {
   background: white;
-  padding-top: 0;
+  padding-top: 5.5vw;
   /*white-space: nowrap;*/
   -webkit-touch-callout: none;
   -webkit-user-select: none;
@@ -94,12 +93,14 @@ button.faded {
   padding-right: 5.5vw;
   height: 22vw;
   background: #9D62C5;
+  background: url(../img/patterns/congruent_pentagon2.png);
 }
 .field.zone {
   text-align: left;
   height: 22vw;
   padding-left: 5.5vw;
   background: #91c794;
+  background: url(../img/patterns/congruent_pentagon2.png);
 }
 .hand.zone {
   padding-top: 2.5vw;
@@ -107,6 +108,7 @@ button.faded {
   position: absolute;
   text-align: center;
   background-color: #ccc;
+  background: url(../img/patterns/congruent_pentagon.png) white;
   bottom: 0;
   left: 0;
   right: 0;

@@ -23,7 +23,7 @@ var Player =
         this.pending_moves = [];
         this.discard = [];
 
-        this.diams = 11;
+        this.diams = 2;
         this.income = 1;
         this.storage = 12;
 
@@ -84,7 +84,6 @@ var Player =
     
     can_dig: function(move) {
         move = move || this.resolving;
-        if (move) console.log(!this.dug, move, move.from_hand);
         return !!(!this._dug && move && move.from_hand);
     },
 
@@ -93,12 +92,16 @@ var Player =
         && card.field_actions[0].cost <= this.diams;
     },
 
-    can_play: function(card){
+    can_play_or_dig: function(card){
       return !card._done
         && (
             !this._dug
-            || (card.hand_actions && card.cost <= this.diams)
+            || this.can_play(card)
         );
+    },
+
+    can_play: function(card){
+      return card.hand_actions && card.cost <= this.diams
     },
     
     // provide an index OR a card for the first arg.
@@ -144,7 +147,10 @@ var Player =
           if (this.field[i].health < 1){
             this.field[i].health = this.field[i].__proto__.health;
             this.move_card(i, this.field, this.discard);
+          } else {
+            card.on_turn && card.on_turn(this, i);
           }
+
         }
     },
     
@@ -171,11 +177,13 @@ var Player =
     },
 
     dig: function(index){
-      var keep = this.field.filter(function(item){return item.is_a('keep')})[0]
-      animate_message(keep, {
-        text: '+1 income',
-        color: '#39f'
-      });
+      var keep = this.field.filter(function(item){return item.is_a('keep')})[0];
+      if (this.client) {
+          animate_message(keep, {
+            text: '+1 income',
+            color: '#39f'
+          });
+      }
       this.income ++;
       this._dug = true;
       this.storage += 1;
@@ -247,6 +255,8 @@ var Player =
 
     apply_move: function(move, then){
         
+        console.log(move.cost, this.diams);
+
         if (move.cost) {
             if (move.cost > this.diams) {
                 return {
@@ -255,7 +265,6 @@ var Player =
                 }
             }
         };
-
 
         move.card._done = true;
         move.card._move = move;
@@ -266,6 +275,7 @@ var Player =
             this.pending_moves.push(move);
 
         } else {
+            console.log('complete')
             this.complete_move(move, then);
 
         }

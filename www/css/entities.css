@@ -33,7 +33,7 @@
 }
 .card .description {
   position: absolute;
-  top: 9vw;
+  top: 3vw;
   left: 0;
   right: 0;
   padding: 0.5vw;
@@ -49,13 +49,12 @@
 }
 .icon {
   position: absolute;
-  top: 1.5vw;
-  left: 1.5vw;
-  padding: 0.5vw;
+  top: 2vw;
+  left: 2vw;
   background-color: #444;
   display: block;
-  height: 7vw;
-  width: 7vw;
+  height: 6vw;
+  width: 6vw;
   text-shadow: 0 0 4px rgba(0,0,0,0.3);
 }
 .soft, .card {
@@ -167,16 +166,19 @@
 .card:hover:not(.dragging) {
   z-index: 201;
 }
-.card:hover .cost,
+.card:hover .cost{
+  top: -9vw;
+  left: -3vw;
+}
 .card.dragging .cost {
   display: none;
 }
 .card:hover:not(.dragging) .icon,
 .card.dragging:not(.drag-over) .icon {
-  width: 5vw;
+  /*width: 5vw;
   height: 5vw;
   left: 0.5vw;
-  top: -4vw;
+  top: -4vw;*/
 }
 .card.dragging .inline-details,
 .card:hover:not(.dragging) .inline-details {
@@ -270,18 +272,19 @@
 }
 .card.minion card, .card.minion .inline-details{
   background: #DCECC8;
+  background: url(../img/patterns/old_map.png) #C5C9E6;
   /*background: radial-gradient(ellipse at center, #fff 70%,#DCECC8 70%);*/
 }
 .card.asset card, .card.asset .inline-details{
-  background: #C5C9E6;
+    background: url(../img/patterns/confectionary.png) #DCECC8;
   /*background: radial-gradient(ellipse at center, #fff 70%,#C5C9E6 70%);*/
 }
 .card.resource card, .card.resource .inline-details{
-  background: #B6E3EB;
+  background: url(../img/patterns/white_leather.png) #B6E3EB;
   /*background: radial-gradient(ellipse at center, #B6E3EB 7%,#fff 70%);*/
 }
 .card.magic card, .card.magic .inline-details{
-  background: #FBCBBD;
+  background: url(../img/patterns/green_dust_scratch.png) #FBCBBD;
 
 /*background: linear-gradient(#ffffff 50%, rgba(255,255,255,0) 0) 0 0,
 radial-gradient(circle closest-side, #FFFFFF 53%, rgba(255,255,255,0) 0) 0 0,
@@ -315,6 +318,24 @@ background-repeat:repeat-x;*/
 .card.done card{
   transform: rotate(15deg);
   /*border: 0.5vw solid #888;*/
+}
+.card.huge .icon {
+  top: -0.5vw;
+  left: -0.5vw;
+  width: 11vw;
+  height: 11vw;
+}
+.card.big .icon {
+  top: 1vw;
+  left: 1vw;
+  width: 8vw;
+  height: 8vw;
+}
+.card.small .icon {
+  top: 3vw;
+  left: 3vw;
+  width: 4vw;
+  height: 4vw;
 }
 
 .card.mini {
