@@ -155,8 +155,6 @@ var animate_strike = function(move, done) {
     actor = get_actor_display(move);
     target = get_target_display(move);
     
-    console.log(actor);
-
     Velocity(actor.el, {
       translateX: target.rect.left - actor.rect.left + 'px',
       translateY: target.rect.top - actor.rect.top + (actor.near ? actor.rect.height * .75 : -actor.rect.height * .75) + 'px'

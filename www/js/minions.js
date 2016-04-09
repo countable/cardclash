@@ -31,13 +31,13 @@ CardSet.Cards.add([
 CardSet.Cards.add([
 
   {
-    name: 'minion',
-    display_class: 'minion',
+    name: 'agent',
+    display_class: 'agent',
     health: 1,
     delay: 1,
     speed: 1,
     events: [],
-    cost: 1, // minion specific
+    cost: 1, // agent specific
     is_alive: function(){
       return this.health > 0;
     },
@@ -80,20 +80,20 @@ CardSet.Cards.add([
 
   {
     name:'mammal',
-    parent: 'minion'
+    parent: 'agent'
   },
   {
     name: 'bird',
-    parent: 'minion'
+    parent: 'agent'
   },
   
-  // minions.
+  // agents.
   {
     name: 'militia',
     cost: 1,
     delay: 2,
     health: 2,
-    speed: 7,
+    speed: 1,
     damage: 1,
     field_actions: [
       Actions.create('charge', {
@@ -101,7 +101,7 @@ CardSet.Cards.add([
         cost: 1
       })
     ],
-    parent: 'minion',
+    parent: 'agent',
     svg: 'broad-dagger',
     rarity: 1
   },
@@ -109,7 +109,7 @@ CardSet.Cards.add([
     name: 'priest',
     cost: 2,
     health: 1,
-    speed: 7,
+    speed: 1,
     events: [
         {
             card: 'card',
@@ -128,27 +128,28 @@ CardSet.Cards.add([
             }
         }
     ],
-    text: 'When a minion deploys, your keep gets +1 health',
+    text: 'When a agent deploys, your keep gets +1 health',
     svg: 'holy-symbol',
-    parent: 'minion',
+    parent: 'agent',
     rarity: 1
   },
   {
     name: 'alpha_wolf',
     cost: 2,
     health: 2,
-    speed: 2,
+    speed: 5,
     delay: 0,
+    damage: 2,
     field_actions: ['charge'],
-    text: 'your minions have -1 speed',
+    text: 'your agents have -1 speed',
     global_effects: [
       {
         card_type: 'card',
         owner: 'ally',
-        speed: -1
+        speed: 1
       }
     ],
-    parent: 'minion',
+    parent: 'agent',
     svg: 'wolf-head',
     rarity: 1
   },
@@ -156,10 +157,10 @@ CardSet.Cards.add([
     name: 'archer',
     cost: 3,
     health: 2,
-    speed: 2,
+    speed: 6,
     damage: 1,
     field_actions: ['volley'],
-    parent: 'minion',
+    parent: 'agent',
     svg: 'bowman',
     rarity: 1
   },
@@ -173,7 +174,7 @@ CardSet.Cards.add([
     field_actions: [
       'charge'
     ],
-    parent: 'minion',
+    parent: 'agent',
     health: 3,
     svg: 'battle-gear',
     rarity: 1
@@ -184,7 +185,7 @@ CardSet.Cards.add([
     speed: 4,
     damage: 3,
     field_actions: ['flank'],
-    parent: 'minion',
+    parent: 'agent',
     health: 4,
     svg: 'cavalry',
     rarity: 1
@@ -193,9 +194,9 @@ CardSet.Cards.add([
     name: 'hunter',
     health: 1,
     cost: 4,
-    speed: 5,
+    speed: 2,
     field_actions: ['hunt'],
-    parent: 'minion',
+    parent: 'agent',
     svg: 'rogue',
     rarity: 2
   },
@@ -204,11 +205,11 @@ CardSet.Cards.add([
     name: 'flame_swan',
     health: 2,
     cost: 5,
-    speed: 6,
+    speed: 1,
     damage: 1,
     field_actions: ['slash'],
     spikes: 1,
-    parent: 'minion',
+    parent: 'agent',
     svg: 'fluffy-flame',
     rarity: 1
   },
@@ -221,8 +222,8 @@ CardSet.Cards.add([
     delay: 2,
     damage: 1,
     field_actions:['charge'],
-    speed: 6,
-    parent: 'minion',
+    speed: 1,
+    parent: 'agent',
     svg: 'bull-horns'
   },
   {
@@ -231,7 +232,7 @@ CardSet.Cards.add([
     cost: 3,
     damage: 1,
     field_actions:['charge'],
-    speed: 5,
+    speed: 2,
     parent: 'mammal',
     svg: 'mouse'
   },
@@ -242,28 +243,24 @@ CardSet.Cards.add([
     cost: 2,
     damage: 2,
     field_actions:['charge'],
-    speed: 3,
+    speed: 4,
     parent: 'bird',
     svg: 'duck'
   },
   
-  {
-    name: 'copier',
-    svg: 'trade',
 
-    rarity: 9
-  },
   {
     name: 'dust_bunny',
     svg: 'rabbit',
     health: 3,
     cost: 3,
-    field_actions:[
-      Actions.create('charge', {
-        damage: 3
-      })
-    ],
-    speed: 2,
+    damage: 3,
+    field_actions:['charge'],
+    on_turn:function(player, i){
+      player.move_card(i, player.field, player.hand)
+    },
+    delay: 0,
+    speed: 5,
     parent: 'mammal',
     rarity: 9
   },
@@ -273,7 +270,7 @@ CardSet.Cards.add([
     health: 2,
     cost: 1,
     field_actions:['charge'],
-    speed: 2,
+    speed: 5,
     parent: 'mammal',
     rarity: 9
   },
@@ -283,12 +280,12 @@ CardSet.Cards.add([
     svg: 'wolf-howl',
     health: 4,
     cost: 3,
-    field_actions:[
-      Actions.create('charge', {
-        damage: 2
-      })
-    ],
-    speed: 5,
+    damage: 2,
+    play_turn: function(player){
+      player.diams += 1;
+    },
+    field_actions:['charge'],
+    speed: 2,
     parent: 'mammal',
     rarity: 9
   },
@@ -297,13 +294,10 @@ CardSet.Cards.add([
     delay: 3,
     health: 5,
     cost: 6,
-    field_actions:[
-      Actions.create('charge', {
-        damage: 3
-      })
-    ],
-    speed: 5,
-    parent: 'minion',
+  damage: 3,
+    field_actions:['charge'],
+    speed: 2,
+    parent: 'agent',
     svg: 'vintage-robot',
     rarity: 9
   },
@@ -314,8 +308,8 @@ CardSet.Cards.add([
     delay: 2,
     damage: 3,
     field_actions:['batter'],
-    speed: 6,
-    parent: 'minion',
+    speed: 1,
+    parent: 'agent',
     svg: 'pig-face',
     rarity: 2
   },
@@ -325,21 +319,22 @@ CardSet.Cards.add([
     damage: 1,
     cost: 2,
     field_actions:['mug'],
-    speed: 4,
-    parent: 'minion',
+    speed: 3,
+    parent: 'agent',
     svg: 'cloak-dagger',
     rarity: 1
   },
   {
     name: 'hillscale',
-    speed: 8,
+    speed: 0,
     health: 7,
     delay: 4,
+    armor: 1,
     cost: 5,
     damage: 4,
     field_actions:['charge'],
-    parent: 'minion',
-    svg: 'jawbone',
+    parent: 'agent',
+    svg: 'shoulder-scales',
     rarity: 1
   },
   {
@@ -348,8 +343,8 @@ CardSet.Cards.add([
     cost: 4,
     untargetable: true,
     field_actions:['batter'],
-    speed: 4,
-    parent: 'minion',
+    speed: 3,
+    parent: 'agent',
     svg: 'spectre',
     rarity: 2
   },
@@ -359,8 +354,8 @@ CardSet.Cards.add([
     health: 5,
     cost: 5,
     field_actions:['flank'],
-    speed: 5,
-    parent: 'minion',
+    speed: 2,
+    parent: 'agent',
     svg: 'daemon-skull',
     rarity: 2,
     armor: 1
@@ -370,8 +365,8 @@ CardSet.Cards.add([
     health: 4,
     poison: 1,
     cost: 3,
-    speed: 4,
-    parent: 'minion',
+    speed: 3,
+    parent: 'agent',
     svg: 'snake',
     rarity: 1
   },
@@ -390,7 +385,8 @@ CardSet.Cards.add([
     health: 1,
     cost: 3,
     spikes: 2,
-    parent: 'minion',
+    damage: 2,
+    parent: 'agent',
     svg:  'lightning-arc',
     rarity: 1
   }

@@ -92,10 +92,10 @@
 <a href='#/{{ epic_id }}/map/{{ map_idx }}' id="exit">X</a>
 <div ng-controller="mapCtrl" id="scenarios">
   <div id="levels">
-    <p ng-repeat="scenario in scenarios track by $index" class="page">
+    <a ng-repeat="scenario in scenarios track by $index" class="page" href="#/{{ epic_id }}/game/{{ map_idx }}/{{ $index }}">
       <b>{{ scenario.order }}</b>
-      <a href="#/{{ epic_id }}/game/{{ map_idx }}/{{ $index }}">{{ scenario.name.replace('_'," ") }}</a>
-    </p>
+      <span>{{ scenario.name.replace('_'," ") }}</span>
+    </a>
   </div>
 </div>
 </script>
@@ -156,6 +156,8 @@
 
 <script type="text/ng-template" id="card.html">
 
+  <div class="spikes" ng-if="card.spikes"></div>
+
   <div class="inline-details">
     <div class="title">{{ card.name.capitalizeFirstLetter() }}</div>
     <div class="description" ng-bind-html="card.get_description()"></div>
@@ -180,6 +182,7 @@
   <div class="health pin" ng-if="card.health !== undefined">{{ card.health }}</div>
   <div class="speed pin" ng-if="card.speed">{{ card.effective_speed }}</div>
   <div class="damage pin" ng-if="card.damage">{{ card.damage }}</div>
+
 </script>
 
 <script type="text/ng-template" id="game.html">
@@ -187,43 +190,37 @@
 <div ng-controller="gameCtrl">
   <div id="wrapper" ng-class="{playing: playing}" ng-cloak>
     
-    <a href='#/{{ epic_id }}/map/{{ GAME.map_idx }}' id="exit">X</a>
+    <a href='#/{{ epic_id }}/map/{{ GAME.map_idx }}' id="exit">
+      X
+    </a>
 
-    <div id="turn" data-intro="After issuing orders, hit the 'turn' button, and sit back to watch the fight." data-step=4 data-position=top ng-click="turn()">
+    <div id="turn" ng-click="turn()">
       GO
     </div>
+
+    <div id="scenario_name">{{ scenario_name }}</div>
     
     <div id="details-mask" ng-if="details" ng-click="close_details()">
-      <div id="details" class="page">
+      <div id="details">
+          
+        <div ng-repeat="card in [details] track by $index" ng-class="get_card_classes(card)">
+          <card card=card zone='details'></card>
+        </div>
 
-        <h3>{{ details.name }}</h3>
-        <table class='page'>
-          <tr>
-            <th>health &hearts;</th>
-            <th>speed <i class='fa fa-bolt'></i></th>
-            <th>damage <i class='fa fa-hand-rock-o'></i></th>
-            <th>cost &diams;</th>
+        <table class=table1 cellpadding=0>
+          <tr ng-repeat="stat in detail_stats track by $index">
+            <th>{{ stat }}</th>
+            <td>{{ get_stat(details, stat) }}</td>
           </tr><tr>
-            <td>{{ details.health }}</td>
-            <td>{{ details.speed }}</td>
-            <td>{{ details.damage }}</td>
-            <td>{{ details.cost }}</td>
+            <th>actions</th>
+            <td>
+              <span ng-repeat="act in details.field_actions"> {{ act.name }} </span>
+              <span ng-repeat="act in details.hand_actions"> {{ act.name }} </span>
+            </td>
           </tr>
         </table>
 
-        <p ng-if="details.field_actions">actions: <i ng-repeat="act in details.field_actions"> {{ act.name }} </i> </p>
-        
-        <table class='page'>
-          <tr>
-            <th>cost</th>
-            <th>delay</th>
-            <th>rarity</th>
-          </tr><tr>
-            <td>{{ details.cost }}</td>
-            <td>{{ details.delay }}</td>
-            <td>{{ details.rarity }}</td>
-          </tr>
-        </table>
+        <div id='rarity'>{{ details.rarity }}</div>
 
       </div>
     </div>
@@ -251,20 +248,20 @@
 
     <div id="zones">
 
-      <div class="enemy zone" data-intro="This is the enemy army. Armies attack each other from the left side. You'll see what I mean in a bit." data-step=2
+      <div class="enemy zone"
       ng-drop="{{ is_targeting_enemy_field() }}"
       ng-drop-success="onDropEnemyField()"
       >
         <div ng-repeat="card in enemy.field.slice().reverse() track by $index" ng-class="get_card_classes(card)"
         ng-drop-success="pick(card)"
-        ng-drop="{{ card._target === true }}"
+        ng-drop="{{ can_target(card) }}"
         >
           <card card=card zone='enemy'></card>
         </div>
       </div>
 
       <!--<ul class="field zone sortable" ng-sortable="sort_config" data-intro="This is your army. Issue orders to your troops by clicking the black <button>buttons</button>, after this tour." data-step=1>-->
-      <div class="field zone" data-intro="This is your army. Issue orders to your troops by clicking the black <button>buttons</button>, after this tour." data-step=1
+      <div class="field zone"
         ng-drop="{{ is_targeting_player_field() }}"
         ng-drop-success="onDropField()"
         >
@@ -287,7 +284,7 @@
         </div>
       </div>
       
-      <div class="hand zone" data-intro="This is your bag of tricks. It refills each turn. Again, use the black <button>buttons</button> to do stuff." data-step=3>
+      <div class="hand zone">
         <div ng-repeat="card in player.hand"
           ng-class="get_card_classes(card)"
           ng-drag="{{ player.can_play_or_dig(card) }}"

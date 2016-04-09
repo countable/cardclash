@@ -67,6 +67,7 @@ GAME.app.controller('gameCtrl', ['$scope','$routeParams','$timeout',
 
     // refs.
     $scope.GAME = GAME;
+    $scope.scenario_name = GAME.get_current_scenario().name;
     $scope.player = GAME.player;
     $scope.enemy = GAME.enemy;
 
@@ -75,21 +76,25 @@ GAME.app.controller('gameCtrl', ['$scope','$routeParams','$timeout',
     $scope.is_targeting_player_field = function(){
       var r=GAME.player.resolving;
       if (!r) return false;
-      return r.cost <= GAME.player.diams && (r.action.num_targets === 'PLAYER_FIELD'
-        || r.action.num_targets === 'BOTH_FIELDS'
-        || r.action.num_targets === 'ANY_FIELD'
+      return r.cost <= GAME.player.diams && (r.action.targets === 'PLAYER_FIELD'
+        || r.action.targets === 'BOTH_FIELDS'
+        || r.action.targets === 'ANY_FIELD'
         );
     };
 
     $scope.is_targeting_enemy_field = function(){
       var r=GAME.player.resolving;
       if (!r) return false;
-      return r.cost <= GAME.player.diams && (r.action.num_targets === 'ENEMY_FIELD'
-        || r.action.num_targets === 'BOTH_FIELD'
-        || r.action.num_targets === 'ANY_FIELD'
+      return r.cost <= GAME.player.diams && (r.action.targets === 'ENEMY_FIELD'
+        || r.action.targets === 'BOTH_FIELD'
+        || r.action.targets === 'ANY_FIELD'
         );
     };
-    
+    $scope.can_target = function(card){
+      return GAME.player.resolving && 
+        card._target === true && GAME.player.can_play(GAME.player.resolving.card);
+    };
+
     // Drag and Drop events.
     $scope.onDropField = function(){
       // complete untargeted moves.
@@ -145,7 +150,20 @@ GAME.app.controller('gameCtrl', ['$scope','$routeParams','$timeout',
     $scope.info = function(card){
       $scope.details=card;
     }
-
+    $scope.detail_stats = ['health', 'speed', 'damage',
+      'cost', 'delay', 'spikes', 'armor', 'poison'
+    ];
+    $scope.get_stat = function(card, stat){
+      var orig = card.__proto__[stat] || 0;
+      var current = card['effective_'+stat] || card[stat] || 0;
+      result = orig;
+      if (current > orig) {
+        result += " + " + (current - orig);
+      } else if (current < orig) {
+        result += " - " + (orig - current);
+      }
+      return result;
+    };
 
     // buying cards - not currently used.    
     $scope.buy = function(card){
@@ -170,17 +188,9 @@ GAME.app.controller('gameCtrl', ['$scope','$routeParams','$timeout',
         
         // queued moves.
         var pending_moves = R.pluck('pending_moves')(GAME.players).reduce(R.concat);
-        console.log(pending_moves);
         // sort actions by speed.
         pending_moves.sort(function(x, y){ 
-            return x.card.speed - y.card.speed;
-            /*if (x.card.speed > y.card.speed) {
-                return 1;
-            }
-            if (x.card.speed < y.card.speed) {
-                return -1;
-            }
-            return 0;*/
+            return y.card.speed - x.card.speed;
         });
         
         var complete = function(){
@@ -228,6 +238,8 @@ GAME.app.controller('gameCtrl', ['$scope','$routeParams','$timeout',
       if (card.stunned) classes.push('stunned');
       if (card.health < card.__proto__.health) classes.push('damaged');
       if (card.health < 1 && 'number' === typeof card.health) classes.push('dead');
+      //if (card.spikes) classes.push('spikes'); // in template
+      if (card.cost > GAME.player.diams) classes.push('overpriced');
 
       var keys = Object.keys(card.facts || {});
       if (keys.length) classes=classes.concat(keys);

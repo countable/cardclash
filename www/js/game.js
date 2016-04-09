@@ -88,13 +88,17 @@ var GAME = {
     }
     return CardSet.Cards.from_list(deck_list);
   },
+  
+  get_current_scenario: function() {
+    return this.maps[this.map_idx].scenarios[this.scen_idx];
+  },
 
-  start: function(){
+  start: function() {
     this.player = inherit(Player);
     this.enemy = inherit(Player);
     this.players = [this.player, this.enemy];
     this.player.deck = this.get_default_deck(this.epic);
-    this.maps[this.map_idx].scenarios[this.scen_idx].start();    
+    this.get_current_scenario().start();
   }
 
 };
@@ -155,12 +159,15 @@ GAME.maps = [
           GAME.player.field = CardSet.Cards.from_list([
             'keep', 'shiba_pup'
           ]);
+
+          GAME.enemy.deck = CardSet.Cards.from_list([
+            'mousefly', 'mousefly', 'mousefly', 'mousefly', 
+            'mousefly', 'mousefly', 'mousefly', 'mousefly', 
+            'mousefly', 'mousefly', 'mousefly', 'mousefly', 
+            ]);
           GAME.enemy.field = [
             inherit(CardSet.Cards.get('nest'), {health: 7})
           ].concat(CardSet.Cards.from_list(['mousefly']));
-        },
-        enemy_turn: function(){
-          if (Math.random() < 0.9) add_enemy('mousefly');
         }
       }),
       inherit(Scenario, {
@@ -227,11 +234,11 @@ GAME.maps = [
     scenarios:[
 
       inherit(Scenario, {
-        name: 'TEST',
+        name: 'Stairwell',
         setup: function(){
           GAME.player.deck = CardSet.Cards.from_list(Object.keys(CardSet.Cards.by_name)).filter(function(c){
             return c.rarity;
-          }).slice(8,16) // all cards that aren't abstract
+          }).slice(30,41) // all cards that aren't abstract
           GAME.enemy.deck = CardSet.Cards.from_list(['bandit', 'bandit', 'bandit', 'bandit', 'bandit', 'bandit', 'bandit', 'bandit', 'bandit', 'bandit', 'bandit', 'bandit'
             , 'bandit', 'bandit'])
           GAME.player.field = CardSet.Cards.from_list([
@@ -239,7 +246,7 @@ GAME.maps = [
           ]);
           GAME.enemy.field = [
             inherit(CardSet.Cards.get('nest'), {health: 7})
-          ].concat(CardSet.Cards.from_list(['bandit', 'bandit']));
+          ].concat(CardSet.Cards.from_list(['zap_trap', 'bandit']));
         },
         enemy_turn: function(){
           if (GAME.enemy.field.length < 4) {
@@ -262,16 +269,6 @@ GAME.maps = [
           GAME.player.field = CardSet.Cards.from_list(['keep', 'goose']);
           GAME.player.store = [];
           GAME.enemy.field = CardSet.Cards.from_list(['nest', 'mousefly','mousefly']);
-          /*
-          setTimeout(function(){
-            introJs().start({
-              showBullets: false,
-              overlayOpacity: 0.2,
-              showStepNumbers: false,
-              tooltipPosition: 'auto'
-            })
-          }, 100);
-          */
         }
       }),
       
@@ -371,7 +368,7 @@ GAME.enemy_turn = function(){
     var action_type = from_hand ? 'hand_actions' : 'field_actions';
     var move_type = from_hand ? 'play' : 'act';
     return function(card){
-      console.log(move_type, GAME.enemy['can_'+move_type](card));
+
       if (card[action_type] && GAME.enemy['can_'+move_type](card)){
         var action = card[action_type][0];
         var move = new Move({
@@ -384,11 +381,10 @@ GAME.enemy_turn = function(){
         GAME.enemy.initiate_move(move);
 
         if (GAME.enemy.resolving) {
-          if (GAME.enemy.resolving.action.targets){
+          if (GAME.enemy.resolving.action.single_target()){
             var targets = GAME.enemy.resolving.action.targets(GAME.enemy.resolving);
             GAME.enemy.done_targetting(targets[Math.floor(Math.random()*targets.length)]);
           } else {
-            console.log('applying', GAME.enemy.resolving);
             GAME.enemy.apply_move(GAME.enemy.resolving);
           }
         }
@@ -396,16 +392,12 @@ GAME.enemy_turn = function(){
     };
   };
 
-  console.log('enemy_hand:', GAME.enemy.hand);
-
   GAME.enemy.field.forEach(consider(false));
   GAME.enemy.hand.forEach(consider(true));
   
   if (GAME.enemy.hand.length > GAME.enemy.diams) {
     GAME.enemy.dig(0)
   }
-  console.log('enemy_pending:', GAME.enemy.pending_moves);
-
   var et = GAME.scenario.enemy_turn;
   et && et();
 };

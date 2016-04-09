@@ -29,7 +29,7 @@
   bottom: 0; top: 0; left: 0; right: 0;
   transition: all 1s;
 }
-#levels p {
+#levels a {
   text-align: center;
   display: inline-block;
   background-color: white;
@@ -41,7 +41,7 @@
   transition: all 1s;
   transform: rotateZ(5deg) rotateX(-20deg);
 }
-#levels p b {
+#levels a b {
   display: block;
   font-size: 5vw;
   line-height: 4vw;
@@ -50,7 +50,7 @@
   height: 21vw;
   transition: all 1s;
 }
-#levels p:hover {
+#levels a:hover {
   color: black;
   transform: rotateX(20deg) scale(1.1);
 }

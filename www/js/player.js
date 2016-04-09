@@ -23,9 +23,9 @@ var Player =
         this.pending_moves = [];
         this.discard = [];
 
-        this.diams = 2;
+        this.diams = 5;
         this.income = 1;
-        this.storage = 12;
+        this.storage = 7;
 
     },
     
@@ -140,17 +140,28 @@ var Player =
           // clear done flag.
           if (card.stunned) card.stunned -= 1;
           if (card.poisoned) card.health -= card.poisoned;
+
           card._done = false;
           card._move = null;
           
           // clear casualties
           if (this.field[i].health < 1){
-            this.field[i].health = this.field[i].__proto__.health;
+            // reset health?
+            //this.field[i].health = this.field[i].__proto__.health;
             this.move_card(i, this.field, this.discard);
           } else {
             card.on_turn && card.on_turn(this, i);
           }
+        }
+    },
 
+    cleanup_hand: function(){
+        var i=this.hand.length;
+        while(--i >= 0) {
+            var card = this.hand[i];
+            card._done = false;
+            card._move = null;
+            card.on_turn_field && card.on_turn_field(this, i);
         }
     },
     
@@ -168,6 +179,7 @@ var Player =
     {
         this.pending_moves = [];
         this.cleanup_field();
+        this.cleanup_hand();
         //this.move_pile(this.hand, this.discard);
         this.move_pile(this.played_cards, this.discard);
     },
@@ -193,7 +205,7 @@ var Player =
     initiate_move: function(move, then) {
         
         //hilight targets, if any, and wait for user to select.
-        if (move.action.num_targets === 1) {
+        if (move.action.single_target()) {
             
             var targets =  move.action.targets(move);
             if (this.client) {
@@ -243,7 +255,7 @@ var Player =
     
     clear_targets: function(){
         if (this.resolving) {
-            if (this.resolving.action.targets) {
+            if (this.resolving.action.single_target()) {
 
                 this.resolving.action.targets(this.resolving).forEach(function(card){
                     delete card._target;
@@ -255,8 +267,6 @@ var Player =
 
     apply_move: function(move, then){
         
-        console.log(move.cost, this.diams);
-
         if (move.cost) {
             if (move.cost > this.diams) {
                 return {
@@ -273,11 +283,8 @@ var Player =
         if (move.action.delayed) {
             if (this.client) animate_order();
             this.pending_moves.push(move);
-
         } else {
-            console.log('complete')
             this.complete_move(move, then);
-
         }
     },
     

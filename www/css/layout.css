@@ -77,7 +77,7 @@ button.faded {
 }
 .zone {
   background: white;
-  padding-top: 5.5vw;
+  padding-top: 7.5vw;
   /*white-space: nowrap;*/
   -webkit-touch-callout: none;
   -webkit-user-select: none;
@@ -201,4 +201,53 @@ button.faded {
   background: #5cc2f1;
   transform: rotate(45deg);
   box-shadow: 0 0 2vw rgba(0,0,0,0.2);
+}
+
+#scenario_name {
+  position: absolute;
+  top: 0;
+  left: 40vw;
+  z-index: 250;
+  background: white;
+  padding: 0.5vw 2vw;
+  box-shadow: 0 0 2vw rgba(0,0,0,0.2);
+}
+
+
+#details-mask {
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  position: absolute;
+  background-color: rgba(0,0,0,0.5);
+  z-index: 300;
+}
+#details {
+  background: url(../img/patterns/congruent_pentagon.png);
+  top: 7vw;
+  left: 19vw;
+  right: 19vw;
+  bottom: 7vw;
+  position: absolute;
+  padding: 3.50vw;
+}
+#details table {
+  position: absolute;
+  border-collapse: collapse;
+  background-color: #FFF;
+  left: 34vw;
+  top: 2.5vw;
+  width: 25.5vw;
+  height: 37vw;
+}
+#details table td, #details table th {
+  padding: 0;
+  font-size: 1.90vw;
+}
+#details .card {
+  position: absolute;
+  top: 23vw;
+  left: 11vw;
+  transform: scale(2);
 }

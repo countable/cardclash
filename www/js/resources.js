@@ -3,7 +3,9 @@ CardSet.Cards.add([
     name: 'resource',
     display_class: 'resource',
     hand_actions: [
-      Actions.create('use')
+      Actions.create('use', {
+        targets: 'ANY_FIELD'
+      })
     ],
     parent: 'card'
   },
@@ -18,14 +20,15 @@ CardSet.Cards.add([
 
   {
     name: 'ore',
-    cost: 0,
+    cost: -1,
     parent: 'resource',
     svg: 'rock',
     hand_actions: [
       Actions.create('use', {
+        targets: 'PLAYER_FIELD',
         effect: function(move){
-          move.player.hand.push(CardSet.Cards.create('gem'));
-          move.player.hand.push(CardSet.Cards.create('gem'));
+          move.player.deck.unshift(CardSet.Cards.create('gem'));
+          move.player.deck.unshift(CardSet.Cards.create('gem'));
           move.player.clear_placeholders();
         }
       })

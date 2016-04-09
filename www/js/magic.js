@@ -18,12 +18,9 @@ CardSet.Cards.add([
     cost: 4,
     hand_actions: [
       Actions.create('cast', {
-        targets: enemy_filter(function(item){
-            return item.is_a('asset')
-        }),
-        fn: function(move){
+        targets: enemy_filter('asset'),
+        effect: function(move){
           move.target.hurt(2);
-          Actions.get('cast').fn.apply(this, [move]);
         }
       })
     ],
@@ -31,13 +28,29 @@ CardSet.Cards.add([
     svg: 'arson',
     rarity: 1
   },
+  
+  {
+    name: 'copier',
+    hand_actions: [
+      Actions.create('cast', {
+        targets: any_filter(),
+        effect: function(move){
+          move.player.hand.push(CardSet.Cards.create(move.target.name))
+        }
+      })
+    ],
+    cost: 2,
+    svg: 'trade',
+    parent: 'magic',
+    rarity: 9
+  },
 
   {
     name: 'entomb',
     cost: 4,
     hand_actions: [
       Actions.create('cast', {
-        targets: enemy_filter('minion'),
+        targets: enemy_filter('agent'),
         effect: function(move){
           move.target.health = 0;
         }
@@ -53,8 +66,7 @@ CardSet.Cards.add([
     cost: 1,
     hand_actions: [
       Actions.create('cast', {
-        num_targets: 1,
-        targets: enemy_filter('minion'),
+        targets: enemy_filter('agent'),
         effect: function(move){
           move.target.hurt(3);
         },
@@ -76,8 +88,7 @@ CardSet.Cards.add([
     cost: 1,
     hand_actions: [
       Actions.create('cast', {
-        num_targets: 1,
-        targets: enemy_filter('minion'),
+        targets: enemy_filter('agent'),
         effect: function(move){
           move.target.hurt(1);
         },
@@ -99,8 +110,7 @@ CardSet.Cards.add([
     cost: 2,
     hand_actions: [
       Actions.create('cast', {
-        num_targets: 1,
-        targets: enemy_filter('minion'),
+        targets: enemy_filter('agent'),
         effect: function(move){
           move.target.hurt(3);
         },
@@ -122,8 +132,7 @@ CardSet.Cards.add([
     cost: 2,
     hand_actions: [
       Actions.create('cast', {
-        num_targets: 1,
-        targets: enemy_filter('minion'),
+        targets: enemy_filter('agent'),
         effect: function(move){
           move.target.hurt(1);
           move.target.delay += 1;
@@ -146,9 +155,9 @@ CardSet.Cards.add([
     cost: 1,
     hand_actions: [
       Actions.create('cast', {
-        targets: ally_filter('minion'),
+        targets: ally_filter('agent'),
         effect: function(move){
-          move.target.speed -= 4;
+          move.target.speed += 4;
           move.target.stunned = 0;
         }
       })
@@ -160,15 +169,15 @@ CardSet.Cards.add([
 
   {
     name: 'blizzard',
-    cost: 3,
+    cost: 4,
     hand_actions: [
       Actions.create('cast', {
-        num_targets: 0,
-        fn: function(move){
-          get_enemies(move, 'minion').forEach(function(enemy){
+        targets: 'ENEMY_FIELD',
+        effect: function(move){
+          target_enemies(move, 'agent').forEach(function(enemy){
             enemy.stunned = 1;
+            enemy.hurt(1, move);
           });
-          Actions.get('cast').fn.apply(this, [move]);
         }
       })
     ],
@@ -182,13 +191,9 @@ CardSet.Cards.add([
     cost: 1,
     hand_actions: [
       Actions.create('cast', {
-        targets: ally_filter(function(item){
-            return item.is_a('minion')
-        }),
-
-        fn: function(move){
-          move.target.spikes -= 3;
-          Actions.get('cast').fn.apply(this, [move]);
+        targets: ally_filter('agent'),
+        effect: function(move){
+          move.target.spikes = (move.target.spikes || 0) + 3;
         }
       })
     ],
@@ -203,16 +208,15 @@ CardSet.Cards.add([
     cost: 1,
     hand_actions: [
       Actions.create('cast', {
-        num_targets: 1,
         targets: enemy_filter(function(item){
-            return item.is_a('minion')
+            return item.is_a('agent')
         }),
         fn: function(move){
-          move.target.delay += 3;
-          Actions.get('cast').fn.apply(self, [move]);
+          move.target.stunned += 1;
         },
         animate: function(move, done){
-          animate_pow(move.target, {
+          animate_message(move.target, {
+            text: "stun +1",
             color: 'black',
             callback: done
           })
@@ -223,22 +227,46 @@ CardSet.Cards.add([
     rarity: 9
   },
   {
+    name: 'quicksand',
+    svg: 'quicksand',
+    cost: 1,
+    hand_actions: [
+      Actions.create('cast', {
+        text: 'Chosen agent skips action.',
+        targets: any_filter('agent'),
+        fn: function(move){
+          move.target.stunned = 1;
+        },
+        animate: function(move, done){
+          animate_message(move.target, {
+            text: "stun 1",
+            color: 'black',
+            callback: done
+          })
+        }
+      })
+    ],
+    parent: 'magic',
+    rarity: 9
+  },
+
+  {
     name: 'math_tome',
     svg: 'white-book',
     cost: 3,
     hand_actions: [
       Actions.create('cast', {
-        num_targets: 0,
-        fn: function(move){
-          var keep = get_allies(move, 'keep')[0];
+        targets: 'ANY_FIELD',
+        effect: function(move){
           GAME.player.draw(2);
-          setTimeout(function(){
-            animate_message(keep, {
-              text: '+3 mana',
-              color: '#0c0'
-            })
-          }, 300);
-          Actions.get('cast').fn.apply(this, [move]);
+        },
+        animate: function(move, done){
+          var keep = target_allies(move, 'keep')[0];
+          animate_message(keep, {
+            text: '+2 cards',
+            color: '#0c0',
+            callback: done
+          });
         }
       })
     ],
@@ -251,13 +279,12 @@ CardSet.Cards.add([
     cost: 1,
     hand_actions: [
       Actions.create('cast', {
-        num_targets: 0,
-        fn: function(move){
-          get_allies(move, 'minion').forEach(function(enemy){
-            enemy.health += 1;
-            enemy.damage += 1;
+        targets: 'PLAYER_FIELD',
+        effect: function(move){
+          target_allies(move, 'agent').forEach(function(ally){
+            ally.health += 1;
+            ally.damage += 1;
           });
-          Actions.get('cast').fn.apply(this, [move]);
         }
       })
     ],
@@ -270,13 +297,9 @@ CardSet.Cards.add([
     cost: 1,
     hand_actions: [
       Actions.create('cast', {
-        num_targets: 1,
-        targets: enemy_filter(function(item){
-            return item.is_a('minion')
-        }),
+        targets: enemy_filter(function(e){return e.speed < 4}),
         fn: function(move){
-          move.target.health -= 3;
-          Actions.get('cast').fn.apply(self, [move]);
+          move.target.health -= 2;
         },
         animate: function(move, done){
           animate_pow(move.target, {
@@ -295,13 +318,10 @@ CardSet.Cards.add([
     cost: 1,
     hand_actions: [
       Actions.create('cast', {
-        num_targets: 1,
-        targets: ally_filter(function(item){
-            return item.is_a('minion')
-        }),
-        fn: function(move){
-          move.target.armor += 1;
-          Actions.get('cast').fn.apply(self, [move]);
+        targets: ally_filter('agent'),
+        effect: function(move){
+          console.log('enhance armor', move)
+          move.target.armor = (move.target.armor || 0) + 1;
         },
         animate: function(move, done){
           animate_pow(move.target, {
@@ -320,16 +340,13 @@ CardSet.Cards.add([
     cost: 6,
     hand_actions: [
       Actions.create('cast', {
-        targets: enemy_filter(function(item){
-            return item.is_a('minion')
-        }),
-        fn: function(move){
+        targets: enemy_filter('agent'),
+        effect: function(move){
           var op = move.player.get_opponent();
-          op.field = op.field.filter(function(item){
-            return c != move.card;
+          op.field = op.field.filter(function(c){
+            return c != move.target;
           });
           move.player.field.push(move.target);
-          Actions.get('cast').fn.apply(this, [move]);
         }
       })
     ],

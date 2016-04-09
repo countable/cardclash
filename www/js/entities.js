@@ -91,11 +91,12 @@ var Cards = new EntityTree({
 
     },
     get_description: function() {
+      var card=this;
       return (this.field_actions || []).map(function(action){
-        return action.get_description();
+        return action.get_description(card);
       }).join(". ")
       + "<br>" + (this.hand_actions || []).map(function(action){
-        return action.get_description();
+        return action.get_description(card);
       }).join(". ")
     },
     get effective_speed() {

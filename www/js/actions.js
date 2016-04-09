@@ -15,33 +15,40 @@ Move.prototype.melee = function(target){
 
 var enemy_filter = function(filter){
   return function(move){
-    return get_enemies(move, filter).filter(function(item){
-      return !item.untargetable;
-    });
+    return target_enemies(move, filter).filter(function(c){return !c.untargetable;});
   }
 };
 var ally_filter = function(filter){
   return function(move){
-    return get_allies(move, filter).filter(function(item){
-      return !item.untargetable;
-    });
+    return target_allies(move, filter).filter(function(c){ return !c.untargetable; });
   }
 };
-var get_enemies = function(move, filter){
+var any_filter = function(filter){
+  return function(move){
+    return target_any(move, filter).filter(function(c){ return !c.untargetable; });
+  }
+}
+var target_any = function(move, filter) {
+  return target_enemies(move, filter).concat(target_allies(move, filter));
+}
+var target_enemies = function(move, filter){
   return filter_field(move.player.get_opponent().field, filter);
 }
-var get_allies = function(move, filter){
+var target_allies = function(move, filter){
   return filter_field(move.player.field, filter);
 }
 var filter_field = function(field, filter) {
   var filter_fn;
-  if (filter + '' === filter) {
+  if (!filter) { // no filter, return all results.
+    filter_fn = function(e){return true};
+  } else if (filter + '' === filter) {
     filter_fn = function(e){return e.is_a(filter)}
   } else {
     filter_fn = filter;
   }
   return field.filter(filter_fn);
 }
+
 
 function isNumeric(n) {
   return !isNaN(parseFloat(n)) && isFinite(n);
@@ -51,21 +58,32 @@ CardSet.Actions.add([
   {
     name: 'action',
     cost: 0,
+    single_target: function(){ // whether the action targets a single card.
+      return this.targets instanceof Function;
+    },
     animate: function(move, done){
       done && done();
     },
     button: function(card){
-      return this.name + (this.damage ? ' ' + this.damage : '');
+      return this.name + (card.effective_damage ? ' ' + card.effective_damage : '');
     },
     get_description: function(card){
-      return this.name + ' ' + (this.damage || '') + ' to ' +
-        (isNumeric(this.num_targets) ? this.num_targets + ' card' : (this.num_targets||'').toLowerCase().replace("_"," "));
+      var desc = this.name;
+      if (this.text){
+        desc += ' : ' + this.text;
+      } else {
+        desc += ' ' +
+        (card.effective_damage || '') + ' to ' +
+        (this.single_target() ? 'a card' : (this.targets || '').toLowerCase().replace("_"," "));
+      }
+      desc += '.';
+      return desc;
     }
   },
   {
     name: 'strike',
     delayed: true,
-    num_targets: 1,
+    targets: 'ENEMY_FIELD',
     animate: function(move, done){
       animate_strike(move, done);
     },
@@ -89,11 +107,9 @@ CardSet.Actions.add([
   // combat.
   {
     name: 'hunt',
-    targets: function(move) {
-      return get_enemies(move, function(enemy){
-        return enemy.speed >= move.card.speed;
-      });
-    },
+    targets: enemy_filter(function(enemy){
+      return enemy.speed <= move.card.speed;
+    }),
     parent: 'strike'
   },
   {
@@ -108,9 +124,9 @@ CardSet.Actions.add([
   },  
   {
     name: 'charge',
-    num_targets: 'ENEMY_FIELD',
+    targets: 'ENEMY_FIELD',
     retarget: function(move){
-      var alive_enemies = get_enemies(move, function(item){
+      var alive_enemies = target_enemies(move, function(item){
         return item.health > 0;
       });
       return alive_enemies[alive_enemies.length-1];
@@ -119,9 +135,9 @@ CardSet.Actions.add([
   },
   {
     name: 'mug',
-    num_targets: 'ENEMY_FIELD',
+    targets: 'ENEMY_FIELD',
     retarget: function(move){
-      var alive_enemies = get_enemies(move, function(item){
+      var alive_enemies = target_enemies(move, function(item){
         return item.health > 0;
       });
       return alive_enemies[Math.floor(alive_enemies.length*Math.random())];
@@ -130,11 +146,7 @@ CardSet.Actions.add([
   },
   {
     name: 'rob',
-    targets: function(move) {
-      return get_enemies(function(enemy){
-        return true;
-      });
-    },
+    targets: enemy_filter(),
     fn: function(move){
       if (move.target.is_a('keep')) {
         move.player.get_opponent().diams -= move.get_damage();
@@ -146,7 +158,6 @@ CardSet.Actions.add([
   },
   {
     name: 'volley',
-    num_targets: 1,
     targets: function(move){
       var targets = [], field = move.player.get_opponent().field;
       for (var i=field.length-1; i; i--){
@@ -162,7 +173,7 @@ CardSet.Actions.add([
   {
     name: 'siege',
     retarget: function(move){
-      return get_enemies('asset')[0];
+      return target_enemies('asset')[0];
     },
     parent: 'strike'
   },
@@ -201,13 +212,10 @@ CardSet.Actions.add([
     animate: function(move, done){
       animate_spin(move, done);
     },
-    num_targets: 'ENEMY_FIELD',
-    targets: function(move){
-      return get_enemies(move, 'minion');
-    },
+    targets: 'ENEMY_FIELD',
     fn: function(move){
       self = this;
-      this.targets(move).forEach(move.melee);
+      target_enemies(move, 'agent').forEach(move.melee);
     },
     parent: 'action'
   },
@@ -217,14 +225,11 @@ CardSet.Actions.add([
     animate: function(move, done){
       animate_spin(move, done);
     },
-    num_targets: 'ENEMY_FIELD',
-    targets: function(move){
-      var t = get_enemies(move, 'card')
-      return t.slice(0,Math.min(t.length, 2));
-    },
+    targets: 'ENEMY_FIELD',
     fn: function(move){
       self = this;
-      this.targets(move).forEach(move.melee);
+      var targets = target_enemies(move, 'card').slice(0,Math.min(t.length, 2));
+      targets.forEach(move.melee);
     },
     parent: 'action'
   },
@@ -240,7 +245,7 @@ CardSet.Actions.add([
       }
       move.player.move_card(move.card, move.player.hand, move.player.field, true);
     },
-    num_targets: 'PLAYER_FIELD',   
+    targets: 'PLAYER_FIELD',   
     button: function(card){
       return card.cost + '&diams; ' + this.name;
     },
@@ -266,8 +271,7 @@ CardSet.Actions.add([
   {
     name: 'cast',
     delayed: true,
-    parent: 'use',
-    num_targets: 1
+    parent: 'use'
   },
   {
     name: 'blast',

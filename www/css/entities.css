@@ -25,7 +25,7 @@
   display: none;
   position: absolute;
   top: -8vw;
-  right: -2.5vw;
+  right: -2vw;
   left: -2vw;
   bottom: -0.5vw;
   background-color: inherit;
@@ -152,50 +152,39 @@
 .hand.zone .card:nth-child(7){transform:rotate(9deg);}
 */
 
-[ng-drop="true"].zone.drag-enter {
-  background: #fff59d;
-}
 [ng-drop="true"].field {
-  background: #c9e4ca
+  -webkit-filter: brightness(1.1);
 }
 [ng-drop="true"].enemy {
-  background: #caa9df;
+  -webkit-filter: brightness(1.1);
 }
 
 /* large drag / hover format */
 .card:hover:not(.dragging) {
   z-index: 201;
 }
-.card:hover .cost{
+.card:hover .cost, #details .card .cost{
   top: -9vw;
   left: -3vw;
 }
-.card.dragging .cost {
-  display: none;
-}
-.card:hover:not(.dragging) .icon,
-.card.dragging:not(.drag-over) .icon {
-  /*width: 5vw;
-  height: 5vw;
-  left: 0.5vw;
-  top: -4vw;*/
-}
+
 .card.dragging .inline-details,
-.card:hover:not(.dragging) .inline-details {
+.card:hover:not(.dragging) .inline-details,
+#details .card .inline-details {
   display: block;
+}
+.card.dragging card {
+  box-shadow: 0 1vw 1vw 1vw rgba(0,0,0,0.3);
 }
 
 /* when hovering over valid target: */
 [ng-drag="true"].card.drag-over:after {
-  /*-webkit-mask:  url(../svg/abstract-038.svg) center;
-  background-color: lightblue;*/
   border-radius: 50%;
   border: 0.5vw solid lightblue;
   top: -3vw; left: -3vw; bottom: -3vw; right: -3vw;
   position: absolute; content: '';
 }
 [ng-drag="true"].card.drag-over .inline-details {
-/*[ng-drag="true"].card.drag-over card {*/
   display: none;
 }
 
@@ -203,12 +192,18 @@
   cursor: pointer;
   border: 0.5vw solid #fff59d;
 }
+/* don't show overpriced items as playable, only diggable */
+.hand [ng-drag="true"].card.overpriced card, [ng-drag="true"].card.overpriced .inline-details {
+  border-color: #9df5ff;
+}
 
 [ng-drop="true"].card card {
   transform: scale(1.2);
+  -webkit-filter: brightness(1.1);
 }
 [ng-drop="true"].card.drag-enter card {
   background: #fff59d;
+  -webkit-filter: brightness(1.1);
 }
 
 
@@ -239,38 +234,13 @@
   display: none;
 }
 
-#details-mask {
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  position: absolute;
-  background-color: rgba(0,0,0,0.5);
-  z-index: 300;
-}
-#details {
-  background-color: white;
-  top: 7vw;
-  left: 21vw;
-  right: 21vw;
-  bottom: 7vw;
-  position: absolute;
-  padding: 3.50vw;
-}
-#details table {
-  background-color: #F88;
-}
-#details table td {
-  padding: 2.80vw;
-  font-size: 4.90vw;
-}
 
 
  /*card types*/
 .card.placeholder {
   opacity: 0 !important;
 }
-.card.minion card, .card.minion .inline-details{
+.card.agent card, .card.agent .inline-details{
   background: #DCECC8;
   background: url(../img/patterns/old_map.png) #C5C9E6;
   /*background: radial-gradient(ellipse at center, #fff 70%,#DCECC8 70%);*/
@@ -298,10 +268,33 @@ background-repeat:repeat-x;*/
 .card.damaged .health {
   background-color: #d11141;
 }
-.card.dead card{
+.card.dead card {
   background: #888;
   border-color: darkred;
 }
+card .spikes, card .spikes:after, card .spikes:before {
+  position: absolute;
+  width: 0; height: 0;
+  border-style: solid;
+}
+card .spikes {
+  top: -1.4vw; left: 4.6vw;
+  border-width: 0 0.5vw 1vw 0.5vw;
+  border-color: transparent transparent #666 transparent;  
+}
+card .spikes:before {
+  content: '';
+  top: 4vw; left: -6.5vw;
+  border-width: 0.5vw 1vw 0.5vw 0;
+  border-color: transparent #666 transparent transparent;  
+}
+card .spikes:after {
+  content: '';
+  border-width: 0.5vw 0 0.5vw 1vw;
+  top: 4vw; right: -6.5vw;
+  border-color: transparent transparent transparent #666;  
+}
+  
 .card .stun {
   font-size: 2vw;
   line-height: 0;
@@ -312,13 +305,11 @@ background-repeat:repeat-x;*/
   background-color: #ffc425;
   color: white;
 }
-.card.dead .stats {
-  border-color: #777;
-}
 .card.done card{
   transform: rotate(15deg);
   /*border: 0.5vw solid #888;*/
 }
+
 .card.huge .icon {
   top: -0.5vw;
   left: -0.5vw;
