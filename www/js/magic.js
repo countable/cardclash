@@ -91,13 +91,13 @@ CardSet.Cards.add([
         targets: enemy_filter('agent'),
         effect: function(move){
           move.target.hurt(1);
-        },
+        }/*,
         animate: function(move, done){
           animate_pow(move.target, {
             color: 'black',
             callback: done
           })
-        }
+        }*/
       })
     ],
     parent: 'magic',
@@ -113,13 +113,13 @@ CardSet.Cards.add([
         targets: enemy_filter('agent'),
         effect: function(move){
           move.target.hurt(3);
-        },
+        }/*,
         animate: function(move, done){
           animate_pow(move.target, {
             color: 'black',
             callback: done
           })
-        }
+        }*/
       })
     ],
     parent: 'magic',
@@ -147,6 +147,24 @@ CardSet.Cards.add([
     ],
     parent: 'magic',
     svg: 'slap',
+    rarity: 1
+  },
+
+  {
+    name: 'cobweb',
+    cost: 1,
+    hand_actions: [
+      Actions.create('cast', {
+        targets: 'ENEMY_FIELD',
+        effect: function(move){
+          target_enemies(move, 'agent').forEach(function(enemy){
+            enemy.speed -= 2;
+          });
+        }
+      })
+    ],
+    parent: 'magic',
+    svg: 'cobweb',
     rarity: 1
   },
 

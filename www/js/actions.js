@@ -257,6 +257,7 @@ CardSet.Actions.add([
   {
     name: 'use',
     fn: function(move) {
+      console.log(move);
       move.player.move_card(move.card, move.player.hand, move.player.played_cards, true);
       this.effect && this.effect(move);
     },

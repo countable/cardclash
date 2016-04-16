@@ -161,9 +161,9 @@ GAME.maps = [
           ]);
 
           GAME.enemy.deck = CardSet.Cards.from_list([
-            'mousefly', 'mousefly', 'mousefly', 'mousefly', 
-            'mousefly', 'mousefly', 'mousefly', 'mousefly', 
-            'mousefly', 'mousefly', 'mousefly', 'mousefly', 
+            'mousefly', 'scratch', 'mousefly', 'mousefly', 
+            'mousefly', 'scratch', 'wall', 'mousefly', 
+            'cobweb', 'scratch', 'cobweb', 'wall', 
             ]);
           GAME.enemy.field = [
             inherit(CardSet.Cards.get('nest'), {health: 7})
