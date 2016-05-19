@@ -1,11 +1,20 @@
 
 
+var W_U, H_U;
+
+update_viewport_dimensions = function(){
+    W_U = Math.max(document.documentElement.clientWidth, window.innerWidth || 0) / 100;
+    H_U = W_U * 9/16;
+}
+
+window.document.body.onresize = update_viewport_dimensions;
+update_viewport_dimensions();
 
 var $$ = function(s){
     return document.querySelectorAll(s);
 }
 
-var 
+var
     shoot_proxy_el = $$(".zap-proxy")[0],
     pow_proxy_el = $$(".pow-proxy")[0],
     arrow_proxy_el = $$(".arrow-proxy")[0],
@@ -14,7 +23,7 @@ var
 if (true) { // mute
     Audio = function(){
         this.play = function(){};
-    }
+    };
 }
 
 var knife_sound = (new Audio('sounds/knifeSlice.mp3')),
@@ -113,24 +122,37 @@ var animate_play= function(move, done){
     if (!move.player.client) return done();
 
     var el = $$(".hand .card")[move.player.hand.indexOf(move.card)];
+    
+    el.className = el.className.replace("done");
+
+    el.children[0].style.transform='';
+
     (move.card.is_a('wealth') ? spend_sound : deploy_sound ).play(); 
     
+    var adjust_x = (37 * W_U - el.getBoundingClientRect().left) / W_U;
+    
+
+    console.log('animate play', adjust_x, 25 * W_U , el.getBoundingClientRect().left);
+
     Velocity(el,{
-        translateY: '-30px',
-        scale: 1.2,
-        opacity: 0
+        translateY: '-35vh',
+        translateX: adjust_x + 'vh',
+        rotate: '0deg',
+        scale: 2,
+        opacity: 1
     },{
-        duraton: 200,
-        visibility: 'hidden',
+        duraton: 400,
+        //visibility: 'hidden',
         complete: function(){
             
             Velocity(el,'reverse',{
                 duration: 1,
-                visibility: 'hidden',
+                delay: 1500,
+                //visibility: 'hidden',
                 complete: function(){
-                    setTimeout(function(){
+                    /*setTimeout(function(){
                         el.style.visibility='visible'; // element may be reused by angular, so make it show again after it's done $applying
-                    }, 500);
+                    }, 500);*/
                     done()
                 }
             });

@@ -259,6 +259,10 @@ CardSet.Actions.add([
   },
   {
     name: 'use',
+    fn: function(move) {
+      move.player.move_card(move.card, move.player.hand, move.player.played_cards, true);
+      this.effect && this.effect(move);
+    },
     animate: function(move, done){
       animate_play(move, done);
     },
