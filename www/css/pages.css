@@ -1,26 +1,59 @@
 
-.introjs-helperLayer {
-  background: rgba(255,255,255,.5);
-  box-shadow: none;
-  display: none;
-  border: 0px none transparent;
+
+.content {
+  text-align: center;
+  position: absolute;
+  left: 0; top: 0; right: 0; bottom: 0;
+  background: url(../img/patterns/green_dust_scratch.png);
 }
-.introjs-helperNumberLayer {
-  left: 16px;
-  top: 16px;
-  display: none;
-}
-.introjs-overlay {
-  background: rgba(0,0,0,0.5);
+.content h1 {
+  font-size: 8vw;
+  opacity: 0.4;
 }
 
 
 
-/* levels page */
-#scenarios {
-  text-aling: center;
+/* epic page */
+.collection {
+  position: absolute;
+  top: 10vw;
+  right: 20vw;
 }
-#levels {
+.cardstock {
+  width: 10vw;
+  height: 10vw;
+  position: absolute;
+  top: 0; left: 0;
+  background: white;
+  box-shadow: 0 0 1vw rgba(0,0,0,0.25);
+}
+.cardstock:first-child {
+}
+.cardstock:nth-child(2) {
+  transform: rotate(10deg) translate(1vw,0);
+
+}
+.cardstock:nth-child(3) {
+  transform: rotate(20deg) translate(2vw, 0);
+}
+.maps {
+  position: absolute;
+  left: 0; top: 25vw;
+  right: 0; bottom: 0;
+  text-align: center;
+}
+.maps a {
+  display: inline-block;
+  width: 10vw; height: 10vw;
+  background: #ddd;
+  margin: 1vw;
+}
+
+/* rooms page */
+#room {
+  text-align: center;
+}
+#rooms {
   background-image: url(../img/cellar.svg);
   background-size: cover;
   text-align: center;
@@ -29,7 +62,7 @@
   bottom: 0; top: 0; left: 0; right: 0;
   transition: all 1s;
 }
-#levels a {
+#rooms a {
   text-align: center;
   display: inline-block;
   background-color: white;
@@ -41,16 +74,34 @@
   transition: all 1s;
   transform: rotateZ(5deg) rotateX(-20deg);
 }
-#levels a b {
+#rooms a b {
   display: block;
   font-size: 5vw;
   line-height: 4vw;
+}
+.disabled {
+  opacity: 0.5;
+}
+
+#scenarios {
+  margin: 0 20vw;
+}
+#scenarios a {
+  display: inline-block;
+  width: 28vw;
+  height: 13vw;
+  margin: 1vw;
+  background: white;
+  box-shadow: 0 0 1vw rgba(0,0,0,0.25);
+}
+#scenarios a b {
+  text-transform: uppercase;
 }
 #logo {
   height: 21vw;
   transition: all 1s;
 }
-#levels a:hover {
+#rooms a:hover {
   color: black;
   transform: rotateX(20deg) scale(1.1);
 }
@@ -94,10 +145,10 @@
 }
 /* done game menu */
 
-.preload #levels a {
+.preload #rooms a {
   transform: rotateX(70deg) rotateZ(-10deg);
 }
-.preload #levels {
+.preload #rooms {
   margin-top: 35vw;
   transform: scale(2) rotateZ(-5deg);
 }
@@ -120,7 +171,7 @@
 }
 .deck-wrap, .pool-wrap {
   position: absolute;
-  top: 4vw;
+  top: 10vw;
   bottom: 0;
   overflow: auto;
 }
@@ -132,6 +183,14 @@
   padding: 5px 10px;
   border-left: 1px solid #ddd;
   border-top: 1px solid #ddd;
+}
+#deckbuilder form {
+  text-align: center;
+  font-size: 4vw;
+  height: 10vw;
+}
+#deckbuilder form input {
+  font-size: 3vw;
 }
 
 #story {
@@ -164,9 +223,17 @@
 #story select {
   font-size: 3.50vw;
 }
-#story button {
-  font-size: 3.50vw;
+button {
+  font-size: 3.0vw;
   margin: 2.10vw 0 0 0;
   animation: wobble 2s infinite;
+  padding: 1vw 6vw;
+  font-weight: normal;
 }
 #story button:active {top: auto}; /* prevent relative button pos */
+
+
+#won .prizes {
+  margin-top: 10vw;
+  text-align: center;
+}

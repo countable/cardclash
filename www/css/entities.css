@@ -193,7 +193,7 @@
   border: 0.5vw solid #fff59d;
 }
 /* don't show overpriced items as playable, only diggable */
-.hand [ng-drag="true"].card.overpriced card, [ng-drag="true"].card.overpriced .inline-details {
+.hand [ng-drag="true"].card.overpriced card, .hand [ng-drag="true"].card.overpriced .inline-details {
   border-color: #9df5ff;
 }
 

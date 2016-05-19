@@ -7,10 +7,12 @@ function Move(o){
 Move.prototype.get_damage = function(){
   return this.action.damage || this.card.effective_damage || 0;
 }
-Move.prototype.melee = function(target){
-  target.hurt(this.get_damage(), this);
-  if (target.spikes) this.card.hurt(target.spikes);
-  if (this.card.poison) target._poison = this.card.poison;
+
+var melee = function(source, target, damage){
+  damage = damage || source.effective_damage || 0;
+  target.hurt(damage);
+  if (target.spikes) source.hurt(target.spikes);
+  if (source.poison) target._poison = source.poison;
 }
 
 var enemy_filter = function(filter){
@@ -88,7 +90,7 @@ CardSet.Actions.add([
       animate_strike(move, done);
     },
     fn: function(move){
-      move.melee(move.target)
+      melee(move.card, move.target)
     },
     parent: 'action'
   },
@@ -215,7 +217,9 @@ CardSet.Actions.add([
     targets: 'ENEMY_FIELD',
     fn: function(move){
       self = this;
-      target_enemies(move, 'agent').forEach(move.melee);
+      target_enemies(move, 'agent').forEach(function(target){
+        melee(move.card, target);
+      });
     },
     parent: 'action'
   },
@@ -229,7 +233,9 @@ CardSet.Actions.add([
     fn: function(move){
       self = this;
       var targets = target_enemies(move, 'card').slice(0,Math.min(t.length, 2));
-      targets.forEach(move.melee);
+      targets.forEach(function(target){
+        melee(move.card, target);
+      });
     },
     parent: 'action'
   },
@@ -246,9 +252,6 @@ CardSet.Actions.add([
       move.player.move_card(move.card, move.player.hand, move.player.field, true);
     },
     targets: 'PLAYER_FIELD',   
-    button: function(card){
-      return card.cost + '&diams; ' + this.name;
-    },
     animate: function(move, done){
       animate_play(move, done);
     },
@@ -256,20 +259,25 @@ CardSet.Actions.add([
   },
   {
     name: 'use',
+    animate: function(move, done){
+      animate_play(move, done);
+    },
+    parent: 'action',
+    delayed: true
+  },
+  {
+    name: 'reuse',
+    fn: function(move) {
+      this.effect && this.effect(move);
+    },
+    parent: 'use'
+  },
+  {
+    name: 'cast',
     fn: function(move) {
       move.player.move_card(move.card, move.player.hand, move.player.played_cards, true);
       this.effect && this.effect(move);
     },
-    animate: function(move, done){
-      animate_play(move, done);
-    },
-    button: function(card){
-      return card.cost + '&diams; ' + this.name;
-    },
-    parent: 'action'
-  },
-  {
-    name: 'cast',
     delayed: true,
     parent: 'use'
   },

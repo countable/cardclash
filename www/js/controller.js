@@ -33,11 +33,20 @@ GAME.app = angular.module('gameApp', ['ngRoute', 'ngDraggable']).config(
         .when('/quick/quick', {
           templateUrl: "game.html"
         })
-        .when('/:epic_id/map/:map', {
+        .when('/:epic_id/map/:map_idx', {
           templateUrl: "map.html"
         })
-        .when('/:epic_id/game/:map/:level', {
+        .when('/:epic_id/room/:map_idx/:room_idx', {
+          templateUrl: "room.html"
+        })
+        .when('/:epic_id/game/:map_idx/:room_idx/:scen_idx', {
           templateUrl: "game.html"
+        })
+        .when('/:epic_id/game/:map_idx/:room_idx/:scen_idx/won', {
+          templateUrl: "won.html"
+        })
+        .when('/:epic_id/game/:map_idx/:room_idx/:scen_idx/lost', {
+          templateUrl: "lost.html"
         })
         .when('/:epic_id/story', {
           templateUrl: "story.html"
@@ -52,22 +61,47 @@ GAME.app = angular.module('gameApp', ['ngRoute', 'ngDraggable']).config(
 ])
 .run();
 
+GAME.app.controller('wonCtrl', ['$scope','$routeParams','$timeout',
+  function($scope, $routeParams, $timeout) {
+    GAME.load_route_context($routeParams, $scope);
+    
+    var scenario = GAME.get_current_scenario();
+    
+    console.log(GAME.currently_awarded(GAME.map_idx, GAME.room_idx, GAME.scen_idx));
+    if (GAME.currently_awarded(GAME.map_idx, GAME.room_idx, GAME.scen_idx) === 1) {
+      $scope.prizes = [];
+    } else {
+      $scope.num_prizes = scenario.num_prizes;
+      $scope.prizes = CL(scenario.prizes);
+    }
+
+    $scope.pick_prize = function(index){
+      var prize = $scope.prizes.splice(index,1);
+      GAME.epic.collection.push(prize[0].name);
+      $scope.num_prizes --;
+      GAME.set_awarded(1);
+    }
+  }
+]);
+
+GAME.app.controller('lostCtrl', ['$scope','$routeParams','$timeout',
+  function($scope, $routeParams, $timeout) {
+    GAME.load_route_context($routeParams, $scope);
+  }
+]);
+
 GAME.app.controller('gameCtrl', ['$scope','$routeParams','$timeout',
   function($scope, $routeParams, $timeout) {
-    
     // get active epic.
-    $scope.epic_id = $routeParams.epic_id;
-    GAME.epic = GAME.get_epic($scope.epic_id);
-    
-    // scenario
-    GAME.scen_idx = parseInt($routeParams.level);
-    GAME.map_idx = parseInt($routeParams.map);
+    GAME.load_route_context($routeParams, $scope);
+
     GAME.start();
     GAME.player.client = true;
 
     // refs.
     $scope.GAME = GAME;
     $scope.scenario_name = GAME.get_current_scenario().name;
+    $scope.room_name = GAME.get_current_room().name;
     $scope.player = GAME.player;
     $scope.enemy = GAME.enemy;
 
@@ -91,8 +125,9 @@ GAME.app.controller('gameCtrl', ['$scope','$routeParams','$timeout',
         );
     };
     $scope.can_target = function(card){
+      console.log(card, GAME.player.resolving, card._target === true);
       return GAME.player.resolving && 
-        card._target === true && GAME.player.can_play(GAME.player.resolving.card);
+        card._target === true /*&& GAME.player.can_play(GAME.player.resolving.card)*/;
     };
 
     // Drag and Drop events.
@@ -129,6 +164,7 @@ GAME.app.controller('gameCtrl', ['$scope','$routeParams','$timeout',
             player: GAME.player,
             cost: card.field_actions[0].cost,
         });
+
         var result = GAME.player.initiate_move(move);
     };
     $scope.cancelDrag = function(){
@@ -227,27 +263,7 @@ GAME.app.controller('gameCtrl', ['$scope','$routeParams','$timeout',
       }, 500);
     };
     
-
-    
-    $scope.get_card_classes = function(card){
-      if (card._placeholder) return ['card', 'placeholder'];
-      var classes = ['card'];
-      
-      if (card._target) classes.push('target');
-      if (card._done) classes.push('done');
-      if (card.stunned) classes.push('stunned');
-      if (card.health < card.__proto__.health) classes.push('damaged');
-      if (card.health < 1 && 'number' === typeof card.health) classes.push('dead');
-      //if (card.spikes) classes.push('spikes'); // in template
-      if (card.cost > GAME.player.diams) classes.push('overpriced');
-
-      var keys = Object.keys(card.facts || {});
-      if (keys.length) classes=classes.concat(keys);
-      
-      classes.push(card.display_class);
-      
-      return classes;
-    };
+    console.log(100);
     
     /*$scope.sort_config = {
         animation: 150,
@@ -259,14 +275,17 @@ GAME.app.controller('gameCtrl', ['$scope','$routeParams','$timeout',
 
 GAME.app.controller('deckCtrl', function($scope, $timeout, $routeParams) {
 
-  $scope.epic_id = $routeParams.epic_id;
-  
-  $scope.epic = GAME.get_epic($scope.epic_id);
+  GAME.load_route_context($routeParams, $scope);
+  $scope.epic=GAME.epic;
 
   $scope.deck = $scope.epic.decks.filter(function(deck){
     return deck.id === $routeParams.deck_id;
   })[0];
-  $scope.pool = CardSet.Cards.all().filter(function(c){return c.rarity});
+  
+  $scope.picks = CardSet.Cards.from_list($scope.deck.cards);
+
+  //$scope.pool = CardSet.Cards.all().filter(function(c){return c.rarity});
+  $scope.pool = CardSet.Cards.from_list($scope.epic.collection);
 
   $scope.sort_config = { // ng-sortable
       animation: 150,
@@ -274,12 +293,14 @@ GAME.app.controller('deckCtrl', function($scope, $timeout, $routeParams) {
   };
 
   $scope.add = function(index){
-    $scope.deck.cards.push($scope.pool[index]);
+    $scope.picks.push($scope.pool[index]);
+    $scope.deck.cards = $scope.picks.map(function(c){return c.name});
     GAME.save_epic($scope.epic);
   };
 
   $scope.remove = function(index){
-    $scope.deck.cards.splice(index,1);
+    $scope.picks.splice(index,1);
+    $scope.deck.cards = $scope.picks.map(function(c){return c.name});
     GAME.save_epic($scope.epic);
   };
 
@@ -292,10 +313,38 @@ GAME.app.controller('deckCtrl', function($scope, $timeout, $routeParams) {
 
 
 GAME.app.controller('mapCtrl', function($scope, $timeout, $routeParams) {
-  $scope.epic_id = $routeParams['epic_id']
-  $scope.map = GAME.maps[$routeParams.map];
-  $scope.map_idx = $routeParams.map;
-  $scope.scenarios = GAME.maps[$routeParams.map].scenarios;
+  GAME.load_route_context($routeParams, $scope);
+  $scope.map = GAME.maps[$routeParams.map_idx];
+  $scope.room_available = function(room_idx){
+    if (room_idx === 0) {
+      return true;
+    } else {
+      return GAME.currently_awarded($routeParams.map_idx, $scope.room_idx-1, 3);
+    }
+  };
+  $scope.goto_room = function(room_idx){
+    if ($scope.room_available(room_idx)) {
+       window.location.hash = '/' + GAME.epic_id + '/room/' + GAME.map_idx + '/' + room_idx;
+    }
+  };
+}).config(disableSCE);
+
+
+GAME.app.controller('roomCtrl', function($scope, $timeout, $routeParams) {
+  GAME.load_route_context($routeParams, $scope);
+  $scope.room = GAME.maps[$routeParams.map_idx].rooms[$scope.room_idx];
+  $scope.scen_available = function(scen_idx){
+    if (scen_idx === 0) {
+      return true;
+    } else {
+      return GAME.currently_awarded($routeParams.map_idx, $scope.room_idx, scen_idx-1);
+    }
+  };
+  $scope.goto_scen = function(scen_idx){
+    if ($scope.scen_available(scen_idx)) {
+       window.location.hash = '/' + GAME.epic_id + '/game/' + GAME.map_idx + '/' + GAME.room_idx + '/' + scen_idx;
+    }
+  };
 }).config(disableSCE);
 
 
@@ -303,26 +352,32 @@ var adjectives = ['spiny','elusive','dark','vile','flappy','angry','beastly','st
 var nouns = ['equine','singer','thrummer','blaster','smash','wheel','plume','aura','fall'];
 
 GAME.app.controller('decksCtrl', function($scope, $timeout, $routeParams) {
-  $scope.epic_id = $routeParams.epic_id;
-  $scope.decks = GAME.get_epic($scope.epic_id).decks || [];
+  GAME.load_route_context($routeParams, $scope);
+  $scope.epic = GAME.epic;
+  $scope.decks = $scope.epic.decks || [];
+  $scope.delete_deck = function(index){
+    $scope.epic.decks.splice(index,1);
+    GAME.save_epic($scope.epic);
+  }
+  $scope.default_deck = function(id){
+    $scope.epic.default_deck_id = id;
+    GAME.save_epic($scope.epic);
+  }
   $scope.new_deck = function(){
     var deck = {
       cards: [],
       id: generateUUID(),
       name: adjectives[Math.floor(Math.random()*adjectives.length)]+nouns[Math.floor(Math.random()*nouns.length)]
     };
-    var epic = GAME.get_epic($routeParams.epic_id);
-    epic.decks = epic.decks || [];
-    epic.decks.push(deck);
-    GAME.save_epic(epic);
+    $scope.epic.decks = $scope.epic.decks || [];
+    $scope.epic.decks.push(deck);
+    GAME.save_epic($scope.epic);
     window.location.hash = '/'+$scope.epic_id+'/deck/'+deck.id
   };
 }).config(disableSCE);
 
 
 GAME.app.controller('menuCtrl', function($scope, $timeout, $routeParams) {
-
-  $scope.maps = GAME.maps;
 
   var get_epics = function(){
     var epics = {};
@@ -341,6 +396,16 @@ GAME.app.controller('menuCtrl', function($scope, $timeout, $routeParams) {
       window.location.hash = "/"+idx+"/story"
     } else {
       window.location.hash = "/"+idx
+    }
+  }
+
+  $scope.delete_epic = function(idx){
+    if ($scope.confirm === idx) {
+      delete localStorage['epic_'+idx];
+      $scope.epics = get_epics();
+      $scope.confirm = null;
+    } else {
+      $scope.confirm = idx;
     }
   }
 

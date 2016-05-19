@@ -3,10 +3,7 @@
 
 <head>
 
-  <link rel="stylesheet" type="text/css" href="vendor/introjs.css">
   <link rel="stylesheet" type="text/css" href="fonts/rpg-font/style.css">
-  <!--<link rel="stylesheet" href="css/font-awesome.min.css">-->
-  <!--<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">-->
   <link rel="stylesheet" type="text/css" href="css/libs.css">
   <link rel="stylesheet" type="text/css" href="css/layout.css">
   <link rel="stylesheet" type="text/css" href="css/entities.css">
@@ -29,8 +26,8 @@
 <script type="text/ng-template" id="deck.html">
 
 <div ng-controller="deckCtrl" id='deckbuilder'>
-  <a href='#/{{ epic_id }}/deck' id="exit">X</a>
-  <form style='text-align:center'>
+  <a href='#/{{ epic_id }}/deck' class='exit'>&lsaquo;</a>
+  <form>
     Deck Name: <input ng-change="save()" ng-model="deck.name" class='deck-name'>
   </form>
   <div class="pool-wrap">
@@ -43,7 +40,6 @@
         <th>health</th>
       </tr>
       <tr ng-repeat="card in pool track by $index">
-        <td ng-bind-html="card.pic" class='icon'></td>
         <td>{{ card.name }}</td>
         <td>&diams; {{ card.cost }}</td>
         <td><i class="fa fa-bolt"></i> {{ card.speed }}</td>
@@ -61,8 +57,7 @@
         <th>speed</th>
         <th>health</th>
       </tr>
-      <tr ng-repeat="card in deck.cards track by $index">
-        <td ng-bind-html="card.pic" class='icon'></td>
+      <tr ng-repeat="card in picks track by $index">
         <td>{{ card.name }}</td>
         <td>&diams; {{ card.cost }}</td>
         <td><i class="fa fa-bolt"></i> {{ card.speed }}</td>
@@ -75,54 +70,112 @@
 </script>
 
 <script type="text/ng-template" id="decks.html">
-<a href='#{{ epic_id }}/' id="exit">X</a>
-<div ng-controller="decksCtrl" id="decks">
-  <p class='paper-stack'>
+<div ng-controller="decksCtrl" id="decks" class='content'>
+  <a href='#/{{ epic_id }}' class='exit'>&lsaquo;</a>
+  <h1>Decks</h1>
+  <p>
     <button ng-click="new_deck()">New Deck</button>
   </p>
-  <div id="decks" class='paper-stack'>
+  <div id="decks">
     <p ng-repeat="deck in decks track by $index">
-      <a href="#/{{ epic_id }}/deck/{{ deck.id }}">{{ deck.name }}</a>
+      <a href="#/{{ epic_id }}/deck/{{ deck.id }}"><button>{{ deck.name }}</button></a> 
+      <a ng-click='delete_deck($index)'><button>X</button></a>
+      <a ng-click='default_deck(deck.id)' ng-if="deck.id != epic.default_deck_id"><button>use</button></a>
+      <a ng-if="deck.id == epic.default_deck_id" style="font-size:4vw;padding:2vw">&check;</a>
     </p>
   </div>
+  <p ng-if="!decks.length"><br>
+    You have not created any decks. Until you do, your entire collection of cards will be used.
+  </p>
+</div>
+</script>
+
+<script type="text/ng-template" id="won.html">
+<div ng-controller="wonCtrl" id="won">
+  <h1>
+    You Won!
+  </h1>
+
+  <div class="prizes" ng-if='prizes.length'>
+    <p>
+  Pick {{ num_prizes }} prizes:
+    </p>
+    <div ng-repeat="card in prizes track by $index" ng-class="card.get_classes()">
+      <card ng-click='pick_prize($index)' card=card zone='prizes'></card>
+    </div>
+  </div>
+  <p>
+    <a href='#/{{ epic_id }}/map/{{ map_idx }}'>
+      <button>OK</button>
+    </a>
+  </p>
+</div>
+</script>
+
+<script type="text/ng-template" id="lost.html">
+<div ng-controller="lostCtrl" id="lost">
+  <h1>
+    You Lost!
+  </h1>
+  <a href='#/{{ epic_id }}/map/{{ map_idx}}'>
+    <button>OK</button>
+  </a>
 </div>
 </script>
 
 <script type="text/ng-template" id="map.html">
-<a href='#/{{ epic_id }}/map/{{ map_idx }}' id="exit">X</a>
-<div ng-controller="mapCtrl" id="scenarios">
-  <div id="levels">
-    <a ng-repeat="scenario in scenarios track by $index" class="page" href="#/{{ epic_id }}/game/{{ map_idx }}/{{ $index }}">
-      <b>{{ scenario.order }}</b>
-      <span>{{ scenario.name.replace('_'," ") }}</span>
+<div ng-controller="mapCtrl">
+  <a href='#/{{ epic_id }}' class='exit'>&lsaquo;</a>
+  <div id="rooms">
+    <a ng-repeat="room in map.rooms track by $index" ng-click="goto_room($index)" ng-class="{disabled:!room_available($index)}">
+      <b>{{ room.order }}</b>
+      <span>{{ room.name.replace('_'," ") }}</span>
     </a>
   </div>
 </div>
 </script>
 
-<script type="text/ng-template" id="menu.html">
-<div ng-controller='menuCtrl'>
-  <div class='paper-stack'>
-    <p ng-repeat="idx in [1,2,3]">
-      <button ng-click="load_epic(idx)">
-        <a>Game {{ idx }}</a>
-        <span ng-if="!epics[idx]">(new)</span>
-      </button>
-    </p>
+
+<script type="text/ng-template" id="room.html">
+<div ng-controller="roomCtrl" class="content">
+  <a href='#/{{ epic_id }}/map/{{ map_idx }}' class='exit'>&lsaquo;</a>
+  <h1>{{ room.name }}</h1>
+  <div id="scenarios">
+    <a ng-repeat="scenario in room.scenarios track by $index" ng-click="goto_scen($index)" ng-class="{disabled:!scen_available($index)}">
+      <b>{{ scenario.name.replace('_'," ") }}</b>
+      <p>{{ scenario.description }}</p>
+    </a>
   </div>
 </div>
 </script>
 
+
+<script type="text/ng-template" id="menu.html">
+<div ng-controller='menuCtrl' class='content'>
+  <h1>CHOOSE HOUSE</h1>
+  <p ng-repeat="idx in [1,2,3]">
+    <button ng-click="load_epic(idx)">
+      <span ng-if="epics[idx]">House {{ idx }}</span>
+      <span ng-if="!epics[idx]">House {{ idx }} [new]</span>
+    </button>
+    <button ng-if="epics[idx]" ng-click="delete_epic(idx)">
+      <span ng-if="confirm === idx">Confirm Delete</span>
+      <span ng-if="!(confirm === idx)">X</span>
+    </button>
+  </p>
+</div>
+</script>
+
 <script type="text/ng-template" id="epic.html">
-<a href='#/' id="exit">X</a>
+<a href='#/' class='exit'>&lsaquo;</a>
 <div ng-controller='epicCtrl'>
-  <div class='paper-stack'>
-    <p><button><a href="#/{{ epic_id }}/deck">decks</a></button></p>
-  </div>
-  <div class='paper-stack'>
-    <p ng-repeat="map in maps track by $index">
-      <button><a href="#/{{ epic_id}}/map/{{ $index }}">{{ map.name }}</a></button>
-    </p>
+  <a class='collection' href="#/{{ epic_id }}/deck">
+    <div class="cardstock"></div>
+    <div class="cardstock"></div>
+    <div class="cardstock">decks</div>
+  </a>
+  <div class='maps'>
+    <a href="#/{{ epic_id}}/map/{{ $index }}" ng-repeat="map in maps track by $index">{{ map.name }}</a>
   </div>
 </div>
 </script>
@@ -155,9 +208,8 @@
 
 
 <script type="text/ng-template" id="card.html">
-
+  
   <div class="spikes" ng-if="card.spikes"></div>
-
   <div class="inline-details">
     <div class="title">{{ card.name.capitalizeFirstLetter() }}</div>
     <div class="description" ng-bind-html="card.get_description()"></div>
@@ -180,7 +232,7 @@
   </div>
 
   <div class="health pin" ng-if="card.health !== undefined">{{ card.health }}</div>
-  <div class="speed pin" ng-if="card.speed">{{ card.effective_speed }}</div>
+  <div class="speed pin" ng-if="card.effective_speed">{{ card.effective_speed }}</div>
   <div class="damage pin" ng-if="card.damage">{{ card.damage }}</div>
 
 </script>
@@ -190,20 +242,20 @@
 <div ng-controller="gameCtrl">
   <div id="wrapper" ng-class="{playing: playing}" ng-cloak>
     
-    <a href='#/{{ epic_id }}/map/{{ GAME.map_idx }}' id="exit">
-      X
+    <a href='#/{{ epic_id }}/room/{{ GAME.map_idx }}/{{ GAME.room_idx }}' class='exit'>
+      &lsaquo;
     </a>
 
     <div id="turn" ng-click="turn()">
       GO
     </div>
 
-    <div id="scenario_name">{{ scenario_name }}</div>
+    <div id="scenario_name">{{ room_name }} - {{ scenario_name }}</div>
     
     <div id="details-mask" ng-if="details" ng-click="close_details()">
       <div id="details">
           
-        <div ng-repeat="card in [details] track by $index" ng-class="get_card_classes(card)">
+        <div ng-repeat="card in [details] track by $index" ng-class="card.get_classes">
           <card card=card zone='details'></card>
         </div>
 
@@ -233,9 +285,6 @@
         {{ player.discard.length }}
       </div>-->
       <div id="diams"
-        data-intro="This denotes your current reserve of diamonds, which serve as money in this game."
-        data-step=5
-        data-position=left 
         ng-drop="{{ player.can_dig() }}"
         ng-drop-success="onDropDig()">
       </div>
@@ -252,7 +301,7 @@
       ng-drop="{{ is_targeting_enemy_field() }}"
       ng-drop-success="onDropEnemyField()"
       >
-        <div ng-repeat="card in enemy.field.slice().reverse() track by $index" ng-class="get_card_classes(card)"
+        <div ng-repeat="card in enemy.field.slice().reverse() track by $index" ng-class="card.get_classes()"
         ng-drop-success="pick(card)"
         ng-drop="{{ can_target(card) }}"
         >
@@ -260,13 +309,12 @@
         </div>
       </div>
 
-      <!--<ul class="field zone sortable" ng-sortable="sort_config" data-intro="This is your army. Issue orders to your troops by clicking the black <button>buttons</button>, after this tour." data-step=1>-->
       <div class="field zone"
         ng-drop="{{ is_targeting_player_field() }}"
         ng-drop-success="onDropField()"
         >
         <div ng-repeat="card in player.field"
-          ng-class="get_card_classes(card)"
+          ng-class="card.get_classes()"
           ng-drop-success="pick(card)"
           ng-drop="{{ card._target === true }}"
           ng-drag="{{ player.can_act(card) }}"
@@ -285,8 +333,8 @@
       </div>
       
       <div class="hand zone">
-        <div ng-repeat="card in player.hand"
-          ng-class="get_card_classes(card)"
+        <div ng-repeat="card in player.hand track by $index"
+          ng-class="card.get_classes()"
           ng-drag="{{ player.can_play_or_dig(card) }}"
           ng-drag-start="playStart(card)"
           ng-drag-stop="cancelDrag()"
@@ -310,9 +358,9 @@
 <div class='shoot-proxy'></div>
 <div class='pow-proxy'></div>
 <div class='zap-proxy'></div>
+<div class='arrow-proxy'></div>
 
 <script src="js/mobile.js"></script>
-<script src="vendor/intro.js"></script>
 <script src="vendor/angular.min.js"></script>
 <script src="vendor/ng-route.js"></script>
 <script src="vendor/ramda.min.js"></script>
@@ -328,7 +376,7 @@
 <script src="js/gfx.js"></script>
 <script src="js/entities.js"></script>
 <script src="js/actions.js"></script>
-<script src="js/minions.js"></script>
+<script src="js/agents.js"></script>
 <script src="js/resources.js"></script>
 <script src="js/magic.js"></script>
 <script src="js/controller.js"></script>

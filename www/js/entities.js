@@ -87,9 +87,27 @@ var Cards = new EntityTree({
     
   {
     name: 'card',
-    valid_target: function(){
 
+    get_classes: function(){
+      var card = this;
+      if (card._placeholder) return ['card', 'placeholder'];
+      var classes = ['card'];
+      
+      if (card._target) classes.push('target');
+      if (card._done) classes.push('done');
+      if (card.stunned) classes.push('stunned');
+      if (card.health < card.__proto__.health) classes.push('damaged');
+      if (card.health < 1 && 'number' === typeof card.health) classes.push('dead');
+      //if (card.spikes) classes.push('spikes'); // in template
+      if (GAME.player && card.cost > GAME.player.diams) classes.push('overpriced');
+
+      var keys = Object.keys(card.facts || {});
+      if (keys.length) classes=classes.concat(keys);
+      
+      classes.push(card.display_class);
+      return classes;
     },
+
     get_description: function() {
       var card=this;
       return (this.field_actions || []).map(function(action){

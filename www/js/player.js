@@ -23,9 +23,9 @@ var Player =
         this.pending_moves = [];
         this.discard = [];
 
-        this.diams = 5;
-        this.income = 1;
-        this.storage = 7;
+        this.diams = 0;
+        this.income = 0;
+        this.storage = 2;
 
     },
     
@@ -47,32 +47,24 @@ var Player =
     {
         var new_cards;
         if (this.hand.length + n > 7) { n = 7 - this.hand.length }
-        if (this.is_client)
+        if (this.deck.length === 0 && this.discard.length === 0)
         {
-            // wait for the server to simulate this.
-            //socket.emit('draw', n);
-            this.waiting = true;
+            new_cards = []; // no cards left to draw.
+        }
+        else if (this.deck.length < n) // need to reshuffle
+        {
+            new_cards = this.deck; this.deck = [];
+            // don't resuffle the discard
+            /*this.deck = CardSet.shuffle(this.discard);
+            this.discard = [];
+            this.draw(n - new_cards.length);*/
+
         }
         else
         {
-            if (this.deck.length === 0 && this.discard.length === 0)
-            {
-                new_cards = []; // no cards left to draw.
-            }
-            else if (this.deck.length < n) // need to reshuffle
-            {
-                new_cards = this.deck;
-                this.deck = CardSet.shuffle(this.discard);
-                this.discard = [];
-                this.draw(n - new_cards.length);
-            }
-            else
-            {
-                new_cards = this.deck.splice(0,n);
-            }
-            this.hand = this.hand.concat(new_cards);
-            //this.socket.emit('drawCards', new_cards);
+            new_cards = this.deck.splice(0,n);
         }
+        this.hand = this.hand.concat(new_cards);
     },
     
     move_pile: function(from, to)
@@ -117,7 +109,7 @@ var Player =
         var card;
         if (placeholder){
             card = source.slice(index, index + 1)[0];
-            source[index] = {_placeholder: true};
+            source[index] = {_placeholder: true, get_classes: function(){return ['card','placeholder']}};
         } else {
             card = source.splice(index, 1)[0];
         }
@@ -187,9 +179,13 @@ var Player =
     readyForCombat: function(){
         this.setPhase('COMBAT');
     },
-
+    
+    get_keep: function(index){
+      return this.field.filter(function(item){return item.is_a('keep')})[0];
+    },
+    
     dig: function(index){
-      var keep = this.field.filter(function(item){return item.is_a('keep')})[0];
+      var keep = this.get_keep();
       if (this.client) {
           animate_message(keep, {
             text: '+1 income',
@@ -208,22 +204,13 @@ var Player =
         if (move.action.single_target()) {
             
             var targets =  move.action.targets(move);
-            if (this.client) {
+            console.log('targets', targets);
                 
-                targets.forEach(function(card){
-                    card._target = true;
-                });
-            
-            }
-            if (targets.length){
-                this.resolving = move;
-            } else if (this.client) {
-                return {
-                    success: false,
-                    message: 'no targets'
-                }
-            }
+            targets.forEach(function(card){
+                card._target = true;
+            });
 
+            this.resolving=move;
             
         } else { // otherwise just complete the move.
             this.resolving = move;

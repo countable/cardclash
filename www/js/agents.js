@@ -4,9 +4,9 @@ CardSet.Cards.add([
   {
     name: 'fieldable',
     parent: 'card',
-    hurt: function(damage, move) {
+    hurt: function(damage) {
       if (this.armor) {
-        damage = Math.min(0, damage=this.armor);
+        damage = Math.max(0, damage-this.armor);
       }
       this.health = this.health - damage;
     },
@@ -379,15 +379,33 @@ CardSet.Cards.add([
     svg: 'brick-wall',
     rarity: 1
   },
+  
+  {
+    name: 'table',
+    health: 1,
+    cost: 3,
+    parent: 'agent',
+    svg: 'table',
+    rarity: 1
+  },
 
   {
     name: 'zap_trap',
     health: 1,
     cost: 3,
-    spikes: 2,
-    damage: 2,
+    spikes: 4,
     parent: 'agent',
     svg:  'lightning-arc',
+    rarity: 1
+  },
+
+  {
+    name: 'bear_trap',
+    health: 1,
+    cost: 3,
+    spikes: 2,
+    parent: 'agent',
+    svg:  'wolf-trap',
     rarity: 1
   }
 ]);
