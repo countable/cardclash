@@ -17,6 +17,14 @@ CardSet.Cards.add([
     svg: 'gems',
     rarity: 2
   },
+  
+  {
+    name: 'cheese',
+    cost: 1,
+    health: 1,
+    svg: 'cheese-wedge',
+    parent: 'agent'
+  },
 
   {
     name: 'ore',
@@ -41,7 +49,7 @@ CardSet.Cards.add([
     health: 5,
     parent: 'asset',
     hurt: function(damage, move){
-      CardSet.Cards.get('fieldable').hurt.call(this, damage, move);
+      CardSet.Cards.get('fieldable').hurt.call(this, damage);
       
       //move.card.health = 0
       if (this.health < 1) GAME.lost();
@@ -53,10 +61,10 @@ CardSet.Cards.add([
     name: 'nest',
     health: 5,
     parent: 'asset',
-    hurt: function(damage, move){
-      CardSet.Cards.get('fieldable').hurt.call(this, damage, move);
+    hurt: function(damage){
+      CardSet.Cards.get('fieldable').hurt.call(this, damage);
       
-      move.card.health = 0;
+      //move.card.health = 0;
       if (this.health < 1) GAME.won();
     },
     svg: 'bridge'

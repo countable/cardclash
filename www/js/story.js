@@ -36,15 +36,10 @@ STORY = {
             text: "the sports award"
           },
           {
-            value: "geek",
-            text: "academic honour award"
-          },
-          {
-            value: "prep",
+            value: "nerd",
             text: "valedictorian"
           },
           {
-
             value: "loser",
             text: "most improved"
           }
@@ -52,7 +47,7 @@ STORY = {
       },
 
       {
-        text: 'You drag yourself to hasty meal of nut butter on bread, and rush out the hatch of your home. Upon leaving your house, you (pick one)',
+        text: 'You drag yourself to hasty meal of nut butter on bread, and rush out the hatch of your home. Upon leaving, you (pick one)',
         input: 'death',
         options: [
           {
@@ -79,8 +74,8 @@ STORY = {
       },
 
       {
-        text: 'Your eyes slowly slide open, and find yourself lying on a morgue slab.'
-      },
+        text: 'Your eyes slowly slide open, and find yourself lying at the bottom of a spiral staircase. A door blocks your way.'
+      }/*,
 
       {
         text: '"Where am I?" you wonder aloud.'
@@ -92,7 +87,7 @@ STORY = {
 
       {
         text: 'Brightly coloured objects flood your vision as familiar feelings course through you. The new powers might give you a chance against the rats!'
-      }
+      }*/
 
     ]
   },
@@ -143,7 +138,7 @@ GAME.app.controller('storyCtrl', function($scope, $timeout, $routeParams) {
 
     $scope.place = -1;
 
-    $scope.collection = ['low_kick', 'low_kick', 'slap', 'slap', 'scratch', 'scratch'];
+    $scope.collection = ['fist'];
 
     $timeout(function(){
       $scope.place++;
@@ -153,17 +148,23 @@ GAME.app.controller('storyCtrl', function($scope, $timeout, $routeParams) {
 
     $scope.next=function(){
       $scope.place++;
-      if ($scope.place == 10) {
+      if ($scope.place == 7) {
+
+        /*
         $scope.collection = $scope.collection.concat(initial_cards[$scope.award]);
         $scope.collection = $scope.collection.concat(initial_cards[$scope.job]);
         $scope.collection = $scope.collection.concat(initial_cards[$scope.death]);
+        */
 
         GAME.save_epic({
           id: $routeParams.epic_id,
-          collection: $scope.collection
+          collection: $scope.collection,
+          job: $scope.job,
+          award: $scope.award,
+          death: $scope.death
         });
 
-        window.location.hash = "/" + $routeParams.epic_id + "/game/0/0";
+        window.location.hash = "/" + $routeParams.epic_id + "/game/0/0/0";
       }
     }
     $scope.choose=function(key, value){

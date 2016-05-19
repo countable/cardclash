@@ -1,5 +1,27 @@
 
 var GAME = {
+  
+  set_awarded: function(value) {
+    var award_status_key = '' + this.map_idx + '-' + this.room_idx + '-' + this.scen_idx;
+    this.epic.awarded[award_status_key] = 1;
+    this.save_epic(this.epic);
+  },
+
+  currently_awarded: function(map_idx, room_idx, scen_idx) {
+    var award_status_key = '' + map_idx + '-' + room_idx + '-' + scen_idx;
+    this.epic.awarded = this.epic.awarded || {};
+    return this.epic.awarded[award_status_key];
+  },
+
+  load_route_context: function($routeParams, $scope){
+    ['scen_idx', 'room_idx', 'map_idx', 'epic_id'].forEach(function(key){
+      if ($routeParams[key]){
+        $scope[key] = parseInt($routeParams[key]);
+        GAME[key] = parseInt($routeParams[key]);
+      }
+    })
+    GAME.epic = GAME.get_epic($scope.epic_id);
+  },
 
   emit_move: function(move){
 
@@ -45,15 +67,17 @@ var GAME = {
     };
 
     // oldschool loops for perf.
-    var fields = GAME.get_fields();
-    for (i=0;i<fields.length;i++) {
-      if (fields[i].global_effects) {
-        from_card = fields[i];
-        for(j=0;j<from_card.global_effects.length;j++){
-          effect = from_card.global_effects[j];
-          if (check(from_card, effect)){
-            total += effect[attr] ? effect[attr] : effect['get_'+attr](card)
-          } 
+    if (GAME.enemy) {// short circuit on non-game pages.
+      var fields = GAME.get_fields();
+      for (i=0;i<fields.length;i++) {
+        if (fields[i].global_effects) {
+          from_card = fields[i];
+          for(j=0;j<from_card.global_effects.length;j++){
+            effect = from_card.global_effects[j];
+            if (check(from_card, effect)){
+              total += effect[attr] ? effect[attr] : effect['get_'+attr](card)
+            } 
+          }
         }
       }
     }
@@ -82,22 +106,32 @@ var GAME = {
   get_default_deck: function(epic) {
     var deck_list;
     if (epic.decks) {
-      deck_list = epic.decks[epic.default_deck_id || object.keys(epic.decks)[0]];
+      deck = epic.decks.filter(function(deck){
+        return deck.id === epic.default_deck_id;
+      })[0];
+      if (!deck) {
+        deck= epic.decks[0];
+      }
     } else { // no decks, use entire collection.
-      deck_list = epic.collection;
+      deck = {
+        cards: epic.collection
+      };
     }
-    return CardSet.Cards.from_list(deck_list);
+    return CardSet.Cards.from_list(deck.cards);
   },
   
   get_current_scenario: function() {
-    return this.maps[this.map_idx].scenarios[this.scen_idx];
+    return this.maps[this.map_idx].rooms[this.room_idx].scenarios[this.scen_idx];
+  },
+
+  get_current_room: function() {
+    return this.maps[this.map_idx].rooms[this.room_idx];
   },
 
   start: function() {
     this.player = inherit(Player);
     this.enemy = inherit(Player);
     this.players = [this.player, this.enemy];
-    this.player.deck = this.get_default_deck(this.epic);
     this.get_current_scenario().start();
   }
 
@@ -108,25 +142,64 @@ String.prototype.capitalizeFirstLetter = function() {
   return this.charAt(0).toUpperCase() + this.slice(1);
 }
 
-var Scenario = {
-  start: function(){
-    this.setup();
-    // initial deploys status.
+var C = function(c, o){
+  o = o || {};
+  return inherit(CardSet.Cards.get(c), o);
+}
+var CL = function(l){
+  return CardSet.Cards.from_list(l);
+}
 
+var Scenario = {
+  
+  // defaults
+  num_prizes: 0,
+  prizes: [],
+
+  setup_player_field: function(){
+    GAME.player.field = CL(['keep']);
+  },
+  
+  setup_enemy_field: function(){
+    GAME.enemy.field = [
+      C('nest', {health: 7})
+    ];
+  },
+  
+  setup_card_state: function(){
+    // initial deploys status.
     GAME.get_fields().forEach(function(c){
       c.stunned=c.delay;
     });
+
     GAME.player.field.concat(GAME.player.deck).forEach(function(c){
       c.owned_by = GAME.player;
     });
     GAME.enemy.field.concat(GAME.enemy.deck).forEach(function(c){
       c.owned_by = GAME.enemy;
     });
+  },
+  
+  shuffle_decks: function(){
     // shuffle deck
     GAME.player.deck = CardSet.shuffle(GAME.player.deck);
     GAME.enemy.deck = CardSet.shuffle(GAME.enemy.deck);
-    
-    this.reg_events();
+  },
+  
+  draw_hands: function(){
+    GAME.player.draw(6);
+    GAME.enemy.draw(6);
+  },
+
+  get_player_deck: function(){
+    GAME.player.deck = GAME.get_default_deck(GAME.epic);
+  },
+
+  get_enemy_deck: function(){
+    GAME.enemy.deck = CL(this.enemy_deck || []);
+  },
+
+  start: function(){
 
     GAME.scenario = this;
     GAME.turn_idx = 0;
@@ -142,12 +215,22 @@ var Scenario = {
   draw_enemy_hand: function(){
     GAME.enemy.draw(this.hand_size || 6);
   },
+  
+  start: function(){
+    this.get_enemy_deck();
+    this.get_player_deck();
 
-  reg_events: function(){
-    GAME.player.deck.forEach(function(card){
-      // TODO:...
-    });
+    this.setup_player_field();
+    this.setup_enemy_field();
+
+    this.setup_card_state();
+
+    this.shuffle_decks();
+    this.draw_hands();
+
+    this.postsetup && this.postsetup()
   }
+
 };
 
 var add_enemy = function(card_name){
@@ -155,229 +238,21 @@ var add_enemy = function(card_name){
   c.owned_by = GAME.enemy;
   GAME.enemy.field.push(c);
 }
-GAME.maps = [
-  {
-    name: "cellar",
-    scenarios: [
-      inherit(Scenario, {
-        order: 1,
-        name: 'stairwell',
-        setup: function(){
 
-          GAME.player.field = CardSet.Cards.from_list([
-            'keep' , 'shiba_pup'
-          ]);
-
-          GAME.enemy.deck = CardSet.Cards.from_list([
-            'mousefly', 'scratch', 'mousefly', 'mousefly', 
-            'mousefly', 'scratch', 'wall', 'mousefly', 
-            'cobweb', 'scratch', 'cobweb', 'wall', 
-            ]);
-          GAME.enemy.field = [
-            inherit(CardSet.Cards.get('nest'), {health: 7})
-          ]; //.concat(CardSet.Cards.from_list(['mousefly']));
-        },
-
-        draw_enemy_hand: function(){
-          GAME.enemy.hand = CardSet.Cards.from_list([
-            'scratch'
-            ])
-        },
-
-        draw_player_hand: function(){
-          GAME.player.hand = CardSet.Cards.from_list([
-            'scratch'
-            ])
-        }
-      }),
-      inherit(Scenario, {
-        order: 2,
-        name: 'mousefly_swarm',
-        setup: function(){
-        },
-        enemy_turn: function(){
-
-        }
-      }),
-      inherit(Scenario, {
-        order: 3,
-        name: 'mousefly_queen',
-        setup: function(){
-        },
-        enemy_turn: function(){
-
-        }
-      }),
-      inherit(Scenario, {
-        order: 5,
-        name: 'kilapede',
-        setup: function(){
-        },
-        enemy_turn: function(){
-
-        }
-      }),
-      inherit(Scenario, {
-        order: 5,
-        name: 'squallway',
-        setup: function(){
-        },
-        enemy_turn: function(){
-
-        }
-      }),
-      inherit(Scenario, {
-        order: 4,
-        name: 'impedence',
-        setup: function(){
-        },
-        enemy_turn: function(){
-
-        }
-      })
-    ]
-  },
-  {
-    name: 'surface',
-    scenarios: [
-
-    ]
-  },
-  {
-    name: 'by_the_sea',
-    scenarios: [
-
-    ]
-  },
-  {
-    name: "tests",
-    scenarios:[
-
-      inherit(Scenario, {
-        name: 'Stairwell',
-        setup: function(){
-          GAME.player.deck = CardSet.Cards.from_list(Object.keys(CardSet.Cards.by_name)).filter(function(c){
-            return c.rarity;
-          }).slice(30,41) // all cards that aren't abstract
-          GAME.enemy.deck = CardSet.Cards.from_list(['bandit', 'bandit', 'bandit', 'bandit', 'bandit', 'bandit', 'bandit', 'bandit', 'bandit', 'bandit', 'bandit', 'bandit'
-            , 'bandit', 'bandit'])
-          GAME.player.field = CardSet.Cards.from_list([
-            'keep', 'alpha_wolf', 'archer'
-          ]);
-          GAME.enemy.field = [
-            inherit(CardSet.Cards.get('nest'), {health: 7})
-          ].concat(CardSet.Cards.from_list(['zap_trap', 'bandit']));
-        },
-        enemy_turn: function(){
-          if (GAME.enemy.field.length < 4) {
-              //if (Math.random() < 0.01) add_enemy('serpent')
-              //else if (Math.random() < 0.9) add_enemy('bandit');
-              //GAME.enemy.field.splice(GAME.enemy.field.length-1, 0, CardSet.Cards.create('serpent'));
-          }
-        }
-      }),
-
-      inherit(Scenario, {
-        name: 'Welcome',
-        hand_size: 3,
-        setup: function(){
-          GAME.player.deck = GAME.player.deck.concat(CardSet.Cards.from_list(['goose', 'goose', 'goose', 'goose']));
-          GAME.player.deck = CardSet.Cards.from_list([
-            'haste','archer',
-            'archer','archer','archer','archer','archer'
-          ]);
-          GAME.player.field = CardSet.Cards.from_list(['keep', 'goose']);
-          GAME.player.store = [];
-          GAME.enemy.field = CardSet.Cards.from_list(['nest', 'mousefly','mousefly']);
-        }
-      }),
-      
-      inherit(Scenario, {
-        name: 'Oger',
-        setup: function(){   
-          GAME.player.deck = CardSet.Cards.from_list([
-            'archer','archer',
-            'archer','archer','archer','archer',
-            'archer','archer','archer','archer','archer'
-          ]);
-          GAME.player.field = CardSet.Cards.from_list(['keep']);
-          GAME.enemy.field = CardSet.Cards.from_list(['nest']);
-        },
-        enemy_turn: function(){
-          add_enemy('ogre');
-        }
-      }),
-
-      
-      inherit(Scenario, {
-        name: 'Magic',
-        setup: function(){   
-          GAME.player.deck = CardSet.Cards.from_list([
-            'militia','militia',
-            'gem','gem','gem','gem',
-            'gem','gem','gem','gem'
-          ]);
-          GAME.player.field = CardSet.Cards.from_list([
-            'keep'
-          ]);
-          GAME.enemy.field = [
-            CardSet.Cards.create('wall'),
-            inherit(CardSet.Cards.get('nest'), {health: 4})
-          ];
-          GAME.player.store = CardSet.Cards.from_list(['archer','arson','bolt']);
-        },
-        enemy_turn: function(){
-          if (GAME.enemy.field.length < 4) {
-            var c= CardSet.Cards.create('bandit');
-            c.owned_by = GAME.enemy;
-            GAME.enemy.field.splice(GAME.enemy.field.length-1, 0, c);
-          }
-        }
-      }),
-      
-      inherit(Scenario, {
-        name: 'Brutes',
-        setup: function(){   
-          GAME.player.deck = CardSet.Cards.from_list([
-            'militia','militia',
-            'gem','gem','gem','gem',
-            'gem','gem','gem','gem'
-          ]);
-          GAME.player.field = CardSet.Cards.from_list([
-            'keep'
-          ]);
-          GAME.enemy.field = [
-            inherit(CardSet.Cards.get('nest'), {health: 7})
-          ];
-          GAME.player.store = CardSet.Cards.from_list(['entomb','cavalry']);
-        },
-        enemy_turn: function(){
-          if (GAME.enemy.field.length < 4) {
-            if (Math.random() < .5)
-              add_enemy('serpent')
-          }
-        }
-      })
-
-    ]
-  }
-
-];
 
 
 GAME.won = function(){
-
   animate_won(function(){
-    
-    window.location.hash = GAME.scen_idx + 1;
-    window.location.reload();
+    window.location.hash += "/won";
+    //window.location.reload();
   });
 }
 
 
 GAME.lost = function(){
   animate_lost(function(){
-    window.location.reload();
+    window.location.hash += "/lost";
+    //window.location.reload();
   })
 }
 
@@ -419,7 +294,7 @@ GAME.enemy_turn = function(){
     GAME.enemy.dig(0)
   }
   var et = GAME.scenario.enemy_turn;
-  et && et();
+  et && et(GAME.turn_idx);
 };
 
 

@@ -17,6 +17,7 @@ var $$ = function(s){
 var
     shoot_proxy_el = $$(".zap-proxy")[0],
     pow_proxy_el = $$(".pow-proxy")[0],
+    arrow_proxy_el = $$(".arrow-proxy")[0],
     text_proxy_el = $$(".text-proxy")[0];
 
 if (true) { // mute
@@ -80,20 +81,19 @@ var get_display = function(card) {
     };
 };
 
+
 var animate_won = function(then){
     setTimeout(function(){
         won_sound.play();
     }, 350);
     
-    Array.prototype.slice.call(document.querySelectorAll('.zone')).forEach(function(el, i){
         
-        Velocity(el, {
-            scale:0.01,
-            opacity: 0
-        },
-            {duration:3500, easing: 'easeInSine', complete:then}
-        );
-    });
+    Velocity(document.querySelectorAll('.zone'), {
+        scale:0.01,
+        opacity: 0
+    },
+        {duration:3500, easing: 'easeInSine', complete:then}
+    );
 };
 
 var animate_lost = function(then){
@@ -101,17 +101,14 @@ var animate_lost = function(then){
         lost_sound.play();
     }, 350);
     
-    Array.prototype.slice.call(document.querySelectorAll('.zone')).forEach(function(el, i){
-        
-        Velocity(el, {
-            translateY:window.screen.height*.15*(4-i)+'px',
-            rotateZ:Math.floor((1-i%2)*20-10)+'deg'
-            //rotateX:Math.floor((i%2)*40-20)+'deg',
-            //rotateY:Math.floor(i*10-40)+'deg'
-        },
-            {duration:3500, easing: [ 300, 10 ], complete:then}
-        );
-    });
+    Velocity(document.querySelectorAll('.zone'), {
+        translateY:window.screen.height*.15*(4-i)+'px',
+        rotateZ:Math.floor((1-i%2)*20-10)+'deg'
+        //rotateX:Math.floor((i%2)*40-20)+'deg',
+        //rotateY:Math.floor(i*10-40)+'deg'
+    },
+        {duration:3500, easing: [ 300, 10 ], complete:then}
+    );
 };
 
 
@@ -252,9 +249,19 @@ var animate_spin = function(move, done) {
     iter(0);
 }
 
+var create_el = function(class_name) {
+    var el = document.createElement('div');
+    el.className = class_name;
+    document.body.appendChild(el);
+    return el;
+};
+
 var animate_shoot = function(move, done){
+
     actor = get_display(move.card);
     target = get_display(move.target);
+    
+    shoot_proxy_el = create_el('shoot-proxy');
 
     shoot_proxy_el.style.left=actor.rect.left + (target.rect.right-target.rect.left)/2 + 'px';
     shoot_proxy_el.style.top=actor.rect.top + (target.rect.bottom-target.rect.top)/2 + 'px';
@@ -266,10 +273,8 @@ var animate_shoot = function(move, done){
     }, {
       duration: 500,
       complete: function(){
-        shoot_proxy_el.style.opacity=0;
-        
-        Velocity(shoot_proxy_el, 'reverse', {duration: 800, complete: done});
-        Velocity(target.el, 'reverse');
+        document.body.removeChild(shoot_proxy_el);
+        Velocity(target.el, 'reverse', {complete:done});
       },
       easing: "easeInQuart"
     });
@@ -326,6 +331,58 @@ var animate_message = function(card, opts){
     });
 }
 
+var animate = function(el, steps) {
+    var step = steps.shift();
+    var duration = step.duration;
+    var delay = step.delay;
+    delete step.delay;
+    delete step.duration;
+    if (step.step) {step=step.step}
+    Velocity(el, step, {
+        delay: delay,
+        duration: duration,
+        complete: function(){
+            if (steps.length) animate(el, steps);
+        }
+    })
+};
+var initial = function(el, values) {
+    for (var k in values){
+        if (k === 'left' || k === 'top') values[k] += 'px';
+        el.style[k] = values[k];
+    }
+};
+
+var animate_help = function(opts){
+    opts = opts || {};
+
+    var actor = get_display(GAME.player.hand[0]);
+
+    initial(arrow_proxy_el, {
+        left: actor.rect.left,
+        top: actor.rect.top,
+        backgroundColor: 'orange'
+    });
+
+    arrow_proxy_el.innerHTML = 'DRAG!';
+
+    var target = get_display(GAME.enemy.field[0]);
+    
+    animate(arrow_proxy_el, [
+    {
+        opacity: 1
+    },
+    {
+        translateY: target.rect.top - actor.rect.top,
+        duration: 800
+    },
+    {
+        step: 'reverse'
+    }
+    ]);
+
+
+}
 
 // async, no callback.
 var animate_pow = function(card, opts){

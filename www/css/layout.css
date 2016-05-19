@@ -135,7 +135,7 @@ button.faded {
 }*/
 
 /* controls */
-#turn, #stats, #exit {
+#turn, #stats, .exit {
   position: absolute;
   z-index: 200;
 }
@@ -144,7 +144,7 @@ button.faded {
   left: 3.5vw;
   transition: 0.5s right;
 }
-#exit, #turn {
+.exit, #turn {
   cursor: pointer;
   font-size: 4.20vw;
   height: 7vw;
@@ -163,9 +163,10 @@ button.faded {
   font-size: 3vw;
   padding-top: 1vw;
 }
-#exit {
+.exit {
   top: -1vw;
   left: -1vw;
+  line-height: 7vw;
 }
 
 #wrapper.playing #turn {
@@ -260,4 +261,13 @@ button.faded {
   top: 23vw;
   left: 11vw;
   transform: scale(2);
+}
+
+#won {
+  text-align: center;
+}
+#won h1 {
+  height: 8vw;
+  padding-top: 2vw;
+  font-size: 10vw;
 }

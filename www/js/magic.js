@@ -3,7 +3,6 @@ CardSet.Cards.add([
 
   {
     name: 'magic',
-    display_class: 'magic',
     cost: 0,
     hand_actions: [
       Actions.create('cast')
@@ -11,6 +10,74 @@ CardSet.Cards.add([
     delayed: true,
     parent: 'card',
     display_class: 'magic',
+  },
+
+  {
+    name: 'tool',
+    display_class: 'tool',
+    cost: 0,
+    hand_actions: [
+      Actions.create('reuse')
+    ],
+    parent: 'card',
+  },
+
+  {
+    name: 'fist',
+    cost: 1,
+    hand_actions: [
+      Actions.create('reuse', {
+        targets: 'ENEMY_FIELD',
+        retarget: function(move){
+          var alive_enemies = target_enemies(move, function(item){
+            return item.health > 0;
+          });
+          return alive_enemies[alive_enemies.length-1];
+        },
+        effect: function(move){
+          melee(move.player.get_keep(), move.target, 1);
+        }
+      })
+    ],
+    svg: 'fist',
+    parent: 'tool'
+  },
+
+  {
+    name: 'mace',
+    cost: 4,
+    hand_actions: [
+      Actions.create('reuse', {
+        targets: 'ENEMY_FIELD',
+        retarget: function(move){
+          var alive_enemies = target_enemies(move, function(item){
+            return item.health > 0;
+          });
+          return alive_enemies[alive_enemies.length-1];
+        },
+        effect: function(move){
+          melee(move.player.get_keep(), move.target, 3);
+          move.player.get_keep().stunned = 2;
+        }
+      })
+    ],
+    svg: 'spiked-mace',
+    parent: 'tool'
+  },
+
+  {
+    name: 'flag',
+    cost: 4,
+    hand_actions: [
+      Actions.create('reuse', {
+        targets: enemy_filter('asset'),
+        effect: function(move){
+          move.player.field.push(C('militia'));
+        }
+      })
+    ],
+    svg: 'flying-flag',
+    parent: 'tool'
   },
 
   {
@@ -80,6 +147,28 @@ CardSet.Cards.add([
     ],
     parent: 'magic',
     svg: 'lightning-storm',
+    rarity: 1
+  },
+
+  {
+    name: 'throw_rock',
+    cost: 1,
+    hand_actions: [
+      Actions.create('cast', {
+        targets: enemy_filter('agent'),
+        effect: function(move){
+          move.target.hurt(1);
+        },
+        animate: function(move, done){
+          animate_pow(move.target, {
+            color: 'black',
+            callback: done
+          })
+        }
+      })
+    ],
+    parent: 'magic',
+    svg: 'rock',
     rarity: 1
   },
 
