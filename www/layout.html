@@ -248,7 +248,16 @@
 
     <div id="zones">
 
-      <div class="enemy zone"
+      <div class="ehand">
+        <div ng-repeat="card in enemy.hand track by $index" ng-class="get_card_classes(card)"
+        ng-drop-success="pick(card)"
+        ng-drop="{{ can_target(card) }}"
+        >
+          <card card=card zone='enemy'></card>
+        </div>
+      </div>
+
+      <div class="efield zone"
       ng-drop="{{ is_targeting_enemy_field() }}"
       ng-drop-success="onDropEnemyField()"
       >

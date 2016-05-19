@@ -108,10 +108,12 @@ var Player =
     move_card: function(index, source, dest, placeholder)
     {
         if (typeof index !== 'number') {
-            index = this.hand.indexOf(index);
-            if (index === -1) {
-                throw 'Card not found.'
+            var i = this.hand.indexOf(index);
+            if (i === -1) {
+                console.trace();
+                console.error('Attempting to move card',index,', but card not found.');
             }
+            index = i;
         }
         if (index >= source.length) {
             console.error("can't move element",index,"of",source);

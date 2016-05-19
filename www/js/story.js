@@ -95,7 +95,33 @@ STORY = {
       }
 
     ]
+  },
+
+  garden: {
+    pages: [
+      {
+        text: 'You exit to the Garden...'
+      },
+      {
+        text: '... it\'s deserted ...'
+      },
+      {
+        text: 'Except for a PLANT!'
+      }
+    ]
+  },
+
+  garden: {
+    pages: [
+      {
+        text: 'Phew! That was a close one! When knew plants could fight?'
+      },
+      {
+        text: 'You march up the stairs into the Kitchen.'
+      }
+    ]
   }
+
 };
 
 GAME.app.controller('storyCtrl', function($scope, $timeout, $routeParams) {

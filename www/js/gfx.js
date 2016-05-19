@@ -36,40 +36,49 @@ var knife_sound = (new Audio('sounds/knifeSlice.mp3')),
     won_sound = (new Audio('sounds/won.mp3')),
     lock_sound = (new Audio('sounds/lock.mp3'));
 
-var get_actor_display = function(move){
-    return get_display(move.card);
-};
 
-var get_target_display = function(move) {
-    return get_display(move.target);
+/**
+ * Find the element associated with a card.
+ */
+var find_card_el = function(card) {
+    var places = [
+        {
+            pile: GAME.player.field,
+            selector: '.field'
+        },
+        {
+            pile: GAME.player.hand,
+            selector: '.hand'
+        },
+        {
+            pile: GAME.enemy.field,
+            selector: '.efield'
+        },
+        {
+            pile: GAME.enemy.hand,
+            selector: '.ehand'
+        }
+    ];
+
+    for (var i=0; i<4; i++){
+        var spot = places[i].pile.indexOf(card);
+        if (spot > -1) {
+            return $$(places[i].selector + ' .card')[spot];
+        }
+    }
+
+    return null;
 };
 
 // Get the dom element and related data for a card, used for animations.
 var get_display = function(card) {
     
-    var selector, field = GAME.player.field, idx = field.indexOf(card);
-
-    if (idx == -1) {
-        field = GAME.player.get_opponent().field;
-        idx = field.indexOf(card);
-    }
-    
-    if (field !== GAME.player.field) {
-        idx = field.length - 1 - idx;
-        selector = '.enemy';
-    } else {
-        selector = '.field';
-    }
-    
-    var el = $$(selector + " .card")[idx];
-    
-    var rect = el.getBoundingClientRect();    
+    var el = find_card_el(card);
     return {
         el: el,
-        rect: rect,
-        near: field === GAME.player.field
+        rect: el.getBoundingClientRect()
     };
-}
+};
 
 var animate_won = function(then){
     setTimeout(function(){
@@ -116,33 +125,32 @@ var animate_war = function(){
 
 var animate_play= function(move, done){
 
-    if (!move.player.client) return done();
+    var actor = get_display(move.card);
 
-    var el = $$(".hand .card")[move.player.hand.indexOf(move.card)];
+    //var el = $$(".hand .card")[move.player.hand.indexOf(move.card)];
     
-    el.className = el.className.replace("done");
-
-    el.children[0].style.transform='';
+    actor.el.className = actor.el.className.replace("done", ""); // untap.
 
     (move.card.is_a('wealth') ? spend_sound : deploy_sound ).play(); 
     
-    var adjust_x = (37 * W_U - el.getBoundingClientRect().left) / W_U;
-    
+    var adjust_x = (37 * W_U - actor.rect.left) / W_U;
+    var adjust_y =  (actor.rect.left / W_U) > 50 ? (-35) : (35);
 
-    console.log('animate play', adjust_x, 25 * W_U , el.getBoundingClientRect().left);
-
-    Velocity(el,{
-        translateY: '-35vh',
-        translateX: adjust_x + 'vh',
-        rotate: '0deg',
-        scale: 2,
-        opacity: 1
+    Velocity(actor.el,{
+        translateY: [adjust_y + 'vh', 0],
+        translateX: [adjust_x + 'vh', 0],
+        scale: 1.7
     },{
         duraton: 400,
         //visibility: 'hidden',
         complete: function(){
-            
-            Velocity(el,'reverse',{
+
+            if (move.target)
+                animate_strike(move, done);
+            else
+                done();
+            return;
+            Velocity(actor.el,'reverse',{
                 duration: 1,
                 delay: 1500,
                 //visibility: 'hidden',
@@ -156,6 +164,7 @@ var animate_play= function(move, done){
         }
     });
 };
+
 
 var animate_buy = function(card){
     buy_sound.play();
@@ -172,19 +181,31 @@ var animate_buy = function(card){
     Velocity(el, 'reverse');
 };
 
+
 var animate_strike = function(move, done) {
     
-    actor = get_actor_display(move);
-    target = get_target_display(move);
+    actor = get_display(move.card);
+    target = get_display(move.target);
     
+    var near = actor.rect.top < target.rect.top;
+
     Velocity(actor.el, {
       translateX: target.rect.left - actor.rect.left + 'px',
-      translateY: target.rect.top - actor.rect.top + (actor.near ? actor.rect.height * .75 : -actor.rect.height * .75) + 'px'
+      translateY: target.rect.top - actor.rect.top + (near ? actor.rect.height * .75 : -actor.rect.height * .75) + 'px',
+      scale: 1
     }, {
       duration: 500,
       complete: function(){
-        Velocity(actor.el, 'reverse', {duration: 800, complete: done});
+        Velocity(actor.el, {
+            opacity: 0,
+        }, {duration: 300, complete: function(){
+            actor.el.style.transform = '';
+            console.log(actor.el);
+            actor.el.style.opacity = '';
+            done();
+        }});
         Velocity(target.el, 'reverse');
+
       },
       easing: "easeInQuart"
     });
@@ -232,8 +253,8 @@ var animate_spin = function(move, done) {
 }
 
 var animate_shoot = function(move, done){
-    actor = get_actor_display(move);
-    target = get_target_display(move);
+    actor = get_display(move.card);
+    target = get_display(move.target);
 
     shoot_proxy_el.style.left=actor.rect.left + (target.rect.right-target.rect.left)/2 + 'px';
     shoot_proxy_el.style.top=actor.rect.top + (target.rect.bottom-target.rect.top)/2 + 'px';
@@ -278,18 +299,20 @@ var animate_message = function(card, opts){
 
     target = get_display(card);
 
-    text_proxy_el.textContent = opts.text;
-    text_proxy_el.style.left=target.rect.left + (target.rect.bottom-target.rect.top)/6 + 'px';
-    text_proxy_el.style.top=target.rect.top /*- (target.rect.bottom-target.rect.top)*.2*/ + 'px';
+    var proxy = text_proxy_el.cloneNode();
 
-    text_proxy_el.style.color = opts.color || 'green';
+    proxy.textContent = opts.text;
+    proxy.style.left=target.rect.left + (target.rect.bottom-target.rect.top)/6 + 'px';
+    proxy.style.top=target.rect.top /*- (target.rect.bottom-target.rect.top)*.2*/ + 'px';
+
+    proxy.style.color = opts.color || 'green';
     
-    Velocity(text_proxy_el,{
+    Velocity(proxy,{
         scaleX: 1.5,
         opacity: 1,
         complete: function(){
 
-            Velocity(text_proxy_el,{
+            Velocity(proxy,{
                 opacity: 0
             },{
                 duration: 100,

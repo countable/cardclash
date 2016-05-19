@@ -131,7 +131,15 @@ var Scenario = {
     GAME.scenario = this;
     GAME.turn_idx = 0;
     
+    this.draw_player_hand();
+    this.draw_enemy_hand();
+  },
+  
+  draw_player_hand: function(){
     GAME.player.draw(this.hand_size || 6);
+  },
+
+  draw_enemy_hand: function(){
     GAME.enemy.draw(this.hand_size || 6);
   },
 
@@ -157,7 +165,7 @@ GAME.maps = [
         setup: function(){
 
           GAME.player.field = CardSet.Cards.from_list([
-            'keep', 'shiba_pup'
+            'keep' , 'shiba_pup'
           ]);
 
           GAME.enemy.deck = CardSet.Cards.from_list([
@@ -167,7 +175,19 @@ GAME.maps = [
             ]);
           GAME.enemy.field = [
             inherit(CardSet.Cards.get('nest'), {health: 7})
-          ].concat(CardSet.Cards.from_list(['mousefly']));
+          ]; //.concat(CardSet.Cards.from_list(['mousefly']));
+        },
+
+        draw_enemy_hand: function(){
+          GAME.enemy.hand = CardSet.Cards.from_list([
+            'scratch'
+            ])
+        },
+
+        draw_player_hand: function(){
+          GAME.player.hand = CardSet.Cards.from_list([
+            'scratch'
+            ])
         }
       }),
       inherit(Scenario, {
