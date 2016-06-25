@@ -247,7 +247,7 @@ CardSet.Actions.add([
     name: 'deploy',
     fn: function(move){
       if (move.card.delay) {
-        move.card.stunned = move.card.delay;
+        move.card.stunned = Math.max(move.card.stunned, move.card.delay);
       }
       move.player.move_card(move.card, move.player.hand, move.player.field, true);
     },

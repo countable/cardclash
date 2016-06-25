@@ -25,11 +25,11 @@ GAME.maps = [
               GAME.player.diams = 5;
               GAME.player.storage = 5;
               GAME.player.income = 5;
-              setTimeout(function(){
-                
-              animate_help();
-              })
+              setTimeout(animate_help);
             },
+            on_order: function(){
+              animate_help_2();
+            }
           }),
 
           inherit(Scenario, {
@@ -63,7 +63,7 @@ GAME.maps = [
             },
             setup_enemy_field: function(){
               GAME.enemy.field = [
-                C('goose', {stunned: 99}),
+                C('goose', {stunned: 5}),
                 C('nest', {health: 4, svg:'portculis'}),
                 C('bear_trap')
               ];
@@ -72,9 +72,12 @@ GAME.maps = [
               GAME.player.diams = 2;
               GAME.player.storage = 5;
               GAME.player.income = 1;
+              setTimeout(animate_help_3, 10);
+              GAME.player.hand.unshift(C('table'));            
             },
             num_prizes: 1,
-            prizes: ['duck']
+            prizes: ['goose'],
+            hand_size: 3
           }),
 
 
@@ -82,7 +85,9 @@ GAME.maps = [
             name: 'trade',
             description: 'This next door looks too strong to bash with your fists.',
             get_enemy_deck: function(){
-              GAME.enemy.deck = [];
+              GAME.enemy.deck = [
+                C("ogre")
+              ];
             },
             setup_enemy_field: function(){
               GAME.enemy.field = [
@@ -92,6 +97,8 @@ GAME.maps = [
             postsetup: function(){
               GAME.player.hand.push(C('mace'));
               GAME.player.diams = 2;
+              GAME.enemy.income = 1;
+              GAME.enemy.storage = 3;
             },
             num_prizes: 1,
             prizes: ['mace']
@@ -117,6 +124,7 @@ GAME.maps = [
               ];
             },
             enemy_turn: function(t){
+              console.log(t, !((t+1)%4));
               if (!((t+1)%4)) GAME.enemy.field.push(C('mousefly'))
             },
             num_prizes: 1,
@@ -260,6 +268,59 @@ GAME.maps = [
     rooms: [
 
     ]
-  }
+  },
+  {},{},{}, // 9 is testing!
+  {
+    name: 'TESTING-GROUND',
+    rooms: [
+      {
+        name: "stairwell",
+        order: 1,
 
+        scenarios: [
+
+          inherit(Scenario, {
+            name: 'the door',
+            description: 'A door blocks your way.',
+            get_enemy_deck: function(){
+              GAME.enemy.deck = [];
+            },
+            setup_enemy_field: function(){
+              GAME.enemy.field = [
+                C('nest', {health: 1, svg:'wooden-door'})
+              ];
+            },
+            setup_player_field: function(){
+              GAME.player.field = [
+                C('keep'),
+                C('bandit')
+              ]
+            },
+            postsetup: function(){
+              GAME.player.diams = 5;
+              GAME.player.storage = 5;
+              GAME.player.income = 5;
+
+              var test_move = {
+                  target: GAME.enemy.field[0],
+                  player: GAME.player,
+                  card: GAME.player.field[0],
+                  action: Actions.create('charge')
+                };
+
+              setTimeout(function(){
+                
+                animate_strike(test_move, function(){
+                  animate_shoot(test_move, function(){
+
+                  });
+                });
+
+              });
+            }
+          })
+        ]
+      }
+    ]
+  }
 ];

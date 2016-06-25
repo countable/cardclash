@@ -268,11 +268,11 @@ var Player =
             }
         };
 
-        move.card._done = true;
         move.card._move = move;
         this.diams -= move.cost;
 
         if (move.action.delayed) {
+            move.card._done = true;
             if (this.client) animate_order();
             this.pending_moves.push(move);
         } else {

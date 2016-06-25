@@ -9,6 +9,11 @@ CardSet.Cards.add([
         damage = Math.max(0, damage-this.armor);
       }
       this.health = this.health - damage;
+      animate_message(this, {
+          text: damage + " dmg!",
+          color: 'red', 
+          delay: 50
+      });
     },
     get: function(attr){
       var base = this[attr];
@@ -307,6 +312,7 @@ CardSet.Cards.add([
     health: 5,
     delay: 2,
     damage: 3,
+    cost: 3,
     field_actions:['batter'],
     speed: 1,
     parent: 'agent',

@@ -129,7 +129,7 @@ var GAME = {
   },
 
   start: function() {
-    this.player = inherit(Player);
+    this.player = inherit(Player, {client: true});
     this.enemy = inherit(Player);
     this.players = [this.player, this.enemy];
     this.get_current_scenario().start();
@@ -169,7 +169,7 @@ var Scenario = {
   setup_card_state: function(){
     // initial deploys status.
     GAME.get_fields().forEach(function(c){
-      c.stunned=c.delay;
+      c.stunned = Math.max(c.stunned, c.delay);
     });
 
     GAME.player.field.concat(GAME.player.deck).forEach(function(c){
@@ -186,10 +186,6 @@ var Scenario = {
     GAME.enemy.deck = CardSet.shuffle(GAME.enemy.deck);
   },
   
-  draw_hands: function(){
-    GAME.player.draw(6);
-    GAME.enemy.draw(6);
-  },
 
   get_player_deck: function(){
     GAME.player.deck = GAME.get_default_deck(GAME.epic);
@@ -198,25 +194,20 @@ var Scenario = {
   get_enemy_deck: function(){
     GAME.enemy.deck = CL(this.enemy_deck || []);
   },
+  
+  draw_player_hand: function(){
+    GAME.player.draw(this.hand_size || 5);
+  },
 
+  draw_enemy_hand: function(){
+    GAME.enemy.draw(this.hand_size || 5);
+  },
+  
   start: function(){
 
     GAME.scenario = this;
     GAME.turn_idx = 0;
     
-    this.draw_player_hand();
-    this.draw_enemy_hand();
-  },
-  
-  draw_player_hand: function(){
-    GAME.player.draw(this.hand_size || 6);
-  },
-
-  draw_enemy_hand: function(){
-    GAME.enemy.draw(this.hand_size || 6);
-  },
-  
-  start: function(){
     this.get_enemy_deck();
     this.get_player_deck();
 
@@ -226,7 +217,9 @@ var Scenario = {
     this.setup_card_state();
 
     this.shuffle_decks();
-    this.draw_hands();
+
+    this.draw_player_hand();
+    this.draw_enemy_hand();
 
     this.postsetup && this.postsetup()
   }
@@ -255,48 +248,4 @@ GAME.lost = function(){
     //window.location.reload();
   })
 }
-
-// AI
-GAME.enemy_turn = function(){
-
-  var consider = function(from_hand) {
-    var action_type = from_hand ? 'hand_actions' : 'field_actions';
-    var move_type = from_hand ? 'play' : 'act';
-    return function(card){
-
-      if (card[action_type] && GAME.enemy['can_'+move_type](card)){
-        var action = card[action_type][0];
-        var move = new Move({
-            card: card,
-            action: action,
-            player: GAME.enemy,
-            cost: from_hand ? (action.cost || card.cost) : action.cost,
-            from_hand: from_hand
-        });
-        GAME.enemy.initiate_move(move);
-
-        if (GAME.enemy.resolving) {
-          if (GAME.enemy.resolving.action.single_target()){
-            var targets = GAME.enemy.resolving.action.targets(GAME.enemy.resolving);
-            GAME.enemy.done_targetting(targets[Math.floor(Math.random()*targets.length)]);
-          } else {
-            GAME.enemy.apply_move(GAME.enemy.resolving);
-          }
-        }
-      }
-    };
-  };
-
-  GAME.enemy.field.forEach(consider(false));
-  GAME.enemy.hand.forEach(consider(true));
-  
-  if (GAME.enemy.hand.length > GAME.enemy.diams) {
-    GAME.enemy.dig(0)
-  }
-  var et = GAME.scenario.enemy_turn;
-  et && et(GAME.turn_idx);
-};
-
-
-
 

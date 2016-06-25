@@ -63,6 +63,7 @@
   transition: all 1s;
 }
 #rooms a {
+  cursor: pointer;
   text-align: center;
   display: inline-block;
   background-color: white;
@@ -87,6 +88,7 @@
   margin: 0 20vw;
 }
 #scenarios a {
+  cursor: pointer;
   display: inline-block;
   width: 28vw;
   height: 13vw;

@@ -75,8 +75,6 @@ EntityTree.prototype.all = function(){
 }
 
 
-
-
 var Cards = new EntityTree({
     on_create: function(card){
       for (var i=0; i<(card.field_actions || []).length; i++) {

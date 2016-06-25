@@ -14,11 +14,6 @@ var $$ = function(s){
     return document.querySelectorAll(s);
 }
 
-var
-    shoot_proxy_el = $$(".zap-proxy")[0],
-    pow_proxy_el = $$(".pow-proxy")[0],
-    arrow_proxy_el = $$(".arrow-proxy")[0],
-    text_proxy_el = $$(".text-proxy")[0];
 
 if (true) { // mute
     Audio = function(){
@@ -64,7 +59,10 @@ var find_card_el = function(card) {
     for (var i=0; i<4; i++){
         var spot = places[i].pile.indexOf(card);
         if (spot > -1) {
-            return $$(places[i].selector + ' .card')[spot];
+            var selector = places[i].selector;
+            if (selector === '.efield') spot = GAME.enemy.field.length - 1 - spot; // rtl
+            console.log(spot, selector);
+            return $$(selector + ' .card')[spot];
         }
     }
 
@@ -114,6 +112,10 @@ var animate_lost = function(then){
 
 var animate_order = function(){
     lock_sound.play();
+    // AOP would be much nicer for this:
+
+    var sc = GAME.get_current_scenario();
+    sc.on_order && sc.on_order();
 };
 
 var animate_war = function(){
@@ -124,40 +126,34 @@ var animate_play= function(move, done){
 
     var actor = get_display(move.card);
 
-    //var el = $$(".hand .card")[move.player.hand.indexOf(move.card)];
-    
-    actor.el.className = actor.el.className.replace("done", ""); // untap.
-
     (move.card.is_a('wealth') ? spend_sound : deploy_sound ).play(); 
     
-    var adjust_x = (37 * W_U - actor.rect.left) / W_U;
-    var adjust_y =  (actor.rect.left / W_U) > 50 ? (-35) : (35);
+    var adjust_x = (44 * W_U - actor.rect.left) / W_U;
+    var adjust_y =  (actor.rect.top / W_U) > 50 ? (-15) : (15);
 
     Velocity(actor.el,{
         translateY: [adjust_y + 'vh', 0],
         translateX: [adjust_x + 'vh', 0],
         scale: 1.7
     },{
-        duraton: 400,
+        duraton: 300,
         //visibility: 'hidden',
         complete: function(){
 
-            if (move.target)
-                animate_strike(move, done);
-            else
-                done();
+            if (move.target) {
+                Velocity(actor.el, 'reverse', {duration: 300, delay: 800, complete:function(){
+                    animate_strike(move, done);
+                }})
+            } else {
+                Velocity(actor.el,'transition.fadeOut',{
+                    duration: 1,
+                    delay: 1200,
+                    complete: function(){
+                        done()
+                    }
+                });
+            }
             return;
-            Velocity(actor.el,'reverse',{
-                duration: 1,
-                delay: 1500,
-                //visibility: 'hidden',
-                complete: function(){
-                    /*setTimeout(function(){
-                        el.style.visibility='visible'; // element may be reused by angular, so make it show again after it's done $applying
-                    }, 500);*/
-                    done()
-                }
-            });
         }
     });
 };
@@ -182,27 +178,35 @@ var animate_buy = function(card){
 var animate_strike = function(move, done) {
     
     actor = get_display(move.card);
+
     target = get_display(move.target);
     
-    var near = actor.rect.top < target.rect.top;
-
+    var near = actor.rect.top > target.rect.top;
+    
     Velocity(actor.el, {
       translateX: target.rect.left - actor.rect.left + 'px',
-      translateY: target.rect.top - actor.rect.top + (near ? actor.rect.height * .75 : -actor.rect.height * .75) + 'px',
+      translateY: target.rect.top - actor.rect.top + (near ? actor.rect.height : -actor.rect.height) + 'px',
       scale: 1
     }, {
       duration: 500,
       complete: function(){
-        Velocity(actor.el, {
-            opacity: 0,
-        }, {duration: 300, complete: function(){
-            actor.el.style.transform = '';
-            console.log(actor.el);
-            actor.el.style.opacity = '';
+        if (move.action.is_a('cast')) {
             done();
-        }});
-        Velocity(target.el, 'reverse');
+            Velocity(actor.el, {
+                opacity: 0,
+            }, {duration: 500, complete: function(){
+                actor.el.style.transform = '';
+                actor.el.style.opacity = '';
+            }});
+        } else {
+            done();
+            Velocity(actor.el, 'reverse',{
+            //    complete: done,
+                delay: 300,
+            });
+        }
 
+        Velocity(target.el, 'reverse');
       },
       easing: "easeInQuart"
     });
@@ -219,12 +223,7 @@ var animate_strike = function(move, done) {
     if (move.action.damage) {
 
         (move.action.name === 'charge' ? trample_sound : knife_sound).play();
-        
-        animate_message(move.target, {
-            text: move.action.damage + " dmg!",
-            color: 'red', 
-            delay: 400
-        });
+
     }
 }
 
@@ -249,11 +248,17 @@ var animate_spin = function(move, done) {
     iter(0);
 }
 
-var create_el = function(class_name) {
+var VIEW_EL = $$('#viewport')[0];
+
+var make_proxy = function(class_name) {
     var el = document.createElement('div');
     el.className = class_name;
     document.body.appendChild(el);
     return el;
+};
+
+var remove_proxy = function(el){
+    document.body.removeChild(el);
 };
 
 var animate_shoot = function(move, done){
@@ -261,10 +266,10 @@ var animate_shoot = function(move, done){
     actor = get_display(move.card);
     target = get_display(move.target);
     
-    shoot_proxy_el = create_el('shoot-proxy');
+    shoot_proxy_el = make_proxy('shoot-proxy');
 
-    shoot_proxy_el.style.left=actor.rect.left + (target.rect.right-target.rect.left)/2 + 'px';
-    shoot_proxy_el.style.top=actor.rect.top + (target.rect.bottom-target.rect.top)/2 + 'px';
+    shoot_proxy_el.style.left=actor.rect.left + 5*W_U + 'px';
+    shoot_proxy_el.style.top=actor.rect.top + 5*W_U + 'px';
     shoot_proxy_el.style.opacity=1;
     
     Velocity(shoot_proxy_el, {
@@ -287,15 +292,7 @@ var animate_shoot = function(move, done){
         duration: 100,
         delay: 500
     });
-    
-    if (move.action.damage) {
 
-        animate_message(move.target, {
-            text: move.action.damage + " dmg!",
-            color: 'red', 
-            delay: 400
-        });
-    }
 }
 
 // async, no callback.
@@ -304,24 +301,26 @@ var animate_message = function(card, opts){
 
     target = get_display(card);
 
-    var proxy = text_proxy_el.cloneNode();
-
-    proxy.textContent = opts.text;
-    proxy.style.left=target.rect.left + (target.rect.bottom-target.rect.top)/6 + 'px';
-    proxy.style.top=target.rect.top /*- (target.rect.bottom-target.rect.top)*.2*/ + 'px';
-
-    proxy.style.color = opts.color || 'green';
+    var proxy = make_proxy('text-proxy bounce');
     
+    proxy.textContent = opts.text;
+
+    initial(proxy, {
+        left: target.rect.left,
+        top: target.rect.top - W_U * 5,
+        color: opts.color || 'green'
+    });
+
     Velocity(proxy,{
         scaleX: 1.5,
         opacity: 1,
         complete: function(){
-
+            opts.effect && Velocity(proxy,opts.effect);
             Velocity(proxy,{
                 opacity: 0
             },{
                 duration: 100,
-                delay: 800
+                delay: opts.duration || 800
             });
             opts.callback && opts.callback();
         }
@@ -348,7 +347,8 @@ var animate = function(el, steps) {
 };
 var initial = function(el, values) {
     for (var k in values){
-        if (k === 'left' || k === 'top') values[k] += 'px';
+        if (k === 'left' || k === 'top' || k === 'width' || k === 'height' || k === 'bottom' || k === 'right')
+            values[k] += 'px';
         el.style[k] = values[k];
     }
 };
@@ -357,38 +357,144 @@ var animate_help = function(opts){
     opts = opts || {};
 
     var actor = get_display(GAME.player.hand[0]);
-
+    var arrow_proxy_el = make_proxy('arrow-proxy');
+    
     initial(arrow_proxy_el, {
-        left: actor.rect.left,
-        top: actor.rect.top,
-        backgroundColor: 'orange'
+        left: actor.rect.left - actor.rect.width,
+        top: actor.rect.top ,
+        backgroundColor: 'red'
     });
-
-    arrow_proxy_el.innerHTML = 'DRAG!';
 
     var target = get_display(GAME.enemy.field[0]);
     
-    animate(arrow_proxy_el, [
-    {
-        opacity: 1
-    },
-    {
-        translateY: target.rect.top - actor.rect.top,
-        duration: 800
-    },
-    {
-        step: 'reverse'
-    }
+    animate_message(GAME.player.hand[0], {
+        text: 'drag me',
+        color: 'red',
+        duration: 3000,
+        effect: 'callout.bounce'
+    });
+
+    Velocity.RunSequence([
+        {
+            e: arrow_proxy_el,
+            p:{ opacity: 1 },
+            o:{ duration: 700, delay: 1000 }
+        },
+        {
+            e: arrow_proxy_el,
+            p: 'callout.pulse'
+        },
+        {
+            e: arrow_proxy_el,
+            p: { translateY: target.rect.top - actor.rect.top },
+            o:{ duration: 1800 }
+        },
+        {
+            e: arrow_proxy_el,
+            p: { opacity: 0, },
+            o: { duration: 500, callback: function(){
+                remove_proxy(arrow_proxy_el);
+            } }
+        }
     ]);
 
+}
+
+
+var animate_help_2 = function(opts){
+    opts = opts || {};
+    
+    var arrow_proxy_el = make_proxy('arrow-proxy');
+
+    initial(arrow_proxy_el, {
+        left: 8 * W_U,
+        top: $$("#turn")[0].getBoundingClientRect().top - 6 * W_U,
+        backgroundColor: '#5cc2f1'
+    });
+
+    Velocity.RunSequence([
+        {
+            e: arrow_proxy_el,
+            p:{ opacity: 1, scale: 0.8, rotateZ:25 },
+            o:{ duration: 500, delay: 500 }
+        },
+        {
+            e: arrow_proxy_el,
+            p: 'callout.pulse'
+        },
+        {
+            e: arrow_proxy_el,
+            p: { opacity: 0, },
+            o: { duration: 500, delay: 5000, callback: function(){
+                remove_proxy(arrow_proxy_el);
+            }}
+        }
+    ]);
 
 }
+
+
+var animate_help_3 = function(opts){
+    opts = opts || {};
+    
+    var arrow_proxy_el = make_proxy('arrow-proxy');
+    var diams_rect = $$("#diams")[0].getBoundingClientRect();
+    var player_card = get_display(GAME.player.hand[0]);
+
+    initial(arrow_proxy_el, {
+        left: player_card.rect.left,
+        top: diams_rect.top - 14 * W_U,
+        backgroundColor: 'red'
+    });
+
+    console.log('left', player_card.left);
+
+    animate_message(GAME.player.hand[0], {
+        text: 'sell me',
+        color: '#5cc2f1',
+        duration: 1300,
+        effect: 'callout.bounce'
+    });
+
+    Velocity.RunSequence([
+        {
+            e: arrow_proxy_el,
+            p:{ rotateZ:90 },
+            o:{ duration: 1, delay: 2300 }
+        },
+        {
+            e: arrow_proxy_el,
+            p:{ opacity: 1, translateX: 6*W_U },
+            o:{ duration: 500 }
+        },
+        {
+            e: arrow_proxy_el,
+            p: 'callout.pulse'
+        },
+        {
+            e: arrow_proxy_el,
+            p: { translateY: player_card.rect.left - diams_rect.left + W_U },
+            o: { duration: 600, delay: 300}
+        },
+        {
+            e: arrow_proxy_el,
+            p: { opacity: 0, },
+            o: { duration: 500, delay: 5000, callback: function(){
+                remove_proxy(arrow_proxy_el);
+            }}
+        }
+    ]);
+
+}
+
+
 
 // async, no callback.
 var animate_pow = function(card, opts){
     opts = opts || {};
     target = get_display(card);
 
+    var pow_proxy_el = make_proxy('pow-proxy');
     pow_proxy_el.style.left=target.rect.left + (target.rect.right-target.rect.left)/2 + 'px';
     pow_proxy_el.style.top=target.rect.top + (target.rect.bottom-target.rect.top)/2 + 'px';
     pow_proxy_el.style.backgroundColor = opts.color || 'orange';

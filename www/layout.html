@@ -7,13 +7,13 @@
   <link rel="stylesheet" type="text/css" href="css/libs.css">
   <link rel="stylesheet" type="text/css" href="css/layout.css">
   <link rel="stylesheet" type="text/css" href="css/entities.css">
-  <link rel="stylesheet" type="text/css" href="css/animations.css">
+  <link rel="stylesheet" type="text/css" href="css/gfx.css">
   <link rel="stylesheet" type="text/css" href="css/pages.css">
   <link rel="stylesheet" type="text/css" href="fonts/type/stylesheet.css">
   
   <meta name="format-detection" content="telephone=no">
   <meta name="msapplication-tap-highlight" content="no">
-  <meta name="viewport" id="viewport" content="user-scalable=yes, initial-scale=1, maximum-scale=2, minimum-scale=1, width=device-width">
+  <meta name="viewport" content="user-scalable=yes, initial-scale=1, maximum-scale=2, minimum-scale=1, width=device-width">
 
 </head>
 
@@ -21,7 +21,9 @@
 
 <div class="splash"></div>
 
-<div ng-view id="view"></div>
+<div id="viewport">
+  <div ng-view></div>
+</div>
 
 <script type="text/ng-template" id="deck.html">
 
@@ -105,7 +107,10 @@
     </div>
   </div>
   <p>
-    <a href='#/{{ epic_id }}/map/{{ map_idx }}'>
+    <a href='#/{{ epic_id }}/room/{{ map_idx }}/{{ room_idx }}' ng-if="scen_idx<3">
+      <button>OK</button>
+    </a>
+    <a href='#/{{ epic_id }}/map/{{ map_idx }}' ng-if="scen_idx==3">
       <button>OK</button>
     </a>
   </p>
@@ -255,12 +260,12 @@
     <div id="details-mask" ng-if="details" ng-click="close_details()">
       <div id="details">
           
-        <div ng-repeat="card in [details] track by $index" ng-class="card.get_classes">
+        <div class='card' ng-repeat="card in [details] track by $index" ng-class="card.get_classes">
           <card card=card zone='details'></card>
         </div>
 
         <table class=table1 cellpadding=0>
-          <tr ng-repeat="stat in detail_stats track by $index">
+          <tr ng-if="get_stat(details,stat)" ng-repeat="stat in detail_stats track by $index">
             <th>{{ stat }}</th>
             <td>{{ get_stat(details, stat) }}</td>
           </tr><tr>
@@ -298,11 +303,12 @@
     <div id="zones">
 
       <div class="ehand">
-        <div ng-repeat="card in enemy.hand track by $index" ng-class="get_card_classes(card)"
+        <div ng-repeat="card in enemy.hand track by $index" ng-class="card.get_classes()"
         ng-drop-success="pick(card)"
         ng-drop="{{ can_target(card) }}"
         >
           <card card=card zone='enemy'></card>
+        
         </div>
       </div>
 
@@ -363,11 +369,6 @@
 </div>
 </script>
 
-<div class='text-proxy'></div>
-<div class='shoot-proxy'></div>
-<div class='pow-proxy'></div>
-<div class='zap-proxy'></div>
-<div class='arrow-proxy'></div>
 
 <script src="js/mobile.js"></script>
 <script src="vendor/angular.min.js"></script>
@@ -377,10 +378,12 @@
 <script src="vendor/ngDraggable.js"></script>
 <!--<script src="vendor/ng-sortable.js"></script>-->
 <script src="vendor/velocity.min.js"></script>
+<script src="vendor/velocity.ui.js"></script>
 
 <script src="js/mix.js"></script>
 
 <script src="js/game.js"></script>
+<script src="js/ai.js"></script>
 <script src="js/maps.js"></script>
 <script src="js/player.js"></script>
 <script src="js/gfx.js"></script>

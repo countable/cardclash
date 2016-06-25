@@ -158,13 +158,13 @@ CardSet.Cards.add([
         targets: enemy_filter('agent'),
         effect: function(move){
           move.target.hurt(1);
-        },
+        }/*,
         animate: function(move, done){
           animate_pow(move.target, {
             color: 'black',
             callback: done
-          })
-        }
+          });
+        }*/
       })
     ],
     parent: 'magic',
@@ -225,12 +225,6 @@ CardSet.Cards.add([
         effect: function(move){
           move.target.hurt(1);
           move.target.delay += 1;
-        },
-        animate: function(move, done){
-          animate_pow(move.target, {
-            color: 'black',
-            callback: done
-          })
         }
       })
     ],
