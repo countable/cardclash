@@ -401,6 +401,7 @@ var animate_help = function(opts){
 }
 
 
+// not used currently... (dead code)
 var animate_help_2 = function(opts){
     opts = opts || {};
     

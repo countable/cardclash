@@ -28,7 +28,7 @@ GAME.maps = [
               setTimeout(animate_help);
             },
             on_order: function(){
-              animate_help_2();
+              //animate_help_2();
             }
           }),
 
