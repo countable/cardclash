@@ -9,16 +9,16 @@ CardSet.Cards.add([
         damage = Math.max(0, damage-this.armor);
       }
       this.health = this.health - damage;
-      animate_message(this, {
+      animate_message(null, this, {
           text: damage + " dmg!",
-          color: 'red', 
+          color: 'red',
           delay: 50
       });
     },
     get: function(attr){
       var base = this[attr];
       GAME.player.field.forEach(function(){
-        
+
       });
     },
     hand_actions: [
@@ -29,7 +29,7 @@ CardSet.Cards.add([
   {
     name: 'asset',
     display_class: 'asset',
-    parent: 'fieldable'  
+    parent: 'fieldable'
   }
 ]);
 
@@ -91,7 +91,7 @@ CardSet.Cards.add([
     name: 'bird',
     parent: 'agent'
   },
-  
+
   // agents.
   {
     name: 'militia',
@@ -125,7 +125,7 @@ CardSet.Cards.add([
                 var keep = get_allies(move, 'keep')[0];
                 keep.health++;
                 setTimeout(function(){
-                  animate_message(keep, {
+                  animate_message(null, keep, {
                     text: '+1 health',
                     color: '#0c0'
                   })
@@ -205,7 +205,7 @@ CardSet.Cards.add([
     svg: 'rogue',
     rarity: 2
   },
-  
+
   {
     name: 'flame_swan',
     health: 2,
@@ -218,7 +218,7 @@ CardSet.Cards.add([
     svg: 'fluffy-flame',
     rarity: 1
   },
-  
+
   // baddies
   {
     name: 'aatxe',
@@ -252,7 +252,7 @@ CardSet.Cards.add([
     parent: 'bird',
     svg: 'duck'
   },
-  
+
 
   {
     name: 'dust_bunny',
@@ -376,7 +376,7 @@ CardSet.Cards.add([
     svg: 'snake',
     rarity: 1
   },
-  
+
   {
     name: 'wall',
     health: 7,
@@ -385,7 +385,7 @@ CardSet.Cards.add([
     svg: 'brick-wall',
     rarity: 1
   },
-  
+
   {
     name: 'table',
     health: 1,

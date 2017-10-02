@@ -95,7 +95,7 @@ CardSet.Cards.add([
     svg: 'arson',
     rarity: 1
   },
-  
+
   {
     name: 'copier',
     hand_actions: [
@@ -137,10 +137,9 @@ CardSet.Cards.add([
         effect: function(move){
           move.target.hurt(3);
         },
-        animate: function(move, done){
-          animate_pow(move.target, {
-            color: 'black',
-            callback: done
+        animate: function(done, move){
+          animate_pow(done, move.target, {
+            color: 'black'
           })
         }
       })
@@ -158,13 +157,7 @@ CardSet.Cards.add([
         targets: enemy_filter('agent'),
         effect: function(move){
           move.target.hurt(1);
-        }/*,
-        animate: function(move, done){
-          animate_pow(move.target, {
-            color: 'black',
-            callback: done
-          });
-        }*/
+        }
       })
     ],
     parent: 'magic',
@@ -180,13 +173,7 @@ CardSet.Cards.add([
         targets: enemy_filter('agent'),
         effect: function(move){
           move.target.hurt(1);
-        }/*,
-        animate: function(move, done){
-          animate_pow(move.target, {
-            color: 'black',
-            callback: done
-          })
-        }*/
+        }
       })
     ],
     parent: 'magic',
@@ -202,13 +189,7 @@ CardSet.Cards.add([
         targets: enemy_filter('agent'),
         effect: function(move){
           move.target.hurt(3);
-        }/*,
-        animate: function(move, done){
-          animate_pow(move.target, {
-            color: 'black',
-            callback: done
-          })
-        }*/
+        }
       })
     ],
     parent: 'magic',
@@ -315,11 +296,10 @@ CardSet.Cards.add([
         fn: function(move){
           move.target.stunned += 1;
         },
-        animate: function(move, done){
-          animate_message(move.target, {
+        animate: function(done, move){
+          animate_message(done, move.target, {
             text: "stun +1",
-            color: 'black',
-            callback: done
+            color: 'black'
           })
         }
       })
@@ -338,11 +318,10 @@ CardSet.Cards.add([
         fn: function(move){
           move.target.stunned = 1;
         },
-        animate: function(move, done){
-          animate_message(move.target, {
+        animate: function(done, move){
+          animate_message(done, move.target, {
             text: "stun 1",
-            color: 'black',
-            callback: done
+            color: 'black'
           })
         }
       })
@@ -361,12 +340,11 @@ CardSet.Cards.add([
         effect: function(move){
           GAME.player.draw(2);
         },
-        animate: function(move, done){
+        animate: function(done, move){
           var keep = target_allies(move, 'keep')[0];
-          animate_message(keep, {
+          animate_message(done, keep, {
             text: '+2 cards',
-            color: '#0c0',
-            callback: done
+            color: '#0c0'
           });
         }
       })
@@ -402,10 +380,9 @@ CardSet.Cards.add([
         fn: function(move){
           move.target.health -= 2;
         },
-        animate: function(move, done){
-          animate_pow(move.target, {
-            color: 'black',
-            callback: done
+        animate: function(done, move){
+          animate_pow(done, move.target, {
+            color: 'black'
           })
         }
       })
@@ -424,10 +401,9 @@ CardSet.Cards.add([
           console.log('enhance armor', move)
           move.target.armor = (move.target.armor || 0) + 1;
         },
-        animate: function(move, done){
-          animate_pow(move.target, {
-            color: 'black',
-            callback: done
+        animate: function(done, move){
+          animate_pow(done, move.target, {
+            color: 'black'
           })
         }
       })

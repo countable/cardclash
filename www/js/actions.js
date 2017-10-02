@@ -7,6 +7,9 @@ function Move(o){
 Move.prototype.get_damage = function(){
   return this.action.damage || this.card.effective_damage || 0;
 }
+Move.prototype.get_cost = function(){
+  return this.action.cost || this.action.cost || 0;
+}
 
 var melee = function(source, target, damage){
   damage = damage || source.effective_damage || 0;
@@ -63,7 +66,7 @@ CardSet.Actions.add([
     single_target: function(){ // whether the action targets a single card.
       return this.targets instanceof Function;
     },
-    animate: function(move, done){
+    animate: function(done, move){
       done && done();
     },
     button: function(card){
@@ -86,8 +89,8 @@ CardSet.Actions.add([
     name: 'strike',
     delayed: true,
     targets: 'ENEMY_FIELD',
-    animate: function(move, done){
-      animate_strike(move, done);
+    animate: function(done, move){
+      animate_strike(done, move);
     },
     fn: function(move){
       melee(move.card, move.target)
@@ -97,15 +100,15 @@ CardSet.Actions.add([
   {
     name: 'shoot',
     delayed: true,
-    animate: function(move, done){
-      animate_shoot(move, done);
+    animate: function(done, move){
+      animate_shoot(done, move);
     },
     fn: function(move){
       move.target.hurt(move.get_damage(), move);
     },
     parent: 'action'
   },
-  
+
   // combat.
   {
     name: 'hunt',
@@ -123,7 +126,7 @@ CardSet.Actions.add([
     name: 'tunnel',
     targets: enemy_filter('asset'),
     parent: 'strike'
-  },  
+  },
   {
     name: 'charge',
     targets: 'ENEMY_FIELD',
@@ -187,7 +190,7 @@ CardSet.Actions.add([
     },
     parent: 'strike'
   },
-  
+
   {
     name: 'guard', // force attacking me, can counterattack.
     parent: 'action'
@@ -198,7 +201,7 @@ CardSet.Actions.add([
   },
   {
     name: 'escort', // protect one unit.
-    parent: 'action' 
+    parent: 'action'
   },
   {
     name: 'assault', // hit first army (only)
@@ -211,8 +214,8 @@ CardSet.Actions.add([
   {
     name: 'slash',
     delayed: true,
-    animate: function(move, done){
-      animate_spin(move, done);
+    animate: function(done, move){
+      animate_spin(done, move);
     },
     targets: 'ENEMY_FIELD',
     fn: function(move){
@@ -226,8 +229,8 @@ CardSet.Actions.add([
   {
     name: 'batter',
     delayed: true,
-    animate: function(move, done){
-      animate_spin(move, done);
+    animate: function(done, move){
+      animate_spin(done, move);
     },
     targets: 'ENEMY_FIELD',
     fn: function(move){
@@ -242,7 +245,7 @@ CardSet.Actions.add([
   {
     name: 'hide', // units attacking this are redirected to next target
   },
-  
+
   {
     name: 'deploy',
     fn: function(move){
@@ -251,9 +254,9 @@ CardSet.Actions.add([
       }
       move.player.move_card(move.card, move.player.hand, move.player.field, true);
     },
-    targets: 'PLAYER_FIELD',   
-    animate: function(move, done){
-      animate_play(move, done);
+    targets: 'PLAYER_FIELD',
+    animate: function(done, move){
+      animate_play(done, move);
     },
     parent: 'action'
   },
@@ -263,8 +266,8 @@ CardSet.Actions.add([
       move.player.move_card(move.card, move.player.hand, move.player.played_cards, true);
       this.effect && this.effect(move);
     },
-    animate: function(move, done){
-      animate_play(move, done);
+    animate: function(done, move){
+      animate_play(done, move);
     },
     parent: 'action',
     delayed: true
@@ -290,4 +293,3 @@ CardSet.Actions.add([
     parent: 'cast'
   }
 ]);
-

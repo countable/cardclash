@@ -10,7 +10,7 @@
   <link rel="stylesheet" type="text/css" href="css/gfx.css">
   <link rel="stylesheet" type="text/css" href="css/pages.css">
   <link rel="stylesheet" type="text/css" href="fonts/type/stylesheet.css">
-  
+
   <meta name="format-detection" content="telephone=no">
   <meta name="msapplication-tap-highlight" content="no">
   <meta name="viewport" content="user-scalable=yes, initial-scale=1, maximum-scale=2, minimum-scale=1, width=device-width">
@@ -80,7 +80,7 @@
   </p>
   <div id="decks">
     <p ng-repeat="deck in decks track by $index">
-      <a href="#/{{ epic_id }}/deck/{{ deck.id }}"><button>{{ deck.name }}</button></a> 
+      <a href="#/{{ epic_id }}/deck/{{ deck.id }}"><button>{{ deck.name }}</button></a>
       <a ng-click='delete_deck($index)'><button>X</button></a>
       <a ng-click='default_deck(deck.id)' ng-if="deck.id != epic.default_deck_id"><button>use</button></a>
       <a ng-if="deck.id == epic.default_deck_id" style="font-size:4vw;padding:2vw">&check;</a>
@@ -131,7 +131,8 @@
 <script type="text/ng-template" id="map.html">
 <div ng-controller="mapCtrl">
   <a href='#/{{ epic_id }}' class='exit'>&lsaquo;</a>
-  <div id="rooms">
+  <h2 id="map_name">{{ map.name }}</h2>
+  <div id="rooms" style="background-image:url(img/{{ map.name }}.svg)">
     <a ng-repeat="room in map.rooms track by $index" ng-click="goto_room($index)" ng-class="{disabled:!room_available($index)}">
       <b>{{ room.order }}</b>
       <span>{{ room.name.replace('_'," ") }}</span>
@@ -185,6 +186,17 @@
 </div>
 </script>
 
+
+<script type="text/ng-template" id="tests.html">
+  <div ng-controller='testCtrl'>
+    <ul>
+      <li ng-repeat="result in results">
+        {{ result }}
+      </li>
+  </div>
+</script>
+
+
 <script type="text/ng-template" id="story.html">
 <div ng-controller="storyCtrl" id="story">
 
@@ -193,7 +205,7 @@
     ng-class="{showing : (place == $index), page:true}"
   >
     <p>{{ page.text }}</p>
-    
+
     <p
       ng-if="page.options"
       ng-repeat="option in page.options"
@@ -213,7 +225,7 @@
 
 
 <script type="text/ng-template" id="card.html">
-  
+
   <div class="spikes" ng-if="card.spikes"></div>
   <div class="inline-details">
     <div class="title">{{ card.name.capitalizeFirstLetter() }}</div>
@@ -223,10 +235,10 @@
   <div class="icon handle"
     pic="{{card.svg}}"
     style="-webkit-mask:url(svg/{{card.svg}}.svg) center"
-    ng-dblclick="info(card)" 
+    ng-dblclick="info(card)"
     ng-if="card.svg"
     ></div>
-  
+
   <div ng-transclude></div>
 
   <div class="statuses">
@@ -246,7 +258,7 @@
 
 <div ng-controller="gameCtrl">
   <div id="wrapper" ng-class="{playing: playing}" ng-cloak>
-    
+
     <a href='#/{{ epic_id }}/room/{{ GAME.map_idx }}/{{ GAME.room_idx }}' class='exit'>
       &lsaquo;
     </a>
@@ -256,10 +268,10 @@
     </div>
 
     <div id="scenario_name">{{ room_name }} - {{ scenario_name }}</div>
-    
+
     <div id="details-mask" ng-if="details" ng-click="close_details()">
       <div id="details">
-          
+
         <div class='card' ng-repeat="card in [details] track by $index" ng-class="card.get_classes">
           <card card=card zone='details'></card>
         </div>
@@ -308,7 +320,7 @@
         ng-drop="{{ can_target(card) }}"
         >
           <card card=card zone='enemy'></card>
-        
+
         </div>
       </div>
 
@@ -346,7 +358,7 @@
           </card>
         </div>
       </div>
-      
+
       <div class="hand zone">
         <div ng-repeat="card in player.hand track by $index"
           ng-class="card.get_classes()"
@@ -355,7 +367,7 @@
           ng-drag-stop="cancelDrag()"
           >
           <card card=card zone='hand'>
-            <div class="cost pin" ng-if="card.cost" ng-class="{faded: player.diams < card.cost}"><span>{{ card.cost }}</span></div>          
+            <div class="cost pin" ng-if="card.cost" ng-class="{faded: player.diams < card.cost}"><span>{{ card.cost }}</span></div>
             <div class="menu" ng-if="card.hand_actions.length > 1">
               <div ng-repeat="action in card.hand_actions.slice(1)" ng-class="{faded: player.diams < card.cost}" ng-click="play(card, action); $event.stopPropagation()" ng-bind-html="action.button(card)">
               </div>
@@ -365,7 +377,7 @@
       </div>
     </div> <!--/#zones-->
   </div> <!--/#wrapper-->
-    
+
 </div>
 </script>
 
@@ -395,6 +407,7 @@
 <script src="js/controller.js"></script>
 <script src="js/story.js"></script>
 <!--<script type="text/javascript" src="cordova.js"></script>-->
+<script src="js/test.js"></script>
 
 
 </body>

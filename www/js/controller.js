@@ -54,6 +54,9 @@ GAME.app = angular.module('gameApp', ['ngRoute', 'ngDraggable']).config(
         .when('/:epic_id/story', {
           templateUrl: "story.html"
         })
+        .when('/tests', {
+          templateUrl: "tests.html"
+        })
         .when('/:epic_id', {
           templateUrl: "epic.html"
         })
@@ -68,9 +71,9 @@ GAME.app = angular.module('gameApp', ['ngRoute', 'ngDraggable']).config(
 GAME.app.controller('wonCtrl', ['$scope','$routeParams','$timeout',
   function($scope, $routeParams, $timeout) {
     GAME.load_route_context($routeParams, $scope);
-    
+
     var scenario = GAME.get_current_scenario();
-    
+
     if (GAME.currently_awarded(GAME.map_idx, GAME.room_idx, GAME.scen_idx) === 1) {
       $scope.prizes = [];
     } else {
@@ -94,6 +97,11 @@ GAME.app.controller('lostCtrl', ['$scope','$routeParams','$timeout',
   }
 ]);
 
+GAME.app.controller('testCtrl', ['$scope',
+  function($scope) {
+    $scope.results = run_tests();
+  }
+]);
 
 GAME.app.controller('gameCtrl', ['$scope','$routeParams','$timeout',
   function($scope, $routeParams, $timeout) {
@@ -130,7 +138,7 @@ GAME.app.controller('gameCtrl', ['$scope','$routeParams','$timeout',
         );
     };
     $scope.can_target = function(card){
-      return GAME.player.resolving && 
+      return GAME.player.resolving &&
         card._target === true /*&& GAME.player.can_play(GAME.player.resolving.card)*/;
     };
 
@@ -155,7 +163,6 @@ GAME.app.controller('gameCtrl', ['$scope','$routeParams','$timeout',
             card: card,
             action: card.hand_actions[0],
             player: GAME.player,
-            cost: card.hand_actions[0].cost || card.cost,
             from_hand: true
         });
         var result = GAME.player.initiate_move(move);
@@ -164,8 +171,7 @@ GAME.app.controller('gameCtrl', ['$scope','$routeParams','$timeout',
         var move = new Move({
             card: card,
             action: card.field_actions[0],
-            player: GAME.player,
-            cost: card.field_actions[0].cost,
+            player: GAME.player
         });
 
         var result = GAME.player.initiate_move(move);
@@ -201,7 +207,7 @@ GAME.app.controller('gameCtrl', ['$scope','$routeParams','$timeout',
       }
       return result;
     };
-    // buying cards - not currently used.    
+    // buying cards - not currently used.
     $scope.buy = function(card){
       if ($scope.player.diams >= card.price) {
         $scope.player.diams -= card.price;
@@ -213,56 +219,49 @@ GAME.app.controller('gameCtrl', ['$scope','$routeParams','$timeout',
     $scope.turn = function(){
 
       if (GAME.player.resolving) return alert('finish targeting first.');
-
       $scope.playing = true;
-      animate_war();
-      GAME.enemy_turn();
-      GAME.turn_idx ++;
-      
+
+      GAME.end_turns();
+
       $timeout(function(){
-        
+
         // queued moves.
-        var pending_moves = R.pluck('pending_moves')(GAME.players).reduce(R.concat);
-        // sort actions by speed.
-        pending_moves.sort(function(x, y){ 
-            return y.card.speed - x.card.speed;
-        });
-        
+        var pending_moves = GAME.get_pending_moves();
+
         var complete = function(){
-          
-            GAME.players.forEach(function(whom) {
-              whom.end_turn();
-            });
+
+            GAME.player.end_turn();
+            GAME.enemy.end_turn();
             // done turn, reset
-            
+
             $scope.playing=false;
             $timeout(function(){
               GAME.player.begin_turn()
               GAME.enemy.begin_turn()
             }, 500);
-            
+
         };
-        
-        var do_action = function(cur_action_idx){
-          var move = pending_moves[cur_action_idx];
+
+        var do_move = function(cur_move_idx){
+          var move = pending_moves[cur_move_idx];
           if (move){
             move.card._done = false;
             move.player.complete_move(move, function(){
               $timeout(function(){ // let ui update.
-            
-                do_action(cur_action_idx + 1);
+
+                do_move(cur_move_idx + 1);
               }, 0);
             });
           } else {
             $timeout(complete, 500);
           }
         };
-        
-        do_action(0);
+
+        do_move(0);
       }, 500);
     };
-    
-    
+
+
 }]).config(disableSCE);
 
 
@@ -274,7 +273,7 @@ GAME.app.controller('deckCtrl', function($scope, $timeout, $routeParams) {
   $scope.deck = $scope.epic.decks.filter(function(deck){
     return deck.id === $routeParams.deck_id;
   })[0];
-  
+
   $scope.picks = CardSet.Cards.from_list($scope.deck.cards);
 
   //$scope.pool = CardSet.Cards.all().filter(function(c){return c.rarity});
@@ -301,7 +300,7 @@ GAME.app.controller('deckCtrl', function($scope, $timeout, $routeParams) {
     $scope.deck.name = $scope.deck.name.replace(/[^a-z\d]/ig,'').substr(0,15);
     GAME.save_epic($scope.epic);
   };
-    
+
 }).config(disableSCE);
 
 
@@ -320,6 +319,7 @@ GAME.app.controller('mapCtrl', function($scope, $timeout, $routeParams) {
        window.location.hash = '/' + GAME.epic_id + '/room/' + GAME.map_idx + '/' + room_idx;
     }
   };
+  $scope.map = GAME.get_current_map();
 }).config(disableSCE);
 
 
@@ -386,7 +386,7 @@ GAME.app.controller('menuCtrl', function($scope, $timeout, $routeParams) {
 
   $scope.epics = get_epics();
 
-  $scope.load_epic = function(idx){
+  $scope.load_epic = function(idx) {
     if (!$scope.epics[idx]) {
       window.location.hash = "/"+idx+"/story"
     } else {

@@ -25,7 +25,7 @@ GAME.maps = [
               GAME.player.diams = 5;
               GAME.player.storage = 5;
               GAME.player.income = 5;
-              setTimeout(animate_help);
+              if (GAME.player.client) setTimeout(animate_help);
             },
             on_order: function(){
               //animate_help_2();
@@ -72,8 +72,8 @@ GAME.maps = [
               GAME.player.diams = 2;
               GAME.player.storage = 5;
               GAME.player.income = 1;
-              setTimeout(animate_help_3, 10);
-              GAME.player.hand.unshift(C('table'));            
+              if (GAME.player.client) setTimeout(animate_help_3, 10);
+              GAME.player.hand.unshift(C('table'));
             },
             num_prizes: 1,
             prizes: ['goose'],
@@ -133,7 +133,7 @@ GAME.maps = [
 
           inherit(Scenario, {
             name: 'rats',
-            description: 'Chittering and a rush of wings.',
+            description: 'Chattring of teeth and bitey things.',
             get_enemy_deck: function(){
               GAME.enemy.deck = [];
             },
@@ -158,7 +158,7 @@ GAME.maps = [
             },
             get_enemy_deck: function(){
               GAME.enemy.deck = CL([
-                
+
                 ]);
             },
             setup_enemy_field: function(){
@@ -269,9 +269,49 @@ GAME.maps = [
 
     ]
   },
-  {},{},{}, // 9 is testing!
+  {},{},
+
+  // 8 is automated tests!
   {
-    name: 'TESTING-GROUND',
+    name: "automated tests",
+    rooms: [
+      {
+        name: "automated test #1",
+        order: 1,
+
+        scenarios: [
+
+          inherit(Scenario, {
+            name: 'the door',
+            description: 'A door blocks your way.',
+            get_enemy_deck: function(){
+              GAME.enemy.deck = [];
+            },
+            setup_enemy_field: function(){
+              GAME.enemy.field = [
+                C('nest', {health: 1, svg:'wooden-door'})
+              ];
+            },
+            num_prizes: 2,
+            prizes: ['slap', 'throw_rock'],
+            postsetup: function(){
+              GAME.player.diams = 5;
+              GAME.player.storage = 5;
+              GAME.player.income = 5;
+              if (GAME.player.client) setTimeout(animate_help);
+            },
+            on_order: function(){
+              //animate_help_2();
+            }
+          })
+        ]
+      }
+    ]
+  },
+
+  // 9 is sandbox!
+  {
+    name: 'SANDBOX',
     rooms: [
       {
         name: "stairwell",
@@ -302,21 +342,12 @@ GAME.maps = [
               GAME.player.income = 5;
 
               var test_move = {
-                  target: GAME.enemy.field[0],
-                  player: GAME.player,
-                  card: GAME.player.field[0],
-                  action: Actions.create('charge')
-                };
+                target: GAME.enemy.field[0],
+                player: GAME.player,
+                card: GAME.player.field[0],
+                action: Actions.create('charge')
+              };
 
-              setTimeout(function(){
-                
-                animate_strike(test_move, function(){
-                  animate_shoot(test_move, function(){
-
-                  });
-                });
-
-              });
             }
           })
         ]

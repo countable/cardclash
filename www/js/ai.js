@@ -31,7 +31,6 @@ GAME.enemy_turn = function(){
             card: card,
             action: action,
             player: GAME.enemy,
-            cost: from_hand ? (action.cost || card.cost) : action.cost,
             from_hand: from_hand
         });
         GAME.enemy.initiate_move(move);
@@ -50,13 +49,10 @@ GAME.enemy_turn = function(){
 
   GAME.enemy.field.forEach(consider(false));
   GAME.enemy.hand.forEach(consider(true));
-  
+
   if (GAME.enemy_should_dig()) {
     GAME.enemy.dig(0)
   }
   var et = GAME.scenario.enemy_turn;
   et && et(GAME.turn_idx);
 };
-
-
-

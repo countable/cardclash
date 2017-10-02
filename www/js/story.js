@@ -68,7 +68,7 @@ STORY = {
       {
         text: 'You convulse violently on the ground and your vision goes dark...'
       },
-      
+
       {
         text: "..."
       },
@@ -120,7 +120,7 @@ STORY = {
 };
 
 GAME.app.controller('storyCtrl', function($scope, $timeout, $routeParams) {
-    
+
     initial_cards = {
       clerk: ['copier'],
       laborer: ['dust_bunny'],
@@ -143,18 +143,18 @@ GAME.app.controller('storyCtrl', function($scope, $timeout, $routeParams) {
     $timeout(function(){
       $scope.place++;
     }, 1000);
-    
+
     $scope.story = STORY.start;
 
     $scope.next=function(){
       $scope.place++;
       if ($scope.place == 7) {
 
-        /*
+        
         $scope.collection = $scope.collection.concat(initial_cards[$scope.award]);
         $scope.collection = $scope.collection.concat(initial_cards[$scope.job]);
         $scope.collection = $scope.collection.concat(initial_cards[$scope.death]);
-        */
+
 
         GAME.save_epic({
           id: $routeParams.epic_id,
@@ -172,7 +172,7 @@ GAME.app.controller('storyCtrl', function($scope, $timeout, $routeParams) {
       $scope[key] = value;
       $scope.place ++;
     }
-    
+
 }).config(function($sceProvider) {
   // Completely disable SCE.  For demonstration purposes only!
   // Do not use in new projects.

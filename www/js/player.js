@@ -2,23 +2,26 @@
 
 (function(){
 
+var _get_move_cost = function(){
+  return move.action.cost || move.card.cost || 0;
+};
 
 if (typeof module !== 'undefined') {
     CardSet = require('./cards')
 }
 
-var Player = 
+var Player =
 {
     phase: 'START', // game has yet to start.
 
     init: function (opts)
     {
-        
+
         this.deck = [];
         this.store = [];
         this.hand = [];
         this.field = [];
-        
+
         this.played_cards = []; // cards played this turn.
         this.pending_moves = [];
         this.discard = [];
@@ -28,14 +31,14 @@ var Player =
         this.storage = 2;
 
     },
-    
+
     getState: function()
     {
         return {
 
         };
     },
-    
+
     getPublicState: function()
     {
         return {
@@ -66,14 +69,14 @@ var Player =
         }
         this.hand = this.hand.concat(new_cards);
     },
-    
+
     move_pile: function(from, to)
     {
         while(from.length){
             this.move_card(0, from, to);
         }
     },
-    
+
     can_dig: function(move) {
         move = move || this.resolving;
         return !!(!this._dug && move && move.from_hand);
@@ -95,7 +98,7 @@ var Player =
     can_play: function(card){
       return card.hand_actions && card.cost <= this.diams
     },
-    
+
     // provide an index OR a card for the first arg.
     move_card: function(index, source, dest, placeholder)
     {
@@ -119,18 +122,18 @@ var Player =
             card = source.splice(index, 1)[0];
         }
         if (!card._placeholder) dest.push(card);
-        
+
         // when switching piles, clear temp state.
         card._done = false;
         card._move = null;
     },
-    
+
     clear_placeholders: function(){
         this.hand = this.hand.filter(function(c){return !c._placeholder});
     },
-    
+
     cleanup_field : function(){
-           
+
         var i=this.field.length;
         while(--i >= 0){
           var card = this.field[i];
@@ -140,7 +143,7 @@ var Player =
 
           card._done = false;
           card._move = null;
-          
+
           // clear casualties
           if (this.field[i].health < 1){
             // reset health?
@@ -161,7 +164,7 @@ var Player =
             card.on_turn_field && card.on_turn_field(this, i);
         }
     },
-    
+
     begin_turn: function(){
         this.clear_placeholders();
         this.diams += this.income;
@@ -180,15 +183,15 @@ var Player =
         //this.move_pile(this.hand, this.discard);
         this.move_pile(this.played_cards, this.discard);
     },
-    
+
     readyForCombat: function(){
         this.setPhase('COMBAT');
     },
-    
+
     get_keep: function(index){
       return this.field.filter(function(item){return item.is_a('keep')})[0];
     },
-    
+
     dig: function(index){
       var keep = this.get_keep();
       if (this.client) {
@@ -202,21 +205,21 @@ var Player =
       this.storage += 1;
       this.move_card(index, this.hand, this.discard);
     },
-    
+
     initiate_move: function(move, then) {
-        
+
         //hilight targets, if any, and wait for user to select.
         if (move.action.single_target()) {
-            
+
             var targets =  move.action.targets(move);
             console.log('targets', targets);
-                
+
             targets.forEach(function(card){
                 card._target = true;
             });
 
             this.resolving=move;
-            
+
         } else { // otherwise just complete the move.
             this.resolving = move;
             //this.apply_move(move, then);
@@ -225,7 +228,7 @@ var Player =
         return {
             success: true
         };
-    
+
     },
 
     done_targetting: function(target, done){
@@ -244,7 +247,7 @@ var Player =
             delete this.resolving;
         }
     },
-    
+
     clear_targets: function(){
         if (this.resolving) {
             if (this.resolving.action.single_target()) {
@@ -258,15 +261,14 @@ var Player =
     },
 
     apply_move: function(move, then){
-        
-        if (move.cost) {
-            if (move.cost > this.diams) {
-                return {
-                    message: "Not enough diamonds.",
-                    success: false
-                }
+
+        var move_cost = move.get_cost();
+        if (move_cost > this.diams) {
+            return {
+                message: "Not enough diamonds.",
+                success: false
             }
-        };
+        }
 
         move.card._move = move;
         this.diams -= move.cost;
@@ -279,9 +281,9 @@ var Player =
             this.complete_move(move, then);
         }
     },
-    
+
     complete_move: function(move, then){
-        
+
         // if the card targets dynamicaly, then do it now.
         if (move.action.retarget) {
             move.target = move.action.retarget(move);
@@ -293,11 +295,11 @@ var Player =
         if (move.card.is_alive && !move.card.is_alive()){
             return then && then();
         }
-        // ensure this move wasnt already used, ie as a counterattack.        
+        // ensure this move wasnt already used, ie as a counterattack.
         if (move._done){
             return then && then();
         }
-        
+
         move.action.animate(move, function(){
             move._done = true;
             move.action.fn(move);
@@ -314,7 +316,7 @@ var Player =
             then && then();
         });
     },
-    
+
     get_opponent: function(){
         var self = this;
         return GAME.players.filter(function(p){ return p !== self })[0];

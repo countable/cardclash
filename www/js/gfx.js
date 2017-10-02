@@ -21,6 +21,18 @@ if (true) { // mute
     };
 }
 
+var _client_only = function(fn){
+    return function(then){
+      if (GAME.player.client) {
+        return fn.apply(null, arguments);
+      } else {
+        return function(then){
+          then && then();
+        }
+      }
+    }
+};
+
 var knife_sound = (new Audio('sounds/knifeSlice.mp3')),
     trample_sound = (new Audio('sounds/trample.mp3')),
     spend_sound = (new Audio('sounds/spend.mp3')),
@@ -71,7 +83,7 @@ var find_card_el = function(card) {
 
 // Get the dom element and related data for a card, used for animations.
 var get_display = function(card) {
-    
+
     var el = find_card_el(card);
     return {
         el: el,
@@ -80,25 +92,24 @@ var get_display = function(card) {
 };
 
 
-var animate_won = function(then){
+var animate_won = _client_only(function(then){
     setTimeout(function(){
         won_sound.play();
     }, 350);
-    
-        
+
     Velocity(document.querySelectorAll('.zone'), {
         scale:0.01,
         opacity: 0
     },
         {duration:3500, easing: 'easeInSine', complete:then}
     );
-};
+});
 
-var animate_lost = function(then){
+var animate_lost = _client_only(function(then){
     setTimeout(function(){
         lost_sound.play();
     }, 350);
-    
+
     Velocity(document.querySelectorAll('.zone'), {
         translateY:window.screen.height*.15*(4-i)+'px',
         rotateZ:Math.floor((1-i%2)*20-10)+'deg'
@@ -107,27 +118,27 @@ var animate_lost = function(then){
     },
         {duration:3500, easing: [ 300, 10 ], complete:then}
     );
-};
+});
 
 
-var animate_order = function(){
+var animate_order = _client_only(function(){
     lock_sound.play();
     // AOP would be much nicer for this:
 
     var sc = GAME.get_current_scenario();
     sc.on_order && sc.on_order();
-};
+});
 
-var animate_war = function(){
+var animate_war = _client_only(function(){
     trumpet_sound.play();
-};
+});
 
-var animate_play= function(move, done){
+var animate_play= _client_only(function(done, move){
 
     var actor = get_display(move.card);
 
-    (move.card.is_a('wealth') ? spend_sound : deploy_sound ).play(); 
-    
+    (move.card.is_a('wealth') ? spend_sound : deploy_sound ).play();
+
     var adjust_x = (44 * W_U - actor.rect.left) / W_U;
     var adjust_y =  (actor.rect.top / W_U) > 50 ? (-15) : (15);
 
@@ -142,26 +153,26 @@ var animate_play= function(move, done){
 
             if (move.target) {
                 Velocity(actor.el, 'reverse', {duration: 300, delay: 800, complete:function(){
-                    animate_strike(move, done);
+                    animate_strike(done, move);
                 }})
             } else {
                 Velocity(actor.el,'transition.fadeOut',{
                     duration: 1,
                     delay: 1200,
                     complete: function(){
-                        done()
+                        done && done()
                     }
                 });
             }
             return;
         }
     });
-};
+});
 
 
-var animate_buy = function(card){
+var animate_buy = _client_only(function(card){
     buy_sound.play();
-    
+
     var el = $$(".store .card")[GAME.player.store.indexOf(card)];
     Velocity(el,{
         translateY: '-30px',
@@ -172,17 +183,17 @@ var animate_buy = function(card){
         duraton: 200
     });
     Velocity(el, 'reverse');
-};
+});
 
 
-var animate_strike = function(move, done) {
-    
+var animate_strike = _client_only(function(done, move) {
+
     actor = get_display(move.card);
 
     target = get_display(move.target);
-    
+
     var near = actor.rect.top > target.rect.top;
-    
+
     Velocity(actor.el, {
       translateX: target.rect.left - actor.rect.left + 'px',
       translateY: target.rect.top - actor.rect.top + (near ? actor.rect.height : -actor.rect.height) + 'px',
@@ -191,7 +202,7 @@ var animate_strike = function(move, done) {
       duration: 500,
       complete: function(){
         if (move.action.is_a('cast')) {
-            done();
+            done && done();
             Velocity(actor.el, {
                 opacity: 0,
             }, {duration: 500, complete: function(){
@@ -199,7 +210,7 @@ var animate_strike = function(move, done) {
                 actor.el.style.opacity = '';
             }});
         } else {
-            done();
+            done && done();
             Velocity(actor.el, 'reverse',{
             //    complete: done,
                 delay: 300,
@@ -210,27 +221,27 @@ var animate_strike = function(move, done) {
       },
       easing: "easeInQuart"
     });
-    
+
     // smash.
     Velocity(target.el, {
       scaleX: 1.1,
-      scaleY: 1.1 
+      scaleY: 1.1
     }, {
         duration: 100,
         delay: 500
     });
-    
+
     if (move.action.damage) {
 
         (move.action.name === 'charge' ? trample_sound : knife_sound).play();
 
     }
-}
+});
 
-var animate_spin = function(move, done) {
-    
+var animate_spin = _client_only(function(done, move) {
+
     var targets = move.action.targets(move);
-    
+
     var iter = function(i){
         move.target = targets[i];
         if (move.action.damage) {
@@ -239,14 +250,14 @@ var animate_spin = function(move, done) {
         animate_strike(move, function(){
             i++;
             if (i>=targets.length) {
-                done();
+                done && done();
             } else {
                 iter(i);
             }
         })
     };
     iter(0);
-}
+});
 
 var VIEW_EL = $$('#viewport')[0];
 
@@ -261,17 +272,17 @@ var remove_proxy = function(el){
     document.body.removeChild(el);
 };
 
-var animate_shoot = function(move, done){
+var animate_shoot = _client_only(function(done, move){
 
     actor = get_display(move.card);
     target = get_display(move.target);
-    
+
     shoot_proxy_el = make_proxy('shoot-proxy');
 
     shoot_proxy_el.style.left=actor.rect.left + 5*W_U + 'px';
     shoot_proxy_el.style.top=actor.rect.top + 5*W_U + 'px';
     shoot_proxy_el.style.opacity=1;
-    
+
     Velocity(shoot_proxy_el, {
       translateX: target.rect.left - actor.rect.left + 'px',
       translateY: target.rect.top - actor.rect.top + 'px'
@@ -283,26 +294,25 @@ var animate_shoot = function(move, done){
       },
       easing: "easeInQuart"
     });
-    
+
     // smash.
     Velocity(target.el, {
       scaleX: 1.1,
-      scaleY: 1.1 
+      scaleY: 1.1
     }, {
         duration: 100,
         delay: 500
     });
-
-}
+});
 
 // async, no callback.
-var animate_message = function(card, opts){
+var animate_message = _client_only(function(done, card, opts){
     opts = opts || {};
 
     target = get_display(card);
 
     var proxy = make_proxy('text-proxy bounce');
-    
+
     proxy.textContent = opts.text;
 
     initial(proxy, {
@@ -322,13 +332,13 @@ var animate_message = function(card, opts){
                 duration: 100,
                 delay: opts.duration || 800
             });
-            opts.callback && opts.callback();
+            done && done();
         }
     },{
         duration: 100,
         delay: opts.delay || 0
     });
-}
+});
 
 var animate = function(el, steps) {
     var step = steps.shift();
@@ -353,12 +363,12 @@ var initial = function(el, values) {
     }
 };
 
-var animate_help = function(opts){
+var animate_help = _client_only(function(opts){
     opts = opts || {};
 
     var actor = get_display(GAME.player.hand[0]);
     var arrow_proxy_el = make_proxy('arrow-proxy');
-    
+
     initial(arrow_proxy_el, {
         left: actor.rect.left - actor.rect.width,
         top: actor.rect.top ,
@@ -366,7 +376,7 @@ var animate_help = function(opts){
     });
 
     var target = get_display(GAME.enemy.field[0]);
-    
+
     animate_message(GAME.player.hand[0], {
         text: 'drag me',
         color: 'red',
@@ -398,13 +408,13 @@ var animate_help = function(opts){
         }
     ]);
 
-}
+});
 
 
 // not used currently... (dead code)
-var animate_help_2 = function(opts){
+var animate_help_2 = _client_only(function(opts){
     opts = opts || {};
-    
+
     var arrow_proxy_el = make_proxy('arrow-proxy');
 
     initial(arrow_proxy_el, {
@@ -432,12 +442,12 @@ var animate_help_2 = function(opts){
         }
     ]);
 
-}
+});
 
 
-var animate_help_3 = function(opts){
+var animate_help_3 = _client_only(function(opts){
     opts = opts || {};
-    
+
     var arrow_proxy_el = make_proxy('arrow-proxy');
     var diams_rect = $$("#diams")[0].getBoundingClientRect();
     var player_card = get_display(GAME.player.hand[0]);
@@ -486,12 +496,10 @@ var animate_help_3 = function(opts){
         }
     ]);
 
-}
-
-
+});
 
 // async, no callback.
-var animate_pow = function(card, opts){
+var animate_pow = _client_only(function(done, card, opts){
     opts = opts || {};
     target = get_display(card);
 
@@ -503,7 +511,7 @@ var animate_pow = function(card, opts){
     Velocity(pow_proxy_el,{
         opacity: 1,
         complete: function(){
-            
+
             Velocity(pow_proxy_el,{
                 scale: 9,
                 opacity: 0,
@@ -514,7 +522,7 @@ var animate_pow = function(card, opts){
                         duration: 1,
                         delay: 0
                     });
-                    opts.callback && opts.callback();
+                    done && done();
                 }
             },{
                 duration: 400,
@@ -525,4 +533,4 @@ var animate_pow = function(card, opts){
         duration: 200,
         delay: opts.delay || 0
     });
-}
+});

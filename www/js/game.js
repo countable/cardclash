@@ -1,6 +1,6 @@
 
 var GAME = {
-  
+
   set_awarded: function(value) {
     var award_status_key = '' + this.map_idx + '-' + this.room_idx + '-' + this.scen_idx;
     this.epic.awarded[award_status_key] = 1;
@@ -53,7 +53,7 @@ var GAME = {
   get_globals: function(for_card, attr){
     var ownership = (for_card.owned_by == GAME.player) ? 'player': 'enemy';
     var from_card, effect, i, j, total = 0;
-    
+
     var check = function(from_card, effect){
       if (!effect[attr] && !effect['get_'+attr]) return false;
       if (!(effect.card_type === 'card' || for_card.is_a(effect.card_type))) return false;
@@ -76,7 +76,7 @@ var GAME = {
             effect = from_card.global_effects[j];
             if (check(from_card, effect)){
               total += effect[attr] ? effect[attr] : effect['get_'+attr](card)
-            } 
+            }
           }
         }
       }
@@ -84,7 +84,7 @@ var GAME = {
 
     return total;
   },
-  
+
   /**
    * Get a list of all units on the field.
    */
@@ -119,17 +119,21 @@ var GAME = {
     }
     return CardSet.Cards.from_list(deck.cards);
   },
-  
+
   get_current_scenario: function() {
-    return this.maps[this.map_idx].rooms[this.room_idx].scenarios[this.scen_idx];
+    return this.get_current_room().scenarios[this.scen_idx];
   },
 
   get_current_room: function() {
-    return this.maps[this.map_idx].rooms[this.room_idx];
+    return this.get_current_map().rooms[this.room_idx];
+  },
+
+  get_current_map: function() {
+    return this.maps[this.map_idx];
   },
 
   start: function() {
-    this.player = inherit(Player, {client: true});
+    this.player = inherit(Player);
     this.enemy = inherit(Player);
     this.players = [this.player, this.enemy];
     this.get_current_scenario().start();
@@ -151,7 +155,7 @@ var CL = function(l){
 }
 
 var Scenario = {
-  
+
   // defaults
   num_prizes: 0,
   prizes: [],
@@ -159,13 +163,13 @@ var Scenario = {
   setup_player_field: function(){
     GAME.player.field = CL(['keep']);
   },
-  
+
   setup_enemy_field: function(){
     GAME.enemy.field = [
       C('nest', {health: 7})
     ];
   },
-  
+
   setup_card_state: function(){
     // initial deploys status.
     GAME.get_fields().forEach(function(c){
@@ -179,13 +183,13 @@ var Scenario = {
       c.owned_by = GAME.enemy;
     });
   },
-  
+
   shuffle_decks: function(){
     // shuffle deck
     GAME.player.deck = CardSet.shuffle(GAME.player.deck);
     GAME.enemy.deck = CardSet.shuffle(GAME.enemy.deck);
   },
-  
+
 
   get_player_deck: function(){
     GAME.player.deck = GAME.get_default_deck(GAME.epic);
@@ -194,7 +198,7 @@ var Scenario = {
   get_enemy_deck: function(){
     GAME.enemy.deck = CL(this.enemy_deck || []);
   },
-  
+
   draw_player_hand: function(){
     GAME.player.draw(this.hand_size || 5);
   },
@@ -202,12 +206,12 @@ var Scenario = {
   draw_enemy_hand: function(){
     GAME.enemy.draw(this.hand_size || 5);
   },
-  
+
   start: function(){
 
     GAME.scenario = this;
     GAME.turn_idx = 0;
-    
+
     this.get_enemy_deck();
     this.get_player_deck();
 
@@ -249,3 +253,19 @@ GAME.lost = function(){
   })
 }
 
+GAME.get_pending_moves = function(){
+  var moves = R.pluck('pending_moves')(GAME.players).reduce(R.concat);
+
+  // sort actions by speed.
+  moves.sort(function(x, y){
+      return y.card.speed - x.card.speed;
+  });
+
+  return moves;
+}
+
+GAME.end_turns = function(){
+  if (GAME.player.client) animate_war();
+  GAME.enemy_turn();
+  GAME.turn_idx ++;
+}
