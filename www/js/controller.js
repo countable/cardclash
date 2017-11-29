@@ -228,7 +228,6 @@ GAME.app.controller('gameCtrl', ['$scope', '$routeParams', '$timeout',
 
         // queued moves.
         var pending_moves = GAME.get_pending_moves();
-
         var complete = function() {
 
           GAME.player.end_turn();
@@ -242,8 +241,11 @@ GAME.app.controller('gameCtrl', ['$scope', '$routeParams', '$timeout',
           }, 500);
 
         };
-
+        var last = (new Date()).valueOf()
         var do_move = function(cur_move_idx) {
+          console.log(pending_moves[cur_move_idx], (new Date()).valueOf() - last)
+          last = (new Date()).valueOf()
+
           var move = pending_moves[cur_move_idx];
           if (move) {
             move.card._done = false;

@@ -112,8 +112,8 @@ var animate_lost = _client_only(function(then) {
   }, 350);
 
   Velocity(document.querySelectorAll('.zone'), {
-    translateY: window.screen.height * .15 * (4 - i) + 'px',
-    rotateZ: Math.floor((1 - i % 2) * 20 - 10) + 'deg'
+    translateY: window.screen.height * .15 * (4 - 1) + 'px', // 1->i
+    rotateZ: Math.floor((1 - 1 % 2) * 20 - 10) + 'deg' // 1->i
     //rotateX:Math.floor((i%2)*40-20)+'deg',
     //rotateY:Math.floor(i*10-40)+'deg'
   }, {
@@ -143,7 +143,7 @@ var animate_play = _client_only(function(done, move) {
   (move.card.is_a('wealth') ? spend_sound : deploy_sound).play();
 
   var adjust_x = (44 * W_U - actor.rect.left) / W_U;
-  var adjust_y = (actor.rect.top / W_U) > 50 ? (-15) : (15);
+  var adjust_y = move.player == GAME.enemy ? 15 : -15;
 
   Velocity(actor.el, {
     translateY: [adjust_y + 'vh', 0],
@@ -220,10 +220,9 @@ var animate_strike = _client_only(function(done, move) {
           }
         });
       } else {
-        done && done();
         Velocity(actor.el, 'reverse', {
-          //    complete: done,
-          delay: 300,
+          complete: done,
+          delay: 500,
         });
       }
 
@@ -248,26 +247,48 @@ var animate_strike = _client_only(function(done, move) {
   }
 });
 
+var animate_stomp = _client_only(function(done, move) {
+
+  actor = get_display(move.card);
+  targets = move.targets.map(get_display);
+  target_els = targets.map(function(t) {
+    return t.el
+  });
+  Velocity(actor.el, {
+    translateY: -20
+  }, {
+    duration: 300,
+    complete: function() {
+      Velocity(actor.el, 'reverse');
+      Velocity(target_els, {
+        translateY: -20
+      }, {
+        duration: 300,
+        complete: function() {
+          Velocity(target_els, 'reverse');
+          done();
+        }
+      });
+    }
+  });
+});
+
 var animate_spin = _client_only(function(done, move) {
 
-  var targets = move.action.targets(move);
+  actor = get_display(move.card);
+  target = get_display(move.target);
 
-  var iter = function(i) {
-    move.target = targets[i];
-    if (move.action.damage) {
-      animate_pow(move.target);
+  Velocity(actor.el, {
+    rotateZ: Math.PI
+  }, {
+    duration: 300,
+    complete: function() {
+      Velocity(target.el, 'reverse');
+      setTimeout(done, 300)
     }
-    animate_strike(move, function() {
-      i++;
-      if (i >= targets.length) {
-        done && done();
-      } else {
-        iter(i);
-      }
-    })
-  };
-  iter(0);
+  });
 });
+
 
 var VIEW_EL = $$('#viewport')[0];
 
@@ -342,7 +363,7 @@ var animate_message = _client_only(function(done, card, opts) {
         opacity: 0
       }, {
         duration: 100,
-        delay: opts.duration || 800
+        delay: opts.duration || 1500
       });
       done && done();
     }

@@ -266,7 +266,6 @@
 
       move.card._move = move;
       this.diams -= move.get_cost();
-
       if (move.action.delayed) {
         move.card._done = true;
         if (this.client) animate_order();
@@ -280,7 +279,8 @@
 
       // if the card targets dynamicaly, then do it now.
       if (move.action.retarget) {
-        move.target = move.action.retarget(move);
+        move.targets = move.action.retarget(move);
+        move.target = move.targets[0];
       }
       if (move.card.stunned) { // stunned cards can't move.
         return then && then();

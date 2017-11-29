@@ -1,5 +1,5 @@
-
 /* apply a natural box layout model to all elements, but allowing components to change */
+
 html {
   box-sizing: border-box;
 }
@@ -7,7 +7,11 @@ html {
 *, *:before, *:after {
   box-sizing: border-box;
 }
-* {line-height:1.2; vertical-align:middle;}
+
+* {
+  line-height: 1.2;
+  vertical-align: middle;
+}
 
 /*
 
@@ -31,26 +35,38 @@ body {
 }
 
 #viewport {
-  top: 0; left: 0; right: 0; bottom: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   position: absolute;
   overflow: hidden;
   width: 100vw;
-  height: 56.25vw; /* height:width ratio = 9/16 = .5625  */
+  height: 56.25vw;
+  /* height:width ratio = 9/16 = .5625  */
   background: white;
   margin: auto;
   position: absolute;
-  top:0;bottom:0; /* vertical center */
-  left:0;right:0; /* horizontal center */
+  top: 0;
+  bottom: 0;
+  /* vertical center */
+  left: 0;
+  right: 0;
+  /* horizontal center */
 }
 
-a, a:hover, a:visited{
+a, a:hover, a:visited {
   color: black;
   text-decoration: none;
 }
 
 @keyframes roll {
-from { transform: rotate(0deg) scale(1)}
-to   { transform: rotate(360deg) scale(0)}
+  from {
+    transform: rotate(0deg) scale(1)
+  }
+  to {
+    transform: rotate(360deg) scale(0)
+  }
 }
 
 .barrel-roll {
@@ -64,7 +80,6 @@ ul {
   padding: 0;
 }
 
-
 button.faded {
   color: #444;
   text-decoration: line-through;
@@ -72,9 +87,11 @@ button.faded {
 }
 
 /* zones */
+
 #zones {
   text-align: center;
 }
+
 .zone {
   background: white;
   padding-top: 7.5vw;
@@ -85,9 +102,10 @@ button.faded {
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
-  box-shadow: 0 0 2vw rgba(0,0,0,0.2);
+  box-shadow: 0 0 2vw rgba(0, 0, 0, 0.2);
   /*transition: 0.5s height, 0.5s opacity;*/
 }
+
 .ehand {
   top: 0;
   height: 0;
@@ -95,9 +113,11 @@ button.faded {
   right: 0;
   position: absolute;
 }
+
 .ehand .card {
-  transform: scale(0.6) translate(0,-3vw);
+  transform: scale(0.6) translate(0, -3vw);
 }
+
 .efield.zone {
   text-align: right;
   padding-right: 5.5vw;
@@ -105,6 +125,7 @@ button.faded {
   background: #9D62C5;
   background: url(../img/patterns/congruent_pentagon2.png);
 }
+
 .field.zone {
   text-align: left;
   height: 22vw;
@@ -112,6 +133,7 @@ button.faded {
   background: #91c794;
   background: url(../img/patterns/congruent_pentagon2.png);
 }
+
 .hand.zone {
   padding-top: 2.5vw;
   height: 12.5vw;
@@ -124,7 +146,6 @@ button.faded {
   right: 0;
 }
 
-
 /*
 .turn-button {
   font-size:2.50vw;
@@ -135,27 +156,32 @@ button.faded {
 }*/
 
 /* controls */
+
 #turn, #stats, .exit {
   position: absolute;
   z-index: 200;
 }
+
 #stats {
   bottom: 3.5vw;
   left: 3.5vw;
   transition: 0.5s right;
 }
+
 .exit, #turn {
   cursor: pointer;
   font-size: 4.20vw;
   height: 7vw;
   width: 7vw;
-  background: #fff; /*background-color: #F88;*/
+  background: #fff;
+  /*background-color: #F88;*/
   display: block;
   color: black;
   text-align: center;
   border-radius: 50%;
-  box-shadow: 0 0 2vw rgba(0,0,0,0.2);
+  box-shadow: 0 0 2vw rgba(0, 0, 0, 0.2);
 }
+
 #turn {
   bottom: -1vw;
   right: -1vw;
@@ -163,6 +189,7 @@ button.faded {
   font-size: 3vw;
   padding-top: 1vw;
 }
+
 .exit {
   top: -1vw;
   left: -1vw;
@@ -172,9 +199,11 @@ button.faded {
 #wrapper.playing #turn {
   bottom: -10.50vw;
 }
+
 #wrapper.playing .zone.store {
   opacity: 0;
 }
+
 #wrapper.playing #stats {
   right: -7vw;
 }
@@ -184,22 +213,26 @@ button.faded {
   height: 5.60vw;
   position: relative;
 }
+
 #diams-val {
   z-index: 2;
   text-align: center;
   line-height: 1.4;
 }
-#diams-current{
+
+#diams-current {
   color: white;
   font-size: 3vw;
-  text-shadow: 0.21vw 0.21vw 0.21vw rgba(0,0,0,0.4);
+  text-shadow: 0.21vw 0.21vw 0.21vw rgba(0, 0, 0, 0.4);
 }
+
 #diams-max {
   border-top: 0.4vw solid #fff;
   color: #fff;
   font-size: 1.7vw;
   opacity: 0.7;
 }
+
 #income {
   font-size: 1.89vw;
   position: absolute;
@@ -207,11 +240,12 @@ button.faded {
   top: -1.40vw;
   right: -1.40vw;
 }
+
 #diams {
   position: absolute;
   background: #5cc2f1;
   transform: rotate(45deg);
-  box-shadow: 0 0 2vw rgba(0,0,0,0.2);
+  box-shadow: 0 0 2vw rgba(0, 0, 0, 0.2);
 }
 
 #scenario_name {
@@ -221,9 +255,8 @@ button.faded {
   z-index: 250;
   background: white;
   padding: 0.5vw 2vw;
-  box-shadow: 0 0 2vw rgba(0,0,0,0.2);
+  box-shadow: 0 0 2vw rgba(0, 0, 0, 0.2);
 }
-
 
 #details-mask {
   top: 0;
@@ -231,9 +264,10 @@ button.faded {
   right: 0;
   bottom: 0;
   position: absolute;
-  background-color: rgba(0,0,0,0.5);
+  background-color: rgba(0, 0, 0, 0.5);
   z-index: 300;
 }
+
 #details {
   background: url(../img/patterns/congruent_pentagon.png);
   top: 7vw;
@@ -243,6 +277,7 @@ button.faded {
   position: absolute;
   padding: 3.50vw;
 }
+
 #details table {
   position: absolute;
   border-collapse: collapse;
@@ -252,10 +287,12 @@ button.faded {
   width: 25.5vw;
   height: 37vw;
 }
+
 #details table td, #details table th {
   padding: 0;
   font-size: 1.90vw;
 }
+
 #details .card {
   position: absolute;
   top: 23vw;
@@ -263,10 +300,11 @@ button.faded {
   transform: scale(2);
 }
 
-#won {
+#won, #lost {
   text-align: center;
 }
-#won h1 {
+
+#won h1, #lost h1 {
   height: 8vw;
   padding-top: 2vw;
   font-size: 10vw;

@@ -5,7 +5,7 @@ Move.prototype.get_damage = function() {
   return this.action.damage || this.card.effective_damage || 0;
 }
 Move.prototype.get_cost = function() {
-  return this.action.cost || this.card.cost || 0;
+  return !isNaN(this.action.cost) ? this.action.cost : (this.card.cost || 0);
 }
 
 var melee = function(source, target, damage) {
@@ -140,7 +140,7 @@ CardSet.Actions.add([{
       var alive_enemies = target_enemies(move, function(item) {
         return item.health > 0;
       });
-      return alive_enemies[alive_enemies.length - 1];
+      return [alive_enemies[alive_enemies.length - 1]];
     },
     parent: 'strike'
   },
@@ -151,7 +151,8 @@ CardSet.Actions.add([{
       var alive_enemies = target_enemies(move, function(item) {
         return item.health > 0;
       });
-      return alive_enemies[Math.floor(alive_enemies.length * Math.random())];
+      console.log(alive_enemies)
+      return [alive_enemies[Math.floor(alive_enemies.length * Math.random())]];
     },
     parent: 'strike'
   },
@@ -185,7 +186,7 @@ CardSet.Actions.add([{
   {
     name: 'siege',
     retarget: function(move) {
-      return target_enemies('asset')[0];
+      return [target_enemies('asset')[0]];
     },
     parent: 'strike'
   },
@@ -226,10 +227,12 @@ CardSet.Actions.add([{
     },
     targets: 'ENEMY_FIELD',
     fn: function(move) {
-      self = this;
-      target_enemies(move, 'agent').forEach(function(target) {
+      move.targets.forEach(function(target) {
         melee(move.card, target);
       });
+    },
+    retarget: function(move) {
+      return target_enemies(move, 'agent');
     },
     parent: 'action'
   },
@@ -237,15 +240,17 @@ CardSet.Actions.add([{
     name: 'batter',
     delayed: true,
     animate: function(done, move) {
-      animate_spin(done, move);
+      animate_stomp(done, move);
     },
     targets: 'ENEMY_FIELD',
     fn: function(move) {
-      self = this;
-      var targets = target_enemies(move, 'card').slice(0, Math.min(t.length, 2));
-      targets.forEach(function(target) {
+      move.targets.forEach(function(target) {
         melee(move.card, target);
       });
+    },
+    retarget: function(move) {
+      var t = target_enemies(move, 'card');
+      return t.slice(0, Math.min(t.length, 2));
     },
     parent: 'action'
   },
@@ -255,6 +260,7 @@ CardSet.Actions.add([{
 
   {
     name: 'deploy',
+    cost: '', // default to card cost.
     fn: function(move) {
       if (move.card.delay) {
         move.card.stunned = Math.max(move.card.stunned, move.card.delay);

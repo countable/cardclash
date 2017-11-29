@@ -1,4 +1,3 @@
-
 CardSet.Cards.add([
 
   {
@@ -28,13 +27,13 @@ CardSet.Cards.add([
     hand_actions: [
       Actions.create('reuse', {
         targets: 'ENEMY_FIELD',
-        retarget: function(move){
-          var alive_enemies = target_enemies(move, function(item){
+        retarget: function(move) {
+          var alive_enemies = target_enemies(move, function(item) {
             return item.health > 0;
           });
-          return alive_enemies[alive_enemies.length-1];
+          return [alive_enemies[alive_enemies.length - 1]];
         },
-        effect: function(move){
+        effect: function(move) {
           melee(move.player.get_keep(), move.target, 1);
         }
       })
@@ -49,13 +48,13 @@ CardSet.Cards.add([
     hand_actions: [
       Actions.create('reuse', {
         targets: 'ENEMY_FIELD',
-        retarget: function(move){
-          var alive_enemies = target_enemies(move, function(item){
+        retarget: function(move) {
+          var alive_enemies = target_enemies(move, function(item) {
             return item.health > 0;
           });
-          return alive_enemies[alive_enemies.length-1];
+          return [alive_enemies[alive_enemies.length - 1]];
         },
-        effect: function(move){
+        effect: function(move) {
           melee(move.player.get_keep(), move.target, 3);
           move.player.get_keep().stunned = 2;
         }
@@ -71,7 +70,7 @@ CardSet.Cards.add([
     hand_actions: [
       Actions.create('reuse', {
         targets: enemy_filter('asset'),
-        effect: function(move){
+        effect: function(move) {
           move.player.field.push(C('militia'));
         }
       })
@@ -86,7 +85,7 @@ CardSet.Cards.add([
     hand_actions: [
       Actions.create('cast', {
         targets: enemy_filter('asset'),
-        effect: function(move){
+        effect: function(move) {
           move.target.hurt(2);
         }
       })
@@ -101,7 +100,7 @@ CardSet.Cards.add([
     hand_actions: [
       Actions.create('cast', {
         targets: any_filter(),
-        effect: function(move){
+        effect: function(move) {
           move.player.hand.push(CardSet.Cards.create(move.target.name))
         }
       })
@@ -118,7 +117,7 @@ CardSet.Cards.add([
     hand_actions: [
       Actions.create('cast', {
         targets: enemy_filter('agent'),
-        effect: function(move){
+        effect: function(move) {
           move.target.health = 0;
         }
       })
@@ -134,10 +133,10 @@ CardSet.Cards.add([
     hand_actions: [
       Actions.create('cast', {
         targets: enemy_filter('agent'),
-        effect: function(move){
+        effect: function(move) {
           move.target.hurt(3);
         },
-        animate: function(done, move){
+        animate: function(done, move) {
           animate_pow(done, move.target, {
             color: 'black'
           })
@@ -155,7 +154,7 @@ CardSet.Cards.add([
     hand_actions: [
       Actions.create('cast', {
         targets: enemy_filter('agent'),
-        effect: function(move){
+        effect: function(move) {
           move.target.hurt(1);
         }
       })
@@ -171,7 +170,7 @@ CardSet.Cards.add([
     hand_actions: [
       Actions.create('cast', {
         targets: enemy_filter('agent'),
-        effect: function(move){
+        effect: function(move) {
           move.target.hurt(1);
         }
       })
@@ -187,7 +186,7 @@ CardSet.Cards.add([
     hand_actions: [
       Actions.create('cast', {
         targets: enemy_filter('agent'),
-        effect: function(move){
+        effect: function(move) {
           move.target.hurt(3);
         }
       })
@@ -203,7 +202,7 @@ CardSet.Cards.add([
     hand_actions: [
       Actions.create('cast', {
         targets: enemy_filter('agent'),
-        effect: function(move){
+        effect: function(move) {
           move.target.hurt(1);
           move.target.delay += 1;
         }
@@ -220,8 +219,8 @@ CardSet.Cards.add([
     hand_actions: [
       Actions.create('cast', {
         targets: 'ENEMY_FIELD',
-        effect: function(move){
-          target_enemies(move, 'agent').forEach(function(enemy){
+        effect: function(move) {
+          target_enemies(move, 'agent').forEach(function(enemy) {
             enemy.speed -= 2;
           });
         }
@@ -238,7 +237,7 @@ CardSet.Cards.add([
     hand_actions: [
       Actions.create('cast', {
         targets: ally_filter('agent'),
-        effect: function(move){
+        effect: function(move) {
           move.target.speed += 4;
           move.target.stunned = 0;
         }
@@ -255,8 +254,8 @@ CardSet.Cards.add([
     hand_actions: [
       Actions.create('cast', {
         targets: 'ENEMY_FIELD',
-        effect: function(move){
-          target_enemies(move, 'agent').forEach(function(enemy){
+        effect: function(move) {
+          target_enemies(move, 'agent').forEach(function(enemy) {
             enemy.stunned = 1;
             enemy.hurt(1, move);
           });
@@ -274,7 +273,7 @@ CardSet.Cards.add([
     hand_actions: [
       Actions.create('cast', {
         targets: ally_filter('agent'),
-        effect: function(move){
+        effect: function(move) {
           move.target.spikes = (move.target.spikes || 0) + 3;
         }
       })
@@ -290,13 +289,13 @@ CardSet.Cards.add([
     cost: 1,
     hand_actions: [
       Actions.create('cast', {
-        targets: enemy_filter(function(item){
-            return item.is_a('agent')
+        targets: enemy_filter(function(item) {
+          return item.is_a('agent')
         }),
-        fn: function(move){
+        fn: function(move) {
           move.target.stunned += 1;
         },
-        animate: function(done, move){
+        animate: function(done, move) {
           animate_message(done, move.target, {
             text: "stun +1",
             color: 'black'
@@ -315,10 +314,10 @@ CardSet.Cards.add([
       Actions.create('cast', {
         text: 'Chosen agent skips action.',
         targets: any_filter('agent'),
-        fn: function(move){
+        fn: function(move) {
           move.target.stunned = 1;
         },
-        animate: function(done, move){
+        animate: function(done, move) {
           animate_message(done, move.target, {
             text: "stun 1",
             color: 'black'
@@ -337,10 +336,10 @@ CardSet.Cards.add([
     hand_actions: [
       Actions.create('cast', {
         targets: 'ANY_FIELD',
-        effect: function(move){
+        effect: function(move) {
           GAME.player.draw(2);
         },
-        animate: function(done, move){
+        animate: function(done, move) {
           var keep = target_allies(move, 'keep')[0];
           animate_message(done, keep, {
             text: '+2 cards',
@@ -359,8 +358,8 @@ CardSet.Cards.add([
     hand_actions: [
       Actions.create('cast', {
         targets: 'PLAYER_FIELD',
-        effect: function(move){
-          target_allies(move, 'agent').forEach(function(ally){
+        effect: function(move) {
+          target_allies(move, 'agent').forEach(function(ally) {
             ally.health += 1;
             ally.damage += 1;
           });
@@ -376,11 +375,13 @@ CardSet.Cards.add([
     cost: 1,
     hand_actions: [
       Actions.create('cast', {
-        targets: enemy_filter(function(e){return e.speed < 4}),
-        fn: function(move){
+        targets: enemy_filter(function(e) {
+          return e.speed < 4
+        }),
+        fn: function(move) {
           move.target.health -= 2;
         },
-        animate: function(done, move){
+        animate: function(done, move) {
           animate_pow(done, move.target, {
             color: 'black'
           })
@@ -397,11 +398,11 @@ CardSet.Cards.add([
     hand_actions: [
       Actions.create('cast', {
         targets: ally_filter('agent'),
-        effect: function(move){
+        effect: function(move) {
           console.log('enhance armor', move)
           move.target.armor = (move.target.armor || 0) + 1;
         },
-        animate: function(done, move){
+        animate: function(done, move) {
           animate_pow(done, move.target, {
             color: 'black'
           })
@@ -418,9 +419,9 @@ CardSet.Cards.add([
     hand_actions: [
       Actions.create('cast', {
         targets: enemy_filter('agent'),
-        effect: function(move){
+        effect: function(move) {
           var op = move.player.get_opponent();
-          op.field = op.field.filter(function(c){
+          op.field = op.field.filter(function(c) {
             return c != move.target;
           });
           move.player.field.push(move.target);
