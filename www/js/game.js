@@ -216,6 +216,7 @@ var Scenario = {
 
   start: function() {
 
+    GAME.is_over = false;
     GAME.scenario = this;
     GAME.turn_idx = 0;
 
@@ -246,6 +247,7 @@ var add_enemy = function(card_name) {
 
 
 GAME.won = function() {
+  GAME.is_over = true;
   animate_won(function() {
     window.location.hash += "/won";
     //window.location.reload();
@@ -254,6 +256,7 @@ GAME.won = function() {
 
 
 GAME.lost = function() {
+  GAME.is_over = true;
   animate_lost(function() {
     window.location.hash += "/lost";
     //window.location.reload();

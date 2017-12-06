@@ -140,7 +140,6 @@ GAME.maps = [{
               ];
             },
             enemy_turn: function(t) {
-              console.log(t, !((t + 1) % 4));
               if (!((t + 1) % 4)) GAME.enemy.field.push(C('mousefly'))
             },
             num_prizes: 1,
@@ -335,17 +334,17 @@ GAME.maps = [{
   {
     name: 'SANDBOX',
     rooms: [{
-      name: "stairwell",
+      name: "sandbox1",
       order: 1,
 
       scenarios: [
 
         inherit(Scenario, {
-          name: 'the door',
-          description: 'A door blocks your way.',
+          name: 'test scenario 1 start big',
+          description: 'add random stuff to test here.',
           get_enemy_deck: function() {
             GAME.enemy.deck = [
-              C('ogre')
+              C('bandit')
             ];
           },
           setup_enemy_field: function() {
@@ -359,7 +358,7 @@ GAME.maps = [{
           setup_player_field: function() {
             GAME.player.field = [
               C('keep'),
-              C('bandit')
+              C('goose')
             ]
           },
           postsetup: function() {
@@ -368,14 +367,34 @@ GAME.maps = [{
             GAME.player.income = 5;
             GAME.enemy.diams = 10;
             GAME.enemy.storage = 10;
+          }
+        }),
 
-            var test_move = {
-              target: GAME.enemy.field[0],
-              player: GAME.player,
-              card: GAME.player.field[0],
-              action: Actions.create('charge')
-            };
+        inherit(Scenario, {
+          name: 'test scenario 2 e2e',
+          description: 'add random stuff to test here.',
+          get_enemy_deck: function() {
+            GAME.enemy.deck = [];
+            var cardnames = Object.keys(CardSet.Cards.by_name)
+            for (var i = 0; i < cardnames.length; i++) {
+              var card = C(cardnames[i])
+              if (card.cost) GAME.enemy.deck.push(card);
+            }
+          },
+          get_player_deck: function() {
+            GAME.player.deck = [];
+            var cardnames = Object.keys(CardSet.Cards.by_name)
+            for (var i = 0; i < cardnames.length; i++) {
+              var card = C(cardnames[i])
+              if (card.cost) GAME.player.deck.push(card);
+            }
+          },
+          shuffle_decks: function() {
 
+          },
+          postsetup: function() {
+            GAME.enemy.diams = 10;
+            GAME.player.diams = 10;
           }
         })
       ]

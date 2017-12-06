@@ -3,10 +3,16 @@ function Move(o) {
 }
 Move.prototype.get_damage = function() {
   return this.action.damage || this.card.effective_damage || 0;
-}
+};
 Move.prototype.get_cost = function() {
-  return !isNaN(this.action.cost) ? this.action.cost : (this.card.cost || 0);
-}
+  var cost;
+  if ('number' == typeof this.action.cost) {
+    cost = this.action.cost;
+  } else {
+    cost = this.card.cost || 0;
+  }
+  return cost;
+};
 
 var melee = function(source, target, damage) {
   damage = damage || source.effective_damage || 0;
@@ -151,7 +157,6 @@ CardSet.Actions.add([{
       var alive_enemies = target_enemies(move, function(item) {
         return item.health > 0;
       });
-      console.log(alive_enemies)
       return [alive_enemies[Math.floor(alive_enemies.length * Math.random())]];
     },
     parent: 'strike'
@@ -250,7 +255,11 @@ CardSet.Actions.add([{
     },
     retarget: function(move) {
       var t = target_enemies(move, 'card');
-      return t.slice(0, Math.min(t.length, 2));
+      if (t.length < 2) {
+        return t
+      } else {
+        return t.slice(t.length - 2, t.length);
+      }
     },
     parent: 'action'
   },

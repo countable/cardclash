@@ -77,13 +77,13 @@ GAME.app.controller('wonCtrl', ['$scope', '$routeParams', '$timeout',
     } else {
       $scope.num_prizes = scenario.num_prizes;
       $scope.prizes = CL(scenario.prizes);
+      GAME.set_awarded(1);
     }
 
     $scope.pick_prize = function(index) {
       var prize = $scope.prizes.splice(index, 1);
       GAME.epic.collection.push(prize[0].name);
       $scope.num_prizes--;
-      GAME.set_awarded(1);
     }
   }
 ]);
@@ -124,8 +124,7 @@ GAME.app.controller('gameCtrl', ['$scope', '$routeParams', '$timeout',
       var r = GAME.player.resolving;
       if (!r) return false;
       return r.get_cost() <= GAME.player.diams && (r.action.targets === 'PLAYER_FIELD' ||
-        r.action.targets === 'BOTH_FIELDS' ||
-        r.action.targets === 'ANY_FIELD'
+        r.action.targets === 'BOTH_FIELDS'
       );
     };
 
@@ -134,8 +133,7 @@ GAME.app.controller('gameCtrl', ['$scope', '$routeParams', '$timeout',
       if (!r) return false;
 
       return r.get_cost() <= GAME.player.diams && (r.action.targets === 'ENEMY_FIELD' ||
-        r.action.targets === 'BOTH_FIELD' ||
-        r.action.targets === 'ANY_FIELD'
+        r.action.targets === 'BOTH_FIELD'
       );
     };
     $scope.can_target = function(card) {
@@ -238,16 +236,18 @@ GAME.app.controller('gameCtrl', ['$scope', '$routeParams', '$timeout',
           $timeout(function() {
             GAME.player.begin_turn()
             GAME.enemy.begin_turn()
+            console.log(GAME.enemy.hand.length, 'cards in ehand')
           }, 500);
 
         };
         var last = (new Date()).valueOf()
         var do_move = function(cur_move_idx) {
-          console.log(pending_moves[cur_move_idx], (new Date()).valueOf() - last)
+          if (GAME.is_over) return;
           last = (new Date()).valueOf()
 
           var move = pending_moves[cur_move_idx];
           if (move) {
+            console.log('executing', move);
             move.card._done = false;
             move.player.complete_move(move, function() {
               $timeout(function() { // let ui update.

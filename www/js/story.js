@@ -1,5 +1,3 @@
-
-
 STORY = {
   start: {
     pages: [
@@ -11,8 +9,7 @@ STORY = {
       {
         text: 'But your unconscious mind is mired in dreams of your day job as a (pick one)',
         input: "job",
-        options: [
-          {
+        options: [{
             value: "clerk",
             text: "office clerk"
           },
@@ -30,8 +27,7 @@ STORY = {
       {
         text: 'Mom: "Don\'t you miss the award ceremony, you\'re nominated for (pick one)',
         input: 'award',
-        options: [
-          {
+        options: [{
             value: "jock",
             text: "the sports award"
           },
@@ -49,8 +45,7 @@ STORY = {
       {
         text: 'You drag yourself to hasty meal of nut butter on bread, and rush out the hatch of your home. Upon leaving, you (pick one)',
         input: 'death',
-        options: [
-          {
+        options: [{
             value: "dogs",
             text: "are downed by a pack of wild dogs"
           },
@@ -75,26 +70,26 @@ STORY = {
 
       {
         text: 'Your eyes slowly slide open, and find yourself lying at the bottom of a spiral staircase. A door blocks your way.'
-      }/*,
+      }
+      /*,
 
-      {
-        text: '"Where am I?" you wonder aloud.'
-      },
+            {
+              text: '"Where am I?" you wonder aloud.'
+            },
 
-      {
-        text: 'The noise of your voice alerts the rats. Huge ones, who scurry toward you. You start to scratch and slap at the rats, and a nearby goose waddles to your aid, but it is not enough!'
-      },
+            {
+              text: 'The noise of your voice alerts the rats. Huge ones, who scurry toward you. You start to scratch and slap at the rats, and a nearby goose waddles to your aid, but it is not enough!'
+            },
 
-      {
-        text: 'Brightly coloured objects flood your vision as familiar feelings course through you. The new powers might give you a chance against the rats!'
-      }*/
+            {
+              text: 'Brightly coloured objects flood your vision as familiar feelings course through you. The new powers might give you a chance against the rats!'
+            }*/
 
     ]
   },
 
   garden: {
-    pages: [
-      {
+    pages: [{
         text: 'You exit to the Garden...'
       },
       {
@@ -107,8 +102,7 @@ STORY = {
   },
 
   garden: {
-    pages: [
-      {
+    pages: [{
         text: 'Phew! That was a close one! When knew plants could fight?'
       },
       {
@@ -121,57 +115,56 @@ STORY = {
 
 GAME.app.controller('storyCtrl', function($scope, $timeout, $routeParams) {
 
-    initial_cards = {
-      clerk: ['copier'],
-      laborer: ['dust_bunny'],
-      gopher: ['gopher'],
+  initial_cards = {
+    clerk: ['copier'],
+    laborer: ['dust_bunny'],
+    gopher: ['gopher'],
 
-      jock: ['spirit_ball'],
-      geek: ['math_tome'],
-      prep: ['leadership'],
-      loser: ['isolation'],
+    jock: ['spirit_ball'],
+    geek: ['math_tome'],
+    prep: ['leadership'],
+    loser: ['isolation'],
 
-      dogs: ['shiba_pup'],
-      bus: ['droid'],
-      nuts: ['nut_shell'],
-    };
+    dogs: ['shiba_pup'],
+    bus: ['droid'],
+    nuts: ['nut_shell'],
+  };
 
-    $scope.place = -1;
+  $scope.place = -1;
 
-    $scope.collection = ['fist'];
+  $scope.collection = ['fist'];
 
-    $timeout(function(){
-      $scope.place++;
-    }, 1000);
+  $timeout(function() {
+    $scope.place++;
+  }, 1000);
 
-    $scope.story = STORY.start;
+  $scope.story = STORY.start;
 
-    $scope.next=function(){
-      $scope.place++;
-      if ($scope.place == 7) {
-
-        
-        $scope.collection = $scope.collection.concat(initial_cards[$scope.award]);
-        $scope.collection = $scope.collection.concat(initial_cards[$scope.job]);
-        $scope.collection = $scope.collection.concat(initial_cards[$scope.death]);
+  $scope.next = function() {
+    $scope.place++;
+    if ($scope.place == 7) {
 
 
-        GAME.save_epic({
-          id: $routeParams.epic_id,
-          collection: $scope.collection,
-          job: $scope.job,
-          award: $scope.award,
-          death: $scope.death
-        });
+      $scope.collection = $scope.collection.concat(initial_cards[$scope.award]);
+      $scope.collection = $scope.collection.concat(initial_cards[$scope.job]);
+      $scope.collection = $scope.collection.concat(initial_cards[$scope.death]);
 
-        window.location.hash = "/" + $routeParams.epic_id + "/game/0/0/0";
-      }
+
+      GAME.save_epic({
+        id: $routeParams.epic_id,
+        collection: $scope.collection,
+        job: $scope.job,
+        award: $scope.award,
+        death: $scope.death
+      });
+
+      window.location.hash = "/" + $routeParams.epic_id + "/game/0/0/0";
     }
-    $scope.choose=function(key, value){
-      console.log(key,value);
-      $scope[key] = value;
-      $scope.place ++;
-    }
+  }
+  $scope.choose = function(key, value) {
+    $scope[key] = value;
+    $scope.place++;
+  }
 
 }).config(function($sceProvider) {
   // Completely disable SCE.  For demonstration purposes only!

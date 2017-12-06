@@ -107,15 +107,11 @@ button.faded {
 }
 
 .ehand {
-  top: 0;
+  top: -20vw;
   height: 0;
   left: 0;
   right: 0;
   position: absolute;
-}
-
-.ehand .card {
-  transform: scale(0.6) translate(0, -3vw);
 }
 
 .efield.zone {

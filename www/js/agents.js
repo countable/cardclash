@@ -6,18 +6,18 @@ CardSet.Cards.add([
     parent: 'card',
     hurt: function(damage) {
       if (this.armor) {
-        damage = Math.max(0, damage-this.armor);
+        damage = Math.max(0, damage - this.armor);
       }
       this.health = this.health - damage;
       animate_message(null, this, {
-          text: damage + " dmg!",
-          color: 'red',
-          delay: 50
+        text: damage + " dmg!",
+        color: 'red',
+        delay: 50
       });
     },
-    get: function(attr){
+    get: function(attr) {
       var base = this[attr];
-      GAME.player.field.forEach(function(){
+      GAME.player.field.forEach(function() {
 
       });
     },
@@ -42,32 +42,28 @@ CardSet.Cards.add([
     delay: 1,
     speed: 1,
     events: [],
-    cost: 1, // agent specific
-    is_alive: function(){
+    is_alive: function() {
       return this.health > 0;
     },
-    get_counterattack: function(move){ // called when melee attacked.
+    get_counterattack: function(move) { // called when melee attacked.
       console.log('checking for counter attack...', this._move);
-      if (
-          !this.is_alive()
-          || move.is_counterattack
-          || (this._move && this._move._done)
-        ) {
-        console.log ('not allowed, abort');
+      if (!this.is_alive() ||
+        move.is_counterattack ||
+        (this._move && this._move._done)
+      ) {
         return;
       }
       var counter_move;
       if (
-          this._move
-          && this._move.action.is_a('strike')
+        this._move &&
+        this._move.action.is_a('strike')
       ) { // pending strike interrupted.
-        console.log ('countered with move');
         counter_move = this._move;
       } else if (this.field_actions) { // if we're idle and have counter action available, use it.
         return null; // only pending actions can be used to counter.
-        console.log ('countered with first action avail.');
-        var a = this.field_actions.filter(function(a){
-          return a.is_a('strike')})[0];
+        var a = this.field_actions.filter(function(a) {
+          return a.is_a('strike')
+        })[0];
         if (a) {
           counter_move = {
             action: a,
@@ -84,7 +80,7 @@ CardSet.Cards.add([
   },
 
   {
-    name:'mammal',
+    name: 'mammal',
     parent: 'agent'
   },
   {
@@ -115,24 +111,22 @@ CardSet.Cards.add([
     cost: 2,
     health: 1,
     speed: 1,
-    events: [
-        {
-            card: 'card',
-            action: 'deploy',
-            target: 'card',
-            setter: null,
-            fn: function(move){
-                var keep = get_allies(move, 'keep')[0];
-                keep.health++;
-                setTimeout(function(){
-                  animate_message(null, keep, {
-                    text: '+1 health',
-                    color: '#0c0'
-                  })
-                }, 300);
-            }
-        }
-    ],
+    events: [{
+      card: 'card',
+      action: 'deploy',
+      target: 'card',
+      setter: null,
+      fn: function(move) {
+        var keep = move.player.field[0];
+        keep.health++;
+        setTimeout(function() {
+          animate_message(null, keep, {
+            text: '+1 health',
+            color: '#0c0'
+          })
+        }, 300);
+      }
+    }],
     text: 'When a agent deploys, your keep gets +1 health',
     svg: 'holy-symbol',
     parent: 'agent',
@@ -147,13 +141,11 @@ CardSet.Cards.add([
     damage: 2,
     field_actions: ['charge'],
     text: 'your agents have -1 speed',
-    global_effects: [
-      {
-        card_type: 'card',
-        owner: 'ally',
-        speed: 1
-      }
-    ],
+    global_effects: [{
+      card_type: 'card',
+      owner: 'ally',
+      speed: 1
+    }],
     parent: 'agent',
     svg: 'wolf-head',
     rarity: 1
@@ -226,7 +218,7 @@ CardSet.Cards.add([
     cost: 1,
     delay: 2,
     damage: 1,
-    field_actions:['charge'],
+    field_actions: ['charge'],
     speed: 1,
     parent: 'agent',
     svg: 'bull-horns'
@@ -236,7 +228,7 @@ CardSet.Cards.add([
     health: 2,
     cost: 3,
     damage: 1,
-    field_actions:['charge'],
+    field_actions: ['charge'],
     speed: 2,
     parent: 'mammal',
     svg: 'mouse'
@@ -247,7 +239,7 @@ CardSet.Cards.add([
     health: 2,
     cost: 2,
     damage: 2,
-    field_actions:['charge'],
+    field_actions: ['charge'],
     speed: 4,
     parent: 'bird',
     svg: 'duck'
@@ -260,9 +252,9 @@ CardSet.Cards.add([
     health: 3,
     cost: 3,
     damage: 3,
-    field_actions:['charge'],
-    on_turn:function(player, i){
-      player.move_card(i, player.field, player.hand)
+    field_actions: ['charge'],
+    on_turn: function(player, i) {
+      player.field[i].hurt(1)
     },
     delay: 0,
     speed: 5,
@@ -274,7 +266,7 @@ CardSet.Cards.add([
     svg: 'fox-head',
     health: 2,
     cost: 1,
-    field_actions:['charge'],
+    field_actions: ['charge'],
     speed: 5,
     parent: 'mammal',
     rarity: 9
@@ -286,10 +278,10 @@ CardSet.Cards.add([
     health: 4,
     cost: 3,
     damage: 2,
-    play_turn: function(player){
+    play_turn: function(player) {
       player.diams += 1;
     },
-    field_actions:['charge'],
+    field_actions: ['charge'],
     speed: 2,
     parent: 'mammal',
     rarity: 9
@@ -299,8 +291,8 @@ CardSet.Cards.add([
     delay: 3,
     health: 5,
     cost: 6,
-  damage: 3,
-    field_actions:['charge'],
+    damage: 3,
+    field_actions: ['charge'],
     speed: 2,
     parent: 'agent',
     svg: 'vintage-robot',
@@ -313,7 +305,7 @@ CardSet.Cards.add([
     delay: 2,
     damage: 3,
     cost: 3,
-    field_actions:['batter'],
+    field_actions: ['batter'],
     speed: 1,
     parent: 'agent',
     svg: 'pig-face',
@@ -324,7 +316,7 @@ CardSet.Cards.add([
     health: 2,
     damage: 1,
     cost: 2,
-    field_actions:['mug'],
+    field_actions: ['mug'],
     speed: 3,
     parent: 'agent',
     svg: 'cloak-dagger',
@@ -338,7 +330,7 @@ CardSet.Cards.add([
     armor: 1,
     cost: 5,
     damage: 4,
-    field_actions:['charge'],
+    field_actions: ['charge'],
     parent: 'agent',
     svg: 'shoulder-scales',
     rarity: 1
@@ -348,7 +340,7 @@ CardSet.Cards.add([
     health: 2,
     cost: 4,
     untargetable: true,
-    field_actions:['batter'],
+    field_actions: ['batter'],
     speed: 3,
     parent: 'agent',
     svg: 'spectre',
@@ -359,7 +351,7 @@ CardSet.Cards.add([
     delay: 2,
     health: 5,
     cost: 5,
-    field_actions:['flank'],
+    field_actions: ['flank'],
     speed: 2,
     parent: 'agent',
     svg: 'daemon-skull',
@@ -401,7 +393,7 @@ CardSet.Cards.add([
     cost: 3,
     spikes: 4,
     parent: 'agent',
-    svg:  'lightning-arc',
+    svg: 'lightning-arc',
     rarity: 1
   },
 
@@ -411,7 +403,7 @@ CardSet.Cards.add([
     cost: 3,
     spikes: 2,
     parent: 'agent',
-    svg:  'wolf-trap',
+    svg: 'wolf-trap',
     rarity: 1
   }
 ]);

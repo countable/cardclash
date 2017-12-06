@@ -95,10 +95,6 @@
     move_card: function(index, source, dest, placeholder) {
       if (typeof index !== 'number') {
         var i = this.hand.indexOf(index);
-        if (i === -1) {
-          console.trace();
-          console.error('Attempting to move card', index, ', but card not found.');
-        }
         index = i;
       }
       if (index >= source.length) {
@@ -187,7 +183,7 @@
 
     get_keep: function(index) {
       return this.field.filter(function(item) {
-        return item.is_a('keep')
+        return item.is_a('keep') || item.is_a('nest')
       })[0];
     },
 
@@ -232,6 +228,7 @@
           this.resolving.target = target
           this.apply_move(this.resolving, done);
         } else {
+          console.log("invalid target", target, this.resolving.action.targets(this.resolving))
           alert('invalid target');
         }
         // clear targets hilight
@@ -265,8 +262,8 @@
       }
 
       move.card._move = move;
-      this.diams -= move.get_cost();
-      if (move.action.delayed) {
+      this.diams -= move_cost;
+      if (true) { //move.action.delayed) {
         move.card._done = true;
         if (this.client) animate_order();
         this.pending_moves.push(move);
@@ -281,6 +278,11 @@
       if (move.action.retarget) {
         move.targets = move.action.retarget(move);
         move.target = move.targets[0];
+        console.log("TARGET", move.target);
+        console.log("TARGETS", move.targets);
+        if (!move.target) {
+          return then && then();
+        }
       }
       if (move.card.stunned) { // stunned cards can't move.
         return then && then();

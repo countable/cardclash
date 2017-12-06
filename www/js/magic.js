@@ -2,7 +2,6 @@ CardSet.Cards.add([
 
   {
     name: 'magic',
-    cost: 0,
     hand_actions: [
       Actions.create('cast')
     ],
@@ -14,7 +13,6 @@ CardSet.Cards.add([
   {
     name: 'tool',
     display_class: 'tool',
-    cost: 0,
     hand_actions: [
       Actions.create('reuse')
     ],
@@ -289,6 +287,7 @@ CardSet.Cards.add([
     cost: 1,
     hand_actions: [
       Actions.create('cast', {
+        text: 'Stuns an agent.',
         targets: enemy_filter(function(item) {
           return item.is_a('agent')
         }),
@@ -335,12 +334,12 @@ CardSet.Cards.add([
     cost: 3,
     hand_actions: [
       Actions.create('cast', {
-        targets: 'ANY_FIELD',
+        targets: 'PLAYER_FIELD',
         effect: function(move) {
           GAME.player.draw(2);
         },
         animate: function(done, move) {
-          var keep = target_allies(move, 'keep')[0];
+          var keep = move.player.field[0];
           animate_message(done, keep, {
             text: '+2 cards',
             color: '#0c0'
@@ -399,7 +398,6 @@ CardSet.Cards.add([
       Actions.create('cast', {
         targets: ally_filter('agent'),
         effect: function(move) {
-          console.log('enhance armor', move)
           move.target.armor = (move.target.armor || 0) + 1;
         },
         animate: function(done, move) {

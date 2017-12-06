@@ -22,7 +22,11 @@ if (true) { // mute
 var _client_only = function(fn) {
   return function(then) {
     if (GAME.player.client) {
-      return fn.apply(null, arguments);
+      result = fn.apply(null, arguments);
+      document.querySelectorAll("[animating]").forEach(function(el) {
+        //el.removeAttribute("animating")
+      })
+      return result;
     } else {
       return function(then) {
         then && then();
@@ -70,20 +74,19 @@ var find_card_el = function(card) {
     if (spot > -1) {
       var selector = places[i].selector;
       if (selector === '.efield') spot = GAME.enemy.field.length - 1 - spot; // rtl
-      console.log(spot, selector);
       return $$(selector + ' .card')[spot];
     }
   }
-
+  debugger;
   return null;
 };
 
 // Get the dom element and related data for a card, used for animations.
 var get_display = function(card) {
-
-  console.log(card);
-
   var el = find_card_el(card);
+  if (!el) debugger;
+  console.log('CARD', card, el);
+  //el.setAttribute('animating', 'animating');
   return {
     el: el,
     rect: el.getBoundingClientRect()
@@ -143,7 +146,7 @@ var animate_play = _client_only(function(done, move) {
   (move.card.is_a('wealth') ? spend_sound : deploy_sound).play();
 
   var adjust_x = (44 * W_U - actor.rect.left) / W_U;
-  var adjust_y = move.player == GAME.enemy ? 15 : -15;
+  var adjust_y = move.player == GAME.enemy ? 40 : -20;
 
   Velocity(actor.el, {
     translateY: [adjust_y + 'vh', 0],
@@ -153,7 +156,10 @@ var animate_play = _client_only(function(done, move) {
     duraton: 300,
     //visibility: 'hidden',
     complete: function() {
-
+      return
+      Velocity(actor.el, 'reverse')
+      done && done()
+      return
       if (move.target) {
         Velocity(actor.el, 'reverse', {
           duration: 300,
@@ -163,17 +169,28 @@ var animate_play = _client_only(function(done, move) {
           }
         })
       } else {
-        Velocity(actor.el, 'transition.fadeOut', {
-          duration: 1,
-          delay: 1200,
+        Velocity(actor.el, {
+          opacity: 0
+        }, {
+          duration: 800,
+          delay: 800,
           complete: function() {
-            done && done()
+            Velocity(actor.el, 'reverse')
+            Velocity(actor.el, 'reverse')
+            actor.el.style.transform = '';
+            actor.el.style.opacity = '';
+            actor.el.style.display = 'block';
+            done && done();
           }
         });
       }
-      return;
     }
   });
+  Velocity(actor.el, 'reverse', {
+    delay: 1000,
+    duration: 0,
+    complete: done
+  })
 });
 
 
@@ -255,10 +272,13 @@ var animate_stomp = _client_only(function(done, move) {
     return t.el
   });
   Velocity(actor.el, {
-    translateY: -20
+    translateX: -10
   }, {
     duration: 300,
     complete: function() {
+      Velocity(actor.el, {
+        translateX: 20
+      });
       Velocity(actor.el, 'reverse');
       Velocity(target_els, {
         translateY: -20
@@ -518,7 +538,6 @@ var animate_help_3 = _client_only(function(opts) {
     backgroundColor: 'red'
   });
 
-  console.log('left', player_card.left);
 
   animate_message(null, GAME.player.hand[0], {
     text: 'sell me',

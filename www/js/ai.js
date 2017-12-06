@@ -1,6 +1,5 @@
 function add_prop(prop) {
   return function(a, b) {
-    console.log(a, b);
     return a + b[prop];
   };
 }
@@ -12,7 +11,7 @@ function sum_of(arr, prop) {
 var enemy_should_dig = function() {
   var enemy = GAME.enemy;
   cost_sum = sum_of(enemy.hand, 'cost');
-  console.log('cost sum / res', cost_sum, (enemy.income * 3 + enemy.diams));
+  //console.log('cost sum / res', cost_sum, (enemy.income * 3 + enemy.diams));
   return cost_sum > (enemy.income * 3 + enemy.diams);
 };
 
@@ -39,7 +38,8 @@ GAME.enemy_turn = function() {
         if (GAME.enemy.resolving) {
           if (GAME.enemy.resolving.action.single_target()) {
             var targets = GAME.enemy.resolving.action.targets(GAME.enemy.resolving);
-            GAME.enemy.done_targetting(targets[Math.floor(Math.random() * targets.length)]);
+            if (targets.length)
+              GAME.enemy.done_targetting(targets[Math.floor(Math.random() * targets.length)]);
           } else {
             GAME.enemy.apply_move(GAME.enemy.resolving);
           }
@@ -53,9 +53,13 @@ GAME.enemy_turn = function() {
 
 
   if (enemy_should_dig()) {
-    GAME.enemy.dig(0)
+    for (var i = 0; i < GAME.enemy.hand.length; i++) {
+      if (!GAME.enemy.hand[i]._done) {
+        GAME.enemy.dig(i);
+        break;
+      }
+    }
   }
-  console.log(GAME.enemy.pending_moves)
   var et = GAME.scenario.enemy_turn;
   et && et(GAME.turn_idx);
 };
