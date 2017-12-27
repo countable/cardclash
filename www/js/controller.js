@@ -18,21 +18,14 @@ var disableSCE = function($sceProvider) {
 }
 
 
-//GAME.app = angular.module('gameApp', ['ng-sortable', 'ngRoute']).config(
 GAME.app = angular.module('gameApp', ['ngRoute', 'ngDraggable']).config(
     ['$routeProvider', '$locationProvider',
       function($routeProvider, $locationProvider) {
-
-        //$locationProvider.html5Mode(true);
-
         $routeProvider.when('/:epic_id/deck/:deck_id', {
             templateUrl: "deck.html"
           })
           .when('/:epic_id/deck', {
             templateUrl: "decks.html"
-          })
-          .when('/quick/quick', {
-            templateUrl: "game.html"
           })
           .when('/:epic_id/map/:map_idx', {
             templateUrl: "map.html"
@@ -206,15 +199,7 @@ GAME.app.controller('gameCtrl', ['$scope', '$routeParams', '$timeout',
       }
       return result;
     };
-    // buying cards - not currently used.
-    $scope.buy = function(card) {
-      if ($scope.player.diams >= card.price) {
-        $scope.player.diams -= card.price;
-        $scope.player.discard.push(CardSet.Cards.create(card.name));
-      } else {
-        alert('cannot afford');
-      }
-    };
+
     $scope.turn = function() {
 
       if (GAME.player.resolving) return alert('finish targeting first.');
