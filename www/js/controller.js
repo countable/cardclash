@@ -77,6 +77,7 @@ GAME.app.controller('wonCtrl', ['$scope', '$routeParams', '$timeout',
       var prize = $scope.prizes.splice(index, 1);
       GAME.epic.collection.push(prize[0].name);
       $scope.num_prizes--;
+      GAME.save_epic(GAME.epic)
     }
   }
 ]);
@@ -253,7 +254,6 @@ GAME.app.controller('gameCtrl', ['$scope', '$routeParams', '$timeout',
   }
 ]).config(disableSCE);
 
-
 GAME.app.controller('deckCtrl', function($scope, $timeout, $routeParams) {
 
   GAME.load_route_context($routeParams, $scope);
@@ -264,21 +264,29 @@ GAME.app.controller('deckCtrl', function($scope, $timeout, $routeParams) {
   })[0];
 
   $scope.picks = CardSet.Cards.from_list($scope.deck.cards);
-
-  //$scope.pool = CardSet.Cards.all().filter(function(c){return c.rarity});
   $scope.pool = CardSet.Cards.from_list($scope.epic.collection);
 
   $scope.sort_config = { // ng-sortable
     animation: 150,
     handle: '.handle'
   };
-
+  $scope.available = function(index) { // check if there are enough left of this card.
+    var cardname = $scope.pool[index].name
+    var num_in_use = $scope.picks.filter(function(c){
+      return cardname === c.name;
+    }).length;
+    var num_available = $scope.pool.filter(function(c){
+      return cardname === c.name;
+    }).length;
+    return num_available > num_in_use;
+  };
   $scope.add = function(index) {
     $scope.picks.push($scope.pool[index]);
+    
     $scope.deck.cards = $scope.picks.map(function(c) {
       return c.name
     });
-    GAME.save_epic($scope.epic);
+    GAME.save_epic(GAME.epic);
   };
 
   $scope.remove = function(index) {

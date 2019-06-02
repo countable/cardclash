@@ -46,7 +46,7 @@
         <td>&diams; {{ card.cost }}</td>
         <td><i class="fa fa-bolt"></i> {{ card.speed }}</td>
         <td>{{ card.health }}</td>
-        <td><button ng-click='add($index)'>add</button></td>
+        <td><button ng-if='available($index)' ng-click='add($index)'>add</button></td>
       </tr>
     </table>
   </div>
